@@ -1,0 +1,17 @@
+# Create environment:
+#   conda env create --file environment.yml
+# Remove environment:
+#   conda remove --name ptwo-dev --all
+
+name: ptwo-dev
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python>=3.12
+  - pip
+
+  - pip:
+    - -r requirements.txt

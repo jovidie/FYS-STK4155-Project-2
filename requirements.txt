@@ -1,0 +1,13 @@
+scikit-learn
+scipy<=1.12.0
+matplotlib
+seaborn
+imageio
+ipython
+jax[cpu]
+jaxlib
+jaxtyping
+notebook
+numpy
+pandas
+tqdm
