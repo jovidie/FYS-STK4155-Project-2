@@ -1,0 +1,99 @@
+\documentclass[reprint,english,notitlepage]{revtex4-1}  % 
+
+\usepackage{silence}
+\WarningFilter{revtex4-1}{Repair the float}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{physics,amssymb} 
+\usepackage{graphicx}        
+\usepackage{xcolor}          
+\usepackage{hyperref}        
+\usepackage{tikz}             
+\usepackage{listings} 
+\usepackage{csquotes}
+\usepackage{subfigure}  
+\usepackage{here}
+\usepackage{fancyvrb}
+\usepackage{fontawesome}
+\bibliographystyle{plain}
+\hypersetup{ % this is just my personal choice, feel free to change things
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}}
+
+%% Defines the style of the programming listing
+%% This is actually my personal template, go ahead and change stuff if you want
+\lstset{ %
+	inputpath=,
+	backgroundcolor=\color{white!88!black},
+	basicstyle={\ttfamily\scriptsize},
+	commentstyle=\color{magenta},
+	language=Python,
+	morekeywords={True,False},
+	tabsize=4,
+	stringstyle=\color{green!55!black},
+	frame=single,
+	keywordstyle=\color{blue},
+	showstringspaces=false,
+	columns=fullflexible,
+	keepspaces=true}
+
+%% TiKz stuff
+\usetikzlibrary{positioning,chains}
+\colorlet{myred}{red!80!black}
+\colorlet{myblue}{blue!80!black}
+\colorlet{mygreen}{green!60!black}
+\colorlet{myorange}{orange!70!red!60!black}
+\colorlet{mydarkred}{red!30!black}
+\colorlet{mydarkblue}{blue!40!black}
+\colorlet{mydarkgreen}{green!30!black}
+
+\definecolor{mako1}{HTML}{38aaac}
+\definecolor{mako2}{HTML}{357ba3}
+\definecolor{mako3}{HTML}{40498e}
+
+
+\begin{document}
+
+%==========================================================
+%------------------ Project content -----------------------
+%==========================================================
+
+%------------------ Title ---------------------------------
+\title{Project 1}
+\author{Even Sletteng Garvang, Ellen-Beate Tysvær, Janita Ovidie Sandtrøen Willumsen \\ \faGithub \, \url{https://github.uio.no/janitaws/FYS-STK4155-Project-2}}        
+\date{\today}
+\noaffiliation
+
+\input{sections/abstract}
+\maketitle
+
+%------------------ Body ----------------------------------
+%\mainmatter
+\input{sections/introduction}
+\input{sections/methods}
+\input{sections/results}
+\input{sections/conclusion}
+\newpage
+
+ 
+%------------------ Bibliography --------------------------
+\onecolumngrid
+\newpage 
+% \nocite{*}
+\bibliography{references}
+
+%------------------ Appendix ------------------------------
+\newpage
+\twocolumngrid
+\input{sections/appendix}
+
+%------------------ Structure -----------------------------
+% \tableofcontents 
+
+%==========================================================
+%------------------ End of project content ----------------
+%==========================================================
+\end{document}
