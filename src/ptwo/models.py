@@ -67,8 +67,6 @@ class NeuralNetwork:
                 self.layers[i] = (W, b)
                 i += 1
 
-import numpy as np
-
 # Retrieved from additionweek42.ipynb
 class LogisticRegression:
     def __init__(self, learning_rate=0.01, num_iterations=1000):
