@@ -5,6 +5,7 @@ class ActivationFunction:
         activation_dict = {
             "sigmoid": self._sigmoid,
             "ReLU": self._ReLU,
+            "leaky_ReLU": self._leaky_ReLU,
             "softmax": self._softmax,
             "softmax_vec": self._softmax_vec
         }
@@ -14,6 +15,9 @@ class ActivationFunction:
     # Activation functions retrieved from exercises week 42
     def _ReLU(z):
         return np.where(z > 0, z, 0)
+    
+    def _leaky_ReLU(z):
+        return 0
 
     def _sigmoid(z):
         return 1 / (1 + np.exp(-z))
