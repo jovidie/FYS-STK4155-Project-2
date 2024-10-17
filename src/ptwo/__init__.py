@@ -5,10 +5,12 @@
 import importlib.metadata
 
 # Example
-# from .models import NeuralNet
+from .models import NeuralNetwork, LogisticRegression, GradientDescent
 
 __version__ = importlib.metadata.version(__package__)
 
-# __all__ = [
-#     "NeuralNet"
-# ]
+__all__ = [
+    "NeuralNetwork",
+    "LogisticRegression", 
+    "GradientDescent", 
+]
