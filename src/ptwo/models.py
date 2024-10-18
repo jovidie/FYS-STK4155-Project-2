@@ -33,6 +33,13 @@ class NeuralNetwork:
             a = activation_func(z)
         return a
     
+    def predict_proba(self, x):
+        probs = self.feed_forward_batch(x)
+        self.predictions = probs
+        self._accuracy()
+        print("Prediction accuracy: " + str(self.prediction_accuracy))
+        return np.argmax(probs, axis = 1)
+    
     def predict(self, x):
         probs = self.feed_forward_batch(x)
         self.predictions = probs
