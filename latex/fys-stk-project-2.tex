@@ -1,21 +1,23 @@
-\documentclass[reprint,english,notitlepage]{revtex4-1}  % 
+\documentclass[reprint,english,notitlepage,nofootinbib]{revtex4-1}  %
 
 \usepackage{silence}
 \WarningFilter{revtex4-1}{Repair the float}
-
+ 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{physics,amssymb} 
 \usepackage{graphicx}        
 \usepackage{xcolor}          
 \usepackage{hyperref}        
-\usepackage{tikz}             
-\usepackage{listings} 
+\usepackage{tikz, pgfplots}
+\usepackage{listofitems}
+\usepackage{listings}
 \usepackage{csquotes}
 \usepackage{subfigure}  
 \usepackage{here}
 \usepackage{fancyvrb}
 \usepackage{fontawesome}
+\usepackage{fontspec}
 \bibliographystyle{plain}
 \hypersetup{ % this is just my personal choice, feel free to change things
     colorlinks,
@@ -40,7 +42,7 @@
 	columns=fullflexible,
 	keepspaces=true}
 
-%% TiKz stuff
+ %% TiKz stuff
 \usetikzlibrary{positioning,chains}
 \colorlet{myred}{red!80!black}
 \colorlet{myblue}{blue!80!black}
@@ -53,6 +55,21 @@
 \definecolor{mako1}{HTML}{38aaac}
 \definecolor{mako2}{HTML}{357ba3}
 \definecolor{mako3}{HTML}{40498e}
+
+% STYLES
+\tikzset{
+  >=latex, % for default LaTeX arrow head
+  node/.style={thick,circle,draw=mako1,minimum size=22,inner sep=0.5,outer sep=0.6},
+  node in/.style={node,black,draw=mako1!30!black,fill=mako1!40},
+  node hidden/.style={node,black,draw=mako2!30!black,fill=mako2!40},
+  node out/.style={node,black,draw=mako3!30!black,fill=mako3!40},
+  connect/.style={->,thick,mako3!40!black}, %,line cap=round
+  connect arrow/.style={-{Latex[length=4,width=3.5]},thick,mako3!40!black,shorten <=0.5,shorten >=1},
+  node 1/.style={node in}, % node styles, numbered for easy mapping with \nstyle
+  node 2/.style={node hidden},
+  node 3/.style={node out}
+}
+\def\nstyle{int(\lay<\Nnodlen?min(2,\lay):3)}
 
 
 \begin{document}
