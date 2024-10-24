@@ -2,8 +2,10 @@ import numpy as np
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-from utils import *
-from GradientDescent import *
+
+from gradients import *
+from optimizers import *
+from models import *
 
 np.random.seed(8923)
 
@@ -43,7 +45,7 @@ print("Regular", gd.theta, sep = "\n")
 
 gamma = 0.3
 
-gd_momentum = GradientDescent(eta, grad, momentum = True, momentum_gamma = 0.3)
+gd_momentum = GradientDescent(eta, grad, momentum = gamma)
 gd_momentum.descend(X, y, n_iter = n_iter)
 print("Momentum", gd_momentum.theta, sep = "\n")
 

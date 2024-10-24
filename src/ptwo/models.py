@@ -117,28 +117,22 @@ if __name__ == "__main__":
 
 
 class GradientDescent:
-    def __init__(self, learning_rate, gradient, momentum = False, momentum_gamma = None, adaptive = None):
+    def __init__(self, learning_rate, gradient, momentum = 0, adaptive = None):
         self.learning_rate = learning_rate
         self.gradient = gradient
         self.momentum = momentum
-        self.momentum_gamma = momentum_gamma
+        self.momentum_change = 0.0
         self.adaptive = adaptive
         self.theta = None
         self.n = None
-        if self.momentum:
-            if self.momentum_gamma is None:
-                raise Exception("No gamma specified for momentum")
-            self.momentum_change = 0.0
     def _initialize_vars(self, X):
         self.theta = np.random.randn(X.shape[1], 1)
         self.n = X.shape[0]
 
     def _gd(self, grad, X, y, current_iter):
         if self.adaptive is None:
-            update = self.learning_rate * grad
-            if self.momentum:
-                update += self.momentum_gamma * self.momentum_change
-                self.momentum_change = update
+            update = self.learning_rate * grad + self.momentum * self.momentum_change
+            self.momentum_change = update
         else:
             update = self.adaptive.calculate(self.learning_rate, grad, current_iter)
 
