@@ -117,12 +117,12 @@ if __name__ == "__main__":
 
 
 class GradientDescent:
-    def __init__(self, learning_rate, gradient, momentum = 0, adaptive = None):
+    def __init__(self, learning_rate, gradient, momentum = 0, optimizer = None):
         self.learning_rate = learning_rate
         self.gradient = gradient
         self.momentum = momentum
         self.momentum_change = 0.0
-        self.adaptive = adaptive
+        self.optimizer = optimizer
         self.theta = None
         self.n = None
     def _initialize_vars(self, X):
@@ -130,11 +130,11 @@ class GradientDescent:
         self.n = X.shape[0]
 
     def _gd(self, grad, X, y, current_iter):
-        if self.adaptive is None:
+        if self.optimizer is None:
             update = self.learning_rate * grad + self.momentum * self.momentum_change
             self.momentum_change = update
         else:
-            update = self.adaptive.calculate(self.learning_rate, grad, current_iter)
+            update = self.optimizer.calculate(self.learning_rate, grad, current_iter)
 
         return update
 
@@ -150,8 +150,8 @@ class GradientDescent:
         n_batches = int(self.n / batch_size)
         xy = np.column_stack([X,y]) # for shuffling x and y together
         for i in range(n_epochs):
-            if self.adaptive is not None:
-                self.adaptive.reset()
+            if self.optimizer is not None:
+                self.optimizer.reset()
             np.random.shuffle(xy)
             for j in range(n_batches):
                 random_index = batch_size * np.random.randint(n_batches)

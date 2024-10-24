@@ -52,18 +52,18 @@ print("Momentum", gd_momentum.theta, sep = "\n")
 eta = 2
 
 adam = ADAM()
-gd_ADAM = GradientDescent(eta, grad, adaptive = adam)
+gd_ADAM = GradientDescent(eta, grad, optimizer = adam)
 gd_ADAM.descend(X, y, n_iter = n_iter)
 print("ADAM",gd_ADAM.theta, sep = "\n")
 
 adagrad = AdaGrad()
-gd_AdaGrad = GradientDescent(eta, grad, adaptive = adagrad)
+gd_AdaGrad = GradientDescent(eta, grad, optimizer = adagrad)
 gd_AdaGrad.descend(X, y, n_iter = n_iter)
 print("AdaGrad", gd_AdaGrad.theta, sep = "\n")
 
 rho = 0.99
 rmsprop = RMSProp(rho = 0.99)
-gd_RMSProp = GradientDescent(eta, grad, adaptive = rmsprop)
+gd_RMSProp = GradientDescent(eta, grad, optimizer = rmsprop)
 gd_RMSProp.descend(X, y, n_iter = n_iter)
 print("RMSProp", gd_RMSProp.theta, sep = "\n")
 
@@ -80,6 +80,6 @@ gd.descend_stochastic(X, y, n_epochs = n_epochs, batch_size = M)
 print("Stochastic regular", gd.theta, sep = "\n")
 
 adam = ADAM()
-gd_ADAM = GradientDescent(eta, grad, adaptive = adam)
+gd_ADAM = GradientDescent(eta, grad, optimizer = adam)
 gd_ADAM.descend_stochastic(X, y, n_epochs = n_epochs, batch_size = M)
 print("Stochastic ADAM",gd_ADAM.theta, sep = "\n")
