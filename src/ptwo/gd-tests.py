@@ -83,3 +83,22 @@ adam = ADAM()
 gd_ADAM = GradientDescent(eta, grad, optimizer = adam)
 gd_ADAM.descend_stochastic(X, y, n_epochs = n_epochs, batch_size = M)
 print("Stochastic ADAM",gd_ADAM.theta, sep = "\n")
+
+# momentum and lr schedule
+n_iter = 200
+gamma = 0.3
+scheduler = lr_scheduler()
+
+gd_momentum = GradientDescent(eta, grad, momentum = gamma, scheduler=scheduler)
+gd_momentum.descend(X, y, n_iter = n_iter)
+print("GD, momentum and learning schedule", gd_momentum.theta, sep = "\n")
+
+# same but stochastic
+M = 5
+n_epochs = 50
+
+scheduler = lr_scheduler(M, n_epochs)
+
+gd_momentum = GradientDescent(eta, grad, momentum = gamma, scheduler=scheduler)
+gd_momentum.descend_stochastic(X, y, n_epochs=n_epochs, batch_size=M)
+print("SGD, momentum and learning schedule", gd_momentum.theta, sep = "\n")

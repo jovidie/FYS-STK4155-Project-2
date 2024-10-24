@@ -52,3 +52,12 @@ class RMSProp:
         update = learning_rate * grad / (self.delta+np.sqrt(self.Giter))
         return update
 
+## Learning rate schedulers ##
+
+def lr_scheduler(t0=1,t1=10):
+    def _step(iteration):
+        return t0/(iteration+t1)
+    return _step
+
+
+

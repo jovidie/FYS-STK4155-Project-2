@@ -117,19 +117,21 @@ if __name__ == "__main__":
 
 
 class GradientDescent:
-    def __init__(self, learning_rate, gradient, momentum = 0, optimizer = None):
+    def __init__(self, learning_rate, gradient, momentum = 0, optimizer = None, scheduler = None):
         self.learning_rate = learning_rate
         self.gradient = gradient
         self.momentum = momentum
         self.momentum_change = 0.0
         self.optimizer = optimizer
+        self.scheduler = scheduler
         self.theta = None
         self.n = None
+        if self.scheduler is not None:
+            print("Using learning rate scheduler, learning_rate argument is ignored")
     def _initialize_vars(self, X):
         self.theta = np.random.randn(X.shape[1], 1)
         self.n = X.shape[0]
-
-    def _gd(self, grad, X, y, current_iter):
+    def _gd(self, grad, current_iter):
         if self.optimizer is None:
             update = self.learning_rate * grad + self.momentum * self.momentum_change
             self.momentum_change = update
@@ -141,8 +143,10 @@ class GradientDescent:
     def descend(self, X, y, n_iter=500):
         self._initialize_vars(X)
         for i in range(n_iter):
+            if self.scheduler is not None:
+                self.learning_rate = self.scheduler(i+1)
             grad = self.gradient(X, y, self.theta)
-            update = self._gd(grad, X, y, i+1)
+            update = self._gd(grad, i+1)
             self.theta -= update
 
     def descend_stochastic(self, X, y, n_epochs = 50, batch_size = 5):
@@ -154,11 +158,13 @@ class GradientDescent:
                 self.optimizer.reset()
             np.random.shuffle(xy)
             for j in range(n_batches):
+                if self.scheduler is not None:
+                    self.learning_rate = self.scheduler(i * batch_size + j)
                 random_index = batch_size * np.random.randint(n_batches)
                 xi = xy[random_index:random_index+5, :-1]
                 yi = xy[random_index:random_index+5, -1:]
                 grad = (1/batch_size) * self.gradient(X, y, self.theta)
-                update = self._gd(grad, xi, yi, current_iter = j+1)
+                update = self._gd(grad, current_iter = j+1)
                 self.theta -= update
 
 
