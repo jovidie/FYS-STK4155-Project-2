@@ -10,17 +10,24 @@ class NeuralNetwork:
     - network_input: the design matrix/variables we wish to predict from
     - targets: the golden truth
     - layer_output_sizes = size of layers, number of layers is determined by len(layer_output sizes)
-    - activation_funcs is the \sigma() function 
+    - activation_funcs is the \sigma() function which makes sigma(z) = a
     
     """
     def __init__(self, network_input, targets, layer_output_sizes, activation_funcs):
         self.network_input = network_input
-        self.network_input_size = network_input.size
+        self.network_input_size = network_input.shape[1]
         self.layer_output_sizes = layer_output_sizes
         self.activation_funcs = activation_funcs
         self.targets = targets
 
     def create_layers_batch(self):
+        """
+        Function that creates all the NN layers based on layer_output_sizes 
+        Args:   
+        input size of network: determines first layer size
+        layer output size: Output sizes of the rest of the layers, where the last layer has to match target size
+        returns nothing, saves layers as instance variable
+        """
         self.layers = []
         i_size = self.network_input_size
         for layer_output_size in self.layer_output_sizes:
@@ -30,6 +37,12 @@ class NeuralNetwork:
             i_size = layer_output_size
 
     def feed_forward_batch(self, x):
+        """
+        Function that transforms input data into target predictions based on current weights and biases
+        Args: 
+        x is the input data to be transformed
+        returns nothing, saves predictions as instance variable
+        """
         a = x
         for (W, b), activation_func in zip(self.layers, self.activation_funcs):
             z = a @ W + b 
@@ -37,32 +50,43 @@ class NeuralNetwork:
         return a
     
     # TODO - fix proba
-    def predict_proba(self, x, targets):
+    def predict_proba(self, x):
         probs = self.feed_forward_batch(x)
         self.predictions = probs
         return np.argmax(probs, axis = 1)
     
     def predict(self, x):
+        """
+        """
         probs = self.feed_forward_batch(x)
         self.predictions = probs
         return np.argmax(probs, axis = 1)
     
     def accuracy(self, x, targets):
+        """
+        """
         predictions = self.feed_forward_batch(x)
         one_hot_predictions = np.zeros(predictions.shape)
         for i, prediction in enumerate(predictions):
             one_hot_predictions[i, np.argmax(prediction)] = 1
         self.prediction_accuracy = accuracy_score(one_hot_predictions, targets)
     
-    # Suggested cost from week 42 exercises
+    # Suggested cost from week 42 exercises -> cost should probably be considered as an argument
     def _cross_entropy(self, predict, target):
+        """
+        """
         return np.sum(-target * np.log(predict))
-
+    
+    # Suggested cost from week 42 exercises
     def _cost(self):
+        """
+        """
         self.train_prediction = self.feed_forward_batch(self.train_input)
         return self.cross_entropy(self.train_predict, self.train_target)
 
     def train_network(self, train_input, train_targets, cost, learning_rate=0.001, epochs=100):
+        """
+        """
         self.train_input = train_input
         self.train_targets = train_targets
         gradient_func = grad(cost, 1)
