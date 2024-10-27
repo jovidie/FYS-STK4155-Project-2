@@ -2,8 +2,10 @@ import numpy as np
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-from utils import *
-from GradientDescent import *
+
+from gradients import *
+from optimizers import *
+from models import *
 
 np.random.seed(8923)
 
@@ -43,25 +45,25 @@ print("Regular", gd.theta, sep = "\n")
 
 gamma = 0.3
 
-gd_momentum = GradientDescent(eta, grad, momentum = True, momentum_gamma = 0.3)
+gd_momentum = GradientDescent(eta, grad, momentum = gamma)
 gd_momentum.descend(X, y, n_iter = n_iter)
 print("Momentum", gd_momentum.theta, sep = "\n")
 
 eta = 2
 
 adam = ADAM()
-gd_ADAM = GradientDescent(eta, grad, adaptive = adam)
+gd_ADAM = GradientDescent(eta, grad, optimizer = adam)
 gd_ADAM.descend(X, y, n_iter = n_iter)
 print("ADAM",gd_ADAM.theta, sep = "\n")
 
 adagrad = AdaGrad()
-gd_AdaGrad = GradientDescent(eta, grad, adaptive = adagrad)
+gd_AdaGrad = GradientDescent(eta, grad, optimizer = adagrad)
 gd_AdaGrad.descend(X, y, n_iter = n_iter)
 print("AdaGrad", gd_AdaGrad.theta, sep = "\n")
 
 rho = 0.99
 rmsprop = RMSProp(rho = 0.99)
-gd_RMSProp = GradientDescent(eta, grad, adaptive = rmsprop)
+gd_RMSProp = GradientDescent(eta, grad, optimizer = rmsprop)
 gd_RMSProp.descend(X, y, n_iter = n_iter)
 print("RMSProp", gd_RMSProp.theta, sep = "\n")
 
@@ -78,6 +80,25 @@ gd.descend_stochastic(X, y, n_epochs = n_epochs, batch_size = M)
 print("Stochastic regular", gd.theta, sep = "\n")
 
 adam = ADAM()
-gd_ADAM = GradientDescent(eta, grad, adaptive = adam)
+gd_ADAM = GradientDescent(eta, grad, optimizer = adam)
 gd_ADAM.descend_stochastic(X, y, n_epochs = n_epochs, batch_size = M)
 print("Stochastic ADAM",gd_ADAM.theta, sep = "\n")
+
+# momentum and lr schedule
+n_iter = 200
+gamma = 0.3
+scheduler = lr_scheduler()
+
+gd_momentum = GradientDescent(eta, grad, momentum = gamma, scheduler=scheduler)
+gd_momentum.descend(X, y, n_iter = n_iter)
+print("GD, momentum and learning schedule", gd_momentum.theta, sep = "\n")
+
+# same but stochastic
+M = 5
+n_epochs = 50
+
+scheduler = lr_scheduler(M, n_epochs)
+
+gd_momentum = GradientDescent(eta, grad, momentum = gamma, scheduler=scheduler)
+gd_momentum.descend_stochastic(X, y, n_epochs=n_epochs, batch_size=M)
+print("SGD, momentum and learning schedule", gd_momentum.theta, sep = "\n")
