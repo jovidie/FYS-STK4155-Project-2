@@ -77,19 +77,43 @@ class NeuralNetwork:
         """
         return np.sum(-target * np.log(predict))
     
+    def _binary_cross_entropy(self, predict, target):
+        """
+        Loss function used in binary classification when target variable has two possible 
+        outcomes: 1 or 0, 
+        Args: 
+        - predict is the prediction we have from input
+        - target are the targets we know to match input
+        """
+        return np.mean((predict*np.log(target)) + ((1 - predict) * np.log(1 - target)))
+    
     # Suggested cost from week 42 exercises
     def _cost(self):
         """
+        #TODO 
+        Cost function, uses the cost function parameter given in the constructor to find the gradients
+        during backpropagarion. 
+
+        Binary classification: should have binarty cross entropy as a cost function (or loss function)
+        Non-binary classificatio: could have other loss functions; cross entropy, MSE, etc.s
         """
         self.train_prediction = self.feed_forward_batch(self.train_input)
-        return self.cross_entropy(self.train_predict, self.train_target)
+        return self._binary_cross_entropy(self.train_predict, self.train_target)
 
-    def train_network(self, train_input, train_targets, cost, learning_rate=0.001, epochs=100):
+    def train_network(self, train_input, train_targets, learning_rate=0.001, epochs=100): #TODO add cost
         """
+        This function performs the back-propagation step to adjust the weights and biases
+        for a default of 100 epochs with a default learning rate of 0.001. 
+        Args: 
+        - train_input: the input variable x we use to predict y, should be a selection of data
+        - train_targets: the matching golden truth to the train_input
+        - cost: a selected cost function #TODO
+        - learning rate: determines the stepsize we take towards reaching the optimal W and b
+        - epochs: number of iterations in one training cycle to reach optimal W and b
         """
         self.train_input = train_input
         self.train_targets = train_targets
-        gradient_func = grad(cost, 1)
+        gradient_func = grad(self.cost, 1)
         layers_grad = gradient_func(train_input, self.layers, self.activation_funcs, train_targets)  # Don't change this
         for i in range(epochs):
             layers_grad = gradient_func(train_input, self.layers, self.activation_funcs, train_targets)
