@@ -3,9 +3,10 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 
-from gradients import *
-from optimizers import *
-from models import *
+from ptwo.optimizers import *
+
+from ptwo.gradients import *
+from ptwo.models import *
 
 np.random.seed(8923)
 
