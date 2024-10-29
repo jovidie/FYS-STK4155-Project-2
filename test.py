@@ -1,7 +1,7 @@
 print("TEST RUNNING")
 
-from src.ptwo.models import NeuralNetwork
-from src.ptwo.activators import sigmoid, ReLU
+from .src.ptwo.models import NeuralNetwork
+from .src.ptwo.activators import sigmoid, ReLU
 from imageio import imread
 import numpy as np
 
