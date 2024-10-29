@@ -1,6 +1,6 @@
 black[jupyter]
 scikit-learn
-scipy<=1.12.0
+scipy
 matplotlib
 seaborn
 imageio
