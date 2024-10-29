@@ -1,4 +1,4 @@
-import numpy as np
+import autograd.numpy as np
 from sklearn.metrics import accuracy_score
 from autograd import grad
 
@@ -10,15 +10,15 @@ class NeuralNetwork:
     - network_input: the design matrix/variables we wish to predict from
     - targets: the golden truth
     - layer_output_sizes = size of layers, number of layers is determined by len(layer_output sizes)
-    - activation_funcs is the \sigma() function which makes sigma(z) = a
+    - activation_funcs is the sigma() function which makes sigma(z) = a
     
     """
-    def __init__(self, network_input, targets, layer_output_sizes, activation_funcs):
-        self.network_input = network_input
-        self.network_input_size = network_input.shape[1]
+    def __init__(self, network_input_size, layer_output_sizes, activation_funcs, cost_function):
+        self.network_input_size = network_input_size
         self.layer_output_sizes = layer_output_sizes
         self.activation_funcs = activation_funcs
-        self.targets = targets
+        self.cost_function = cost_function
+        self.create_layers_batch()
 
     def create_layers_batch(self):
         """
@@ -36,15 +36,25 @@ class NeuralNetwork:
             self.layers.append((W, b))
             i_size = layer_output_size
 
-    def feed_forward_batch(self, x):
+    def _cost(self, x, targets, layers = None):
+        if layers is None:
+            layers = self.layers
+        predictions = self.feed_forward_batch(x, layers)
+        return self.cost_function(predictions, targets)
+
+
+
+    def feed_forward_batch(self, x, layers=None):
         """
         Function that transforms input data into target predictions based on current weights and biases
         Args: 
         x is the input data to be transformed
         returns nothing, saves predictions as instance variable
         """
+        if layers is None:
+            layers = self.layers
         a = x
-        for (W, b), activation_func in zip(self.layers, self.activation_funcs):
+        for (W, b), activation_func in zip(layers, self.activation_funcs):
             z = a @ W + b 
             a = activation_func(z)
         return a
@@ -87,8 +97,9 @@ class NeuralNetwork:
         """
         return np.mean((predict*np.log(target)) + ((1 - predict) * np.log(1 - target)))
     
+
     # Suggested cost from week 42 exercises
-    def _cost(self):
+    def _cost_bce(self):
         """
         #TODO 
         Cost function, uses the cost function parameter given in the constructor to find the gradients
@@ -97,8 +108,16 @@ class NeuralNetwork:
         Binary classification: should have binarty cross entropy as a cost function (or loss function)
         Non-binary classificatio: could have other loss functions; cross entropy, MSE, etc.s
         """
-        self.train_prediction = self.feed_forward_batch(self.train_input)
+        self.train_prediction = self.feed_forward_batch(self.train_input, self.layers)
         return self._binary_cross_entropy(self.train_predict, self.train_target)
+
+    def _train(self, layers_grad):
+        """
+        This is the inner logic of the gradient descent, to be reused between
+        regular and stochastic gradient descent.
+        """
+
+
 
     def train_network(self, train_input, train_targets, learning_rate=0.001, epochs=100): #TODO add cost
         """
@@ -113,10 +132,9 @@ class NeuralNetwork:
         """
         self.train_input = train_input
         self.train_targets = train_targets
-        gradient_func = grad(self.cost, 1)
-        layers_grad = gradient_func(train_input, self.layers, self.activation_funcs, train_targets)  # Don't change this
+        gradient_func = grad(self._cost, 2)
         for i in range(epochs):
-            layers_grad = gradient_func(train_input, self.layers, self.activation_funcs, train_targets)
+            layers_grad = gradient_func(train_input, train_targets, self.layers)
             i = 0
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
                 W -= learning_rate * W_g

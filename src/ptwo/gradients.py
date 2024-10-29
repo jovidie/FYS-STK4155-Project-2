@@ -1,4 +1,4 @@
-import numpy as np
+import autograd.numpy as np
 
 def grad_OLS():
     def grad_fun(X, y, theta):
