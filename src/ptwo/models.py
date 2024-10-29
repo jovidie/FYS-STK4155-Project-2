@@ -13,11 +13,20 @@ class NeuralNetwork:
     - activation_funcs is the sigma() function which makes sigma(z) = a
     
     """
-    def __init__(self, network_input_size, layer_output_sizes, activation_funcs, cost_function):
+    def __init__(self, 
+                 network_input_size, 
+                 layer_output_sizes, 
+                 activation_funcs, 
+                 cost_function,
+                 optimizer = None,
+                 momentum = 0.0):
         self.network_input_size = network_input_size
         self.layer_output_sizes = layer_output_sizes
         self.activation_funcs = activation_funcs
         self.cost_function = cost_function
+        self.optimizer = optimizer
+        self.momentum = momentum
+        self.momentum_change = 0.0
         self.create_layers_batch()
 
     def create_layers_batch(self):
@@ -111,13 +120,16 @@ class NeuralNetwork:
         self.train_prediction = self.feed_forward_batch(self.train_input, self.layers)
         return self._binary_cross_entropy(self.train_predict, self.train_target)
 
-    def _train(self, layers_grad):
-        """
-        This is the inner logic of the gradient descent, to be reused between
-        regular and stochastic gradient descent.
-        """
+    def _train(self, grad, learning_rate, current_iter):
+        #if self.momentum == 0.0:
+        # handle momentum, doesn't fit with the shapes of the gradients ...
+        if self.optimizer is None:
+            update = learning_rate * grad #+ self.momentum * self.momentum_change
+            self.momentum_change = update
+        else:
+            update = self.optimizer.calculate(learning_rate, grad, current_iter)
 
-
+        return update
 
     def train_network(self, train_input, train_targets, learning_rate=0.001, epochs=100): #TODO add cost
         """
@@ -135,12 +147,10 @@ class NeuralNetwork:
         gradient_func = grad(self._cost, 2)
         for i in range(epochs):
             layers_grad = gradient_func(train_input, train_targets, self.layers)
-            i = 0
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
-                W -= learning_rate * W_g
+                W -= self._train(W_g, learning_rate, i)
                 b -= learning_rate * b_g
-                self.layers[i] = (W, b)
-                i += 1
+
 
 # Retrieved from additionweek42.ipynb
 class LogisticRegression:
