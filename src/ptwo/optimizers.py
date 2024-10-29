@@ -1,24 +1,46 @@
 import numpy as np
 
 class ADAM:
-    def __init__(self, beta1=0.9, beta2=0.999, delta=1e-8):
+    def __init__(self, layers = None, beta1=0.9, beta2=0.999, delta=1e-8):
         self.beta1 = beta1
         self.beta2 = beta2
         self.delta = delta
-        self.first_moment = 0.0
-        self.second_moment = 0.0
+        if layers is None:
+            self.first_moment = 0.0
+            self.second_moment = 0.0
+        else:
+            self.first_moment = []
+            self.second_moment = []
+            for W, b in layers:
+                Ws = np.zeros(W.shape)
+                bs = np.zeros(b.shape)
+                self.first_moment.append([Ws, bs])
+                self.second_moment.append([Ws, bs])
+
 
     def reset(self):
         self.first_moment = 0.0
         self.second_moment = 0.0
 
-    def calculate(self, learning_rate, grad, current_iter):
-        self.first_moment = self.beta1*self.first_moment + (1-self.beta1)*grad
-        self.second_moment = self.beta2*self.second_moment + (1-self.beta2)*grad*grad
+    def calculate(self, learning_rate, grad, current_iter, current_layer = None, current_var = None):
+        if current_layer is None:
+            first_moment = self.beta1*self.first_moment + (1-self.beta1)*grad
+            second_moment = self.beta2*self.second_moment + (1-self.beta2)*grad*grad
+            self.first_moment = first_moment
+            self.second_moment = second_moment
+        else:
+            print(current_layer, current_var)
+            moment1 = self.first_moment[current_layer][current_var]
+            moment2 = self.second_moment[current_layer][current_var]
+            first_moment = self.beta1*moment1 + (1-self.beta1)*grad
+            second_moment = self.beta2*moment2 + (1-self.beta2)*grad*grad
+            self.first_moment[current_layer][current_var] = first_moment
+            self.second_moment[current_layer][current_var] = second_moment
 
-        first_term = self.first_moment/(1.0-self.beta1**current_iter)
-        second_term = self.second_moment/(1.0-self.beta2**current_iter)
+        first_term = first_moment/(1.0-self.beta1**current_iter)
+        second_term = second_moment/(1.0-self.beta2**current_iter)
         update = learning_rate*first_term/(np.sqrt(second_term)+self.delta)
+            
 
         return update
 

@@ -60,8 +60,22 @@ out = nn.feed_forward_batch(X_train)
 print("MSE after training", mse(out, y_train))
 
 print("With ADAM optimizer:")
+# for now until I become smarter
+def create_layers_batch(network_input_size, layer_output_sizes):
+    layers = []
 
-nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=ADAM())
+    i_size = network_input_size
+    for layer_output_size in layer_output_sizes:
+        W = np.random.randn(i_size, layer_output_size)
+        b = np.random.randn(layer_output_size)
+        layers.append((W, b))
+
+        i_size = layer_output_size
+    return layers
+
+layers = create_layers_batch(X_train.shape[1], layer_output_sizes)
+
+nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=ADAM(layers))
 
 out = nn.feed_forward_batch(X_train)
 

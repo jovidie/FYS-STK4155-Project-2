@@ -120,14 +120,14 @@ class NeuralNetwork:
         self.train_prediction = self.feed_forward_batch(self.train_input, self.layers)
         return self._binary_cross_entropy(self.train_predict, self.train_target)
 
-    def _train(self, grad, learning_rate, current_iter):
+    def _train(self, grad, learning_rate, current_iter, current_layer = None, current_var = None):
         #if self.momentum == 0.0:
         # handle momentum, doesn't fit with the shapes of the gradients ...
         if self.optimizer is None:
             update = learning_rate * grad #+ self.momentum * self.momentum_change
             self.momentum_change = update
         else:
-            update = self.optimizer.calculate(learning_rate, grad, current_iter)
+            update = self.optimizer.calculate(learning_rate, grad, current_iter, current_layer, current_var)
 
         return update
 
@@ -147,9 +147,11 @@ class NeuralNetwork:
         gradient_func = grad(self._cost, 2)
         for i in range(epochs):
             layers_grad = gradient_func(train_input, train_targets, self.layers)
+            j=0
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
-                W -= self._train(W_g, learning_rate, i)
-                b -= learning_rate * b_g
+                W -= self._train(W_g, learning_rate, i, current_layer=j, current_var=0)
+                b -= self._train(b_g, learning_rate, i, current_layer=j, current_var=1)
+                j+=1
 
 
 # Retrieved from additionweek42.ipynb
