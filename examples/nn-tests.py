@@ -111,3 +111,64 @@ print("MSE before training", mse(out, y_train))
 nn.train_network(X_train, y_train, learning_rate=0.01, epochs=1000)
 out = nn.feed_forward_batch(X_train)
 print("MSE after training", mse(out, y_train))
+
+print(" -----------------------------")
+print("| Stochastic gradient descent |")
+print(" -----------------------------")
+
+print("No optimizer")
+rho = 0.99
+nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse)
+
+out = nn.feed_forward_batch(X_train)
+
+print("MSE before training", mse(out, y_train))
+nn.train_network_sgd(X_train, y_train, learning_rate=0.001, epochs=1000)
+print(nn.optimizer)
+out = nn.feed_forward_batch(X_train)
+
+print("MSE after training", mse(out, y_train))
+
+print("-----------------------------")
+print("With momentum:")
+gamma = 0.3
+nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=Momentum(gamma))
+
+out = nn.feed_forward_batch(X_train)
+
+print("MSE before training", mse(out, y_train))
+
+nn.train_network_sgd(X_train, y_train, learning_rate=0.001, epochs=1000)
+out = nn.feed_forward_batch(X_train)
+
+print("MSE after training", mse(out, y_train))
+
+print("-----------------------------")
+print("With ADAM:")
+gamma = 0.3
+nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=ADAM())
+
+out = nn.feed_forward_batch(X_train)
+
+print("MSE before training", mse(out, y_train))
+
+nn.train_network_sgd(X_train, y_train, learning_rate=0.01, epochs=1000)
+out = nn.feed_forward_batch(X_train)
+
+print("MSE after training", mse(out, y_train))
+
+
+
+print("-----------------------------")
+print("With ADAM and L2 regularization (experimental):")
+gamma = 0.3
+nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=ADAM(), lmb=0.1)
+
+out = nn.feed_forward_batch(X_train)
+
+print("MSE before training", mse(out, y_train))
+
+nn.train_network_sgd(X_train, y_train, learning_rate=0.01, epochs=1000)
+out = nn.feed_forward_batch(X_train)
+
+print("MSE after training", mse(out, y_train))

@@ -16,12 +16,14 @@ class NeuralNetwork:
                  layer_output_sizes, 
                  activation_funcs, 
                  cost_function,
-                 optimizer = None):
+                 optimizer = None,
+                 lmb = 0):
         self.network_input_size = network_input_size
         self.layer_output_sizes = layer_output_sizes
         self.activation_funcs = activation_funcs
         self.cost_function = cost_function
         self.optimizer = optimizer
+        self.lmb = lmb
         self.create_layers_batch()
 
     def create_layers_batch(self):
@@ -41,10 +43,21 @@ class NeuralNetwork:
             i_size = layer_output_size
 
     def _cost(self, x, targets, layers = None):
+
+
         if layers is None:
             layers = self.layers
         predictions = self.feed_forward_batch(x, layers)
-        return self.cost_function(predictions, targets)
+        base_cost = self.cost_function(predictions, targets)
+        
+        # L2 regularization term
+        l2_term = 0
+        for W, b in layers:
+            l2_term += np.sum(W**2)
+        l2_term *= (self.lmb / 2.0)
+        
+        return base_cost + l2_term
+
 
     def feed_forward_batch(self, x, layers=None):
         """
@@ -141,7 +154,33 @@ class NeuralNetwork:
             layers_grad = gradient_func(train_input, train_targets, self.layers)
             j=0
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
-                W -= self._train(W_g, learning_rate, i+1, current_layer=j, current_var=0)
+                W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
+                b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
+                j+=1
+    def train_network_sgd(self, train_input, train_targets, learning_rate=0.001, epochs = 100, batch_size = 5):
+        # feel free to implement this differently
+        # i.e. as part of the other train_network function
+        self.train_input = train_input
+        self.train_targets = train_targets
+        n = train_input.shape[0]
+        n_batches = int(n / batch_size)
+
+        gradient_func = grad(self._cost, 2)
+        xy = np.column_stack([train_input,train_targets]) # for shuffling x and y together
+
+        for i in range(epochs):
+            if self.optimizer is not None:
+                self.optimizer.reset(self.layers)
+            np.random.shuffle(xy)
+            for _ in range(n_batches):
+                random_index = batch_size * np.random.randint(n_batches)
+                xi = xy[random_index:random_index+batch_size, :-1]
+                yi = xy[random_index:random_index+batch_size, -1:]
+
+            layers_grad = gradient_func(xi, yi, self.layers)
+            j=0
+            for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
+                W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
                 j+=1
 
@@ -357,8 +396,8 @@ class GradientDescent:
                 if self.scheduler is not None:
                     self.learning_rate = self.scheduler(i * batch_size + j)
                 random_index = batch_size * np.random.randint(n_batches)
-                xi = xy[random_index:random_index+5, :-1]
-                yi = xy[random_index:random_index+5, -1:]
+                xi = xy[random_index:random_index+batch_size, :-1]
+                yi = xy[random_index:random_index+batch_size, -1:]
                 grad = (1/batch_size) * self.gradient(X, y, self.theta)
                 update = self._gd(grad, current_iter = j+1)
                 self.theta -= update
