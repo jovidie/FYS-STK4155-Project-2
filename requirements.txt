@@ -4,6 +4,7 @@ scipy
 matplotlib
 seaborn
 imageio
+matplotlib
 ipython
 jax[cpu]
 autograd

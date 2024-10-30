@@ -13,12 +13,12 @@ class NeuralNetwork:
     - activation_funcs is the \sigma() function which makes sigma(z) = a
     
     """
-    def __init__(self, network_input, targets, layer_output_sizes, activation_funcs):
+    def __init__(self, network_input, layer_output_sizes, activation_funcs):
         self.network_input = network_input
         self.network_input_size = network_input.shape[1]
         self.layer_output_sizes = layer_output_sizes
         self.activation_funcs = activation_funcs
-        self.targets = targets
+        self.create_layers_batch()
 
     def create_layers_batch(self):
         """
@@ -88,14 +88,14 @@ class NeuralNetwork:
         return np.mean((predict*np.log(target)) + ((1 - predict) * np.log(1 - target)))
     
     # Suggested cost from week 42 exercises
-    def _cost(self):
+    def cost(self):
         """
         #TODO 
         Cost function, uses the cost function parameter given in the constructor to find the gradients
         during backpropagarion. 
 
         Binary classification: should have binarty cross entropy as a cost function (or loss function)
-        Non-binary classificatio: could have other loss functions; cross entropy, MSE, etc.s
+        Non-binary classificatio: could have other loss functions; cross entropy, MSE, etc.
         """
         self.train_prediction = self.feed_forward_batch(self.train_input)
         return self._binary_cross_entropy(self.train_predict, self.train_target)
@@ -114,7 +114,7 @@ class NeuralNetwork:
         self.train_input = train_input
         self.train_targets = train_targets
         gradient_func = grad(self.cost, 1)
-        layers_grad = gradient_func(train_input, self.layers, self.activation_funcs, train_targets)  # Don't change this
+        layers_grad = gradient_func(self.train_input, self.layers, self.activation_funcs, train_targets)  # Don't change this
         for i in range(epochs):
             layers_grad = gradient_func(train_input, self.layers, self.activation_funcs, train_targets)
             i = 0
