@@ -19,6 +19,7 @@ class Momentum:
             self.change = 0
         else:
             self.initialize_layers(layers)
+            
     def calculate(self, learning_rate, grad, current_iter, current_layer = None, current_var = None):
         if current_layer is None:
             update_term =  self.gamma * self.change

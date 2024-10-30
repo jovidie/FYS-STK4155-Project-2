@@ -148,7 +148,32 @@ class NeuralNetwork:
                 W -= self._train(W_g, learning_rate, i+1, current_layer=j, current_var=0)
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
                 j+=1
+    def train_network_sgd(self, train_input, train_targets, learning_rate=0.001, epochs = 100, batch_size = 5):
+        # feel free to implement this differently
+        # i.e. as part of the other train_network function
+        self.train_input = train_input
+        self.train_targets = train_targets
+        n = train_input.shape[0]
+        n_batches = int(n / batch_size)
 
+        gradient_func = grad(self._cost, 2)
+        xy = np.column_stack([train_input,train_targets]) # for shuffling x and y together
+
+        for i in range(epochs):
+            if self.optimizer is not None:
+                self.optimizer.reset(self.layers)
+            np.random.shuffle(xy)
+            for _ in range(n_batches):
+                random_index = batch_size * np.random.randint(n_batches)
+                xi = xy[random_index:random_index+batch_size, :-1]
+                yi = xy[random_index:random_index+batch_size, -1:]
+
+            layers_grad = gradient_func(xi, yi, self.layers)
+            j=0
+            for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
+                W -= self._train(W_g, learning_rate, i+1, current_layer=j, current_var=0)
+                b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
+                j+=1
 
 # Retrieved from additionweek42.ipynb
 class LogisticRegression:
@@ -363,8 +388,8 @@ class GradientDescent:
                 if self.scheduler is not None:
                     self.learning_rate = self.scheduler(i * batch_size + j)
                 random_index = batch_size * np.random.randint(n_batches)
-                xi = xy[random_index:random_index+5, :-1]
-                yi = xy[random_index:random_index+5, -1:]
+                xi = xy[random_index:random_index+batch_size, :-1]
+                yi = xy[random_index:random_index+batch_size, -1:]
                 grad = (1/batch_size) * self.gradient(X, y, self.theta)
                 update = self._gd(grad, current_iter = j+1)
                 self.theta -= update
