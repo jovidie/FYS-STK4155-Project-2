@@ -1,5 +1,37 @@
 import numpy as np
 
+class Momentum:
+    def __init__(self, gamma, layers = None):
+        self.gamma = gamma
+        if layers is None:
+            self.change = 0.0
+            self.has_layers = False
+    
+    def initialize_layers(self, layers):
+        self.change = []
+        for W, b in layers:
+            Ws = np.zeros(W.shape)
+            bs = np.zeros(b.shape)
+            self.change.append([Ws, bs])
+        self.has_layers = True
+    def reset(self, layers = None):
+        if layers is None:
+            self.change = 0
+        else:
+            self.initialize_layers(layers)
+    def calculate(self, learning_rate, grad, current_iter, current_layer = None, current_var = None):
+        if current_layer is None:
+            update_term =  self.gamma * self.change
+            update = learning_rate * grad + update_term
+            self.change = update
+        else:
+            current_change = self.change[current_layer][current_var]
+            update_term = self.gamma * current_change
+            update = learning_rate * grad + update_term
+            self.change[current_layer][current_var] = update
+        return update
+
+
 class ADAM:
     def __init__(self, layers = None, beta1=0.9, beta2=0.999, delta=1e-8):
         self.beta1 = beta1
@@ -90,17 +122,37 @@ class AdaGrad:
 
 
 class RMSProp:
-    def __init__(self, rho, delta = 1e-8):
+    def __init__(self, rho, layers = None, delta = 1e-8):
         self.rho = rho
         self.delta = delta
-        self.Giter = 0.0
-
+        if layers is None:
+            self.Giter = 0.0
+            self.has_layers = False
+        else:
+            self.initialize_layers(layers)
+    
+    def initialize_layers(self, layers):
+        self.Giter = []
+        for W, b in layers:
+            Ws = np.zeros(W.shape)
+            bs = np.zeros(b.shape)
+            self.Giter.append([Ws, bs])
+        self.has_layers = True
+    
     def reset(self):
         self.Giter = 0.0
     
-    def calculate(self, learning_rate, grad, current_iter):
-        self.Giter = self.rho*self.Giter + (1-self.rho)*grad*grad
-        update = learning_rate * grad / (self.delta+np.sqrt(self.Giter))
+    def calculate(self, learning_rate, grad, current_iter, current_layer = None, current_var = None):
+
+        if current_layer is None:
+            Giter = self.rho*self.Giter + (1-self.rho)*grad*grad
+            self.Giter = Giter
+        else:
+            current_Giter = self.Giter[current_layer][current_var]
+            Giter = self.rho*current_Giter + (1-self.rho)*grad*grad
+            self.Giter[current_layer][current_var] = Giter
+
+        update = learning_rate * grad / (self.delta+np.sqrt(Giter))
         return update
 
 ## Learning rate schedulers ##

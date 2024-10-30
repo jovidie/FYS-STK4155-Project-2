@@ -18,15 +18,12 @@ class NeuralNetwork:
                  layer_output_sizes, 
                  activation_funcs, 
                  cost_function,
-                 optimizer = None,
-                 momentum = 0.0):
+                 optimizer = None):
         self.network_input_size = network_input_size
         self.layer_output_sizes = layer_output_sizes
         self.activation_funcs = activation_funcs
         self.cost_function = cost_function
         self.optimizer = optimizer
-        self.momentum = momentum
-        self.momentum_change = 0.0
         self.create_layers_batch()
 
     def create_layers_batch(self):
@@ -121,11 +118,8 @@ class NeuralNetwork:
         return self._binary_cross_entropy(self.train_predict, self.train_target)
 
     def _train(self, grad, learning_rate, current_iter, current_layer = None, current_var = None):
-        #if self.momentum == 0.0:
-        # handle momentum, doesn't fit with the shapes of the gradients ...
         if self.optimizer is None:
-            update = learning_rate * grad #+ self.momentum * self.momentum_change
-            self.momentum_change = update
+            update = learning_rate * grad
         else:
             if not self.optimizer.has_layers:
                 self.optimizer.initialize_layers(self.layers)
@@ -326,24 +320,23 @@ if __name__ == "__main__":
 
 
 class GradientDescent:
-    def __init__(self, learning_rate, gradient, momentum = 0, optimizer = None, scheduler = None):
+    def __init__(self, learning_rate, gradient, optimizer = None, scheduler = None):
         self.learning_rate = learning_rate
         self.gradient = gradient
-        self.momentum = momentum
-        self.momentum_change = 0.0
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.theta = None
         self.n = None
         if self.scheduler is not None:
             print("Using learning rate scheduler, learning_rate argument is ignored")
+
     def _initialize_vars(self, X):
         self.theta = np.random.randn(X.shape[1], 1)
         self.n = X.shape[0]
+
     def _gd(self, grad, current_iter):
         if self.optimizer is None:
-            update = self.learning_rate * grad + self.momentum * self.momentum_change
-            self.momentum_change = update
+            update = self.learning_rate * grad
         else:
             update = self.optimizer.calculate(self.learning_rate, grad, current_iter)
 

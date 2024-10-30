@@ -1,9 +1,8 @@
 from ptwo.models import NeuralNetwork
 from ptwo.activators import sigmoid, ReLU
-from ptwo.optimizers import ADAM, AdaGrad, RMSProp
+from ptwo.optimizers import ADAM, AdaGrad, RMSProp, Momentum
 
 import autograd.numpy as np
-from autograd import grad
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.model_selection import train_test_split
 
@@ -57,6 +56,22 @@ nn.train_network(X_train, y_train, learning_rate=0.001, epochs=1000)
 out = nn.feed_forward_batch(X_train)
 
 print("MSE after training", mse(out, y_train))
+
+print("-----------------------------")
+print("With momentum:")
+gamma = 0.3
+nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=Momentum(gamma))
+
+out = nn.feed_forward_batch(X_train)
+
+print("MSE before training", mse(out, y_train))
+
+nn.train_network(X_train, y_train, learning_rate=0.001, epochs=1000)
+out = nn.feed_forward_batch(X_train)
+
+print("MSE after training", mse(out, y_train))
+
+
 print("-----------------------------")
 print("With ADAM optimizer:")
 
@@ -80,5 +95,19 @@ out = nn.feed_forward_batch(X_train)
 print("MSE before training", mse(out, y_train))
 
 nn.train_network(X_train, y_train, learning_rate=0.5, epochs=1000)
+out = nn.feed_forward_batch(X_train)
+print("MSE after training", mse(out, y_train))
+
+print("-----------------------------")
+
+print("With RMSProp optimizer")
+rho = 0.99
+nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=RMSProp(rho))
+
+out = nn.feed_forward_batch(X_train)
+
+print("MSE before training", mse(out, y_train))
+
+nn.train_network(X_train, y_train, learning_rate=0.01, epochs=1000)
 out = nn.feed_forward_batch(X_train)
 print("MSE after training", mse(out, y_train))
