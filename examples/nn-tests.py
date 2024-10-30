@@ -156,3 +156,19 @@ nn.train_network_sgd(X_train, y_train, learning_rate=0.01, epochs=1000)
 out = nn.feed_forward_batch(X_train)
 
 print("MSE after training", mse(out, y_train))
+
+
+
+print("-----------------------------")
+print("With ADAM and L2 regularization (experimental):")
+gamma = 0.3
+nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=ADAM(), lmb=0.1)
+
+out = nn.feed_forward_batch(X_train)
+
+print("MSE before training", mse(out, y_train))
+
+nn.train_network_sgd(X_train, y_train, learning_rate=0.01, epochs=1000)
+out = nn.feed_forward_batch(X_train)
+
+print("MSE after training", mse(out, y_train))
