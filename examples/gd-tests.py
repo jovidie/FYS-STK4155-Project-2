@@ -46,7 +46,7 @@ print("Regular", gd.theta, sep = "\n")
 
 gamma = 0.3
 
-gd_momentum = GradientDescent(eta, grad, momentum = gamma)
+gd_momentum = GradientDescent(eta, grad, optimizer=Momentum(gamma))
 gd_momentum.descend(X, y, n_iter = n_iter)
 print("Momentum", gd_momentum.theta, sep = "\n")
 
@@ -90,7 +90,7 @@ n_iter = 200
 gamma = 0.3
 scheduler = lr_scheduler()
 
-gd_momentum = GradientDescent(eta, grad, momentum = gamma, scheduler=scheduler)
+gd_momentum = GradientDescent(eta, grad, optimizer= Momentum(gamma), scheduler=scheduler)
 gd_momentum.descend(X, y, n_iter = n_iter)
 print("GD, momentum and learning schedule", gd_momentum.theta, sep = "\n")
 
@@ -100,6 +100,6 @@ n_epochs = 50
 
 scheduler = lr_scheduler(M, n_epochs)
 
-gd_momentum = GradientDescent(eta, grad, momentum = gamma, scheduler=scheduler)
+gd_momentum = GradientDescent(eta, grad, optimizer=Momentum(gamma), scheduler=scheduler)
 gd_momentum.descend_stochastic(X, y, n_epochs=n_epochs, batch_size=M)
 print("SGD, momentum and learning schedule", gd_momentum.theta, sep = "\n")

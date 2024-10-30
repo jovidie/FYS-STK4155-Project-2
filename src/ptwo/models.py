@@ -320,24 +320,23 @@ if __name__ == "__main__":
 
 
 class GradientDescent:
-    def __init__(self, learning_rate, gradient, momentum = 0, optimizer = None, scheduler = None):
+    def __init__(self, learning_rate, gradient, optimizer = None, scheduler = None):
         self.learning_rate = learning_rate
         self.gradient = gradient
-        self.momentum = momentum
-        self.momentum_change = 0.0
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.theta = None
         self.n = None
         if self.scheduler is not None:
             print("Using learning rate scheduler, learning_rate argument is ignored")
+
     def _initialize_vars(self, X):
         self.theta = np.random.randn(X.shape[1], 1)
         self.n = X.shape[0]
+
     def _gd(self, grad, current_iter):
         if self.optimizer is None:
-            update = self.learning_rate * grad + self.momentum * self.momentum_change
-            self.momentum_change = update
+            update = self.learning_rate * grad
         else:
             update = self.optimizer.calculate(self.learning_rate, grad, current_iter)
 
