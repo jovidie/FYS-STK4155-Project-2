@@ -42,24 +42,24 @@ class NeuralNetwork:
             self.layers.append((W, b))
             i_size = layer_output_size
 
-    def _cost(self, x, targets, layers = None):
-
-
-        if layers is None:
-            layers = self.layers
+    def _cost(self, x, targets, layers):
+        #if layers is None:
+        #   layers = self.layers
         predictions = self.feed_forward_batch(x, layers)
         base_cost = self.cost_function(predictions, targets)
         
         # L2 regularization term
+        """
         l2_term = 0
         for W, b in layers:
             l2_term += np.sum(W**2)
         l2_term *= (self.lmb / 2.0)
+        """
         
-        return base_cost + l2_term
+        return base_cost # + l2_term
 
 
-    def feed_forward_batch(self, x, layers=None):
+    def feed_forward_batch(self, x, layers = None):
         """
         Function that transforms input data into target predictions based on current weights and biases
         Args: 
@@ -70,7 +70,7 @@ class NeuralNetwork:
             layers = self.layers
         a = x
         for (W, b), activation_func in zip(layers, self.activation_funcs):
-            z = a @ W + b 
+            z = W.T @ a  + b 
             a = activation_func(z)
         return a
     
@@ -85,7 +85,8 @@ class NeuralNetwork:
         """
         probs = self.feed_forward_batch(x)
         self.predictions = probs
-        return np.argmax(probs, axis = 1)
+        #return np.argmax(probs, axis = 1)
+        return probs
     
     def accuracy(self, x, targets):
         """
@@ -127,13 +128,11 @@ class NeuralNetwork:
 
     def _train(self, grad, learning_rate, current_iter, current_layer = None, current_var = None):
         if self.optimizer is None:
-            update = learning_rate * grad
+            return learning_rate * grad
         else:
             if not self.optimizer.has_layers:
                 self.optimizer.initialize_layers(self.layers)
-            update = self.optimizer.calculate(learning_rate, grad, current_iter, current_layer, current_var)
-
-        return update
+            return self.optimizer.calculate(learning_rate, grad, current_iter, current_layer, current_var)
 
     def train_network(self, train_input, train_targets, learning_rate=0.001, epochs=100): #TODO add cost
         """
@@ -142,13 +141,13 @@ class NeuralNetwork:
         Args: 
         - train_input: the input variable x we use to predict y, should be a selection of data
         - train_targets: the matching golden truth to the train_input
-        - cost: a selected cost function #TODO
+        - cost: a selected cost function given in constructor
         - learning rate: determines the stepsize we take towards reaching the optimal W and b
         - epochs: number of iterations in one training cycle to reach optimal W and b
         """
         self.train_input = train_input
         self.train_targets = train_targets
-        gradient_func = grad(self._cost, 2)
+        gradient_func = grad(self._cost) #hvorfor står det 2 her?
         for i in range(epochs):
             print("EPOCH:", i)
             layers_grad = gradient_func(train_input, train_targets, self.layers)
@@ -157,6 +156,7 @@ class NeuralNetwork:
                 W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
                 j+=1
+    
     def train_network_sgd(self, train_input, train_targets, learning_rate=0.001, epochs = 100, batch_size = 5):
         # feel free to implement this differently
         # i.e. as part of the other train_network function

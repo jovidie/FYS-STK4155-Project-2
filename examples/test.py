@@ -5,11 +5,12 @@ from ptwo.activators import sigmoid, ReLU
 from imageio import imread
 import numpy as np
 import matplotlib.pyplot as plt
+# maco
 
 
 def main():
 
-    def binary_cross_entropy(predict, target):
+    def cost_binary_cross_entropy(predict, target):
         """
         Loss function used in binary classification when target variable has two possible 
         outcomes: 1 or 0, 
@@ -21,6 +22,7 @@ def main():
     
     def mse(predict, target):
         return np.mean((predict - target) ** 2)
+
 
     # data prepping: 
     print("PREPPING DATA")
@@ -37,8 +39,8 @@ def main():
     network_input = xy
     network_input_size = xy.shape[1]
     layer_output_sizes = [12, 10, 1]
-    activation_funcs = [ReLU, ReLU, sigmoid]
-    NN = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs=activation_funcs, cost_function = binary_cross_entropy)
+    activation_funcs = [ReLU, ReLU, lambda x: x]
+    NN = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs=activation_funcs, cost_function = mse)
 
     print("TESTING NETWORK")
     print(NN.predict(network_input).shape)

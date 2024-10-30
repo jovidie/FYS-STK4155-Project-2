@@ -9,12 +9,10 @@ from sklearn.model_selection import train_test_split
 def ReLU(z):
     return np.where(z > 0, z, 0)
 
-
 def mse(predict, target):
     return np.mean((predict - target) ** 2)
 
 # generate data
-
 np.random.seed(8923)
 
 # generate data
