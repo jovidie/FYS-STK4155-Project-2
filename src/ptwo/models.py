@@ -5,13 +5,11 @@ from autograd import grad
 class NeuralNetwork:
     """
     Neural Network model
-
     Args: 
     - network_input: the design matrix/variables we wish to predict from
     - targets: the golden truth
     - layer_output_sizes = size of layers, number of layers is determined by len(layer_output sizes)
     - activation_funcs is the sigma() function which makes sigma(z) = a
-    
     """
     def __init__(self, 
                  network_input_size, 
@@ -29,7 +27,7 @@ class NeuralNetwork:
     def create_layers_batch(self):
         """
         Function that creates all the NN layers based on layer_output_sizes 
-        Args:   
+        Args:
         input size of network: determines first layer size
         layer output size: Output sizes of the rest of the layers, where the last layer has to match target size
         returns nothing, saves layers as instance variable
@@ -47,8 +45,6 @@ class NeuralNetwork:
             layers = self.layers
         predictions = self.feed_forward_batch(x, layers)
         return self.cost_function(predictions, targets)
-
-
 
     def feed_forward_batch(self, x, layers=None):
         """
@@ -103,7 +99,6 @@ class NeuralNetwork:
         """
         return np.mean((predict*np.log(target)) + ((1 - predict) * np.log(1 - target)))
     
-
     # Suggested cost from week 42 exercises
     def _cost_bce(self):
         """
@@ -142,13 +137,13 @@ class NeuralNetwork:
         self.train_targets = train_targets
         gradient_func = grad(self._cost, 2)
         for i in range(epochs):
+            print("EPOCH:", i)
             layers_grad = gradient_func(train_input, train_targets, self.layers)
             j=0
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
                 W -= self._train(W_g, learning_rate, i+1, current_layer=j, current_var=0)
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
                 j+=1
-
 
 # Retrieved from additionweek42.ipynb
 class LogisticRegression:
@@ -177,7 +172,6 @@ class LogisticRegression:
         linear_model = X @ self.beta_logreg
         y_predicted = self.sigmoid(linear_model)
         return [1 if i >= 0.5 else 0 for i in y_predicted]
-    
 
 # Not necessary with both, condence classes into one
 class LogReg:

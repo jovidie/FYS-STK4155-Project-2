@@ -6,7 +6,22 @@ from imageio import imread
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def main():
+
+    def binary_cross_entropy(predict, target):
+        """
+        Loss function used in binary classification when target variable has two possible 
+        outcomes: 1 or 0, 
+        Args: 
+        - predict is the prediction we have from input
+        - target are the targets we know to match input
+    """
+        return np.mean((predict*np.log(target)) + ((1 - predict) * np.log(1 - target)))
+    
+    def mse(predict, target):
+        return np.mean((predict - target) ** 2)
+
     # data prepping: 
     print("PREPPING DATA")
     terrain_full = imread('../data/SRTM_data_Norway_2.tif')
@@ -20,9 +35,10 @@ def main():
     print("PREPPING NETWORK")
     # network prepping: 
     network_input = xy
+    network_input_size = xy.shape[1]
     layer_output_sizes = [12, 10, 1]
     activation_funcs = [ReLU, ReLU, sigmoid]
-    NN = NeuralNetwork(network_input, layer_output_sizes, activation_funcs)
+    NN = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs=activation_funcs, cost_function = binary_cross_entropy)
 
     print("TESTING NETWORK")
     print(NN.predict(network_input).shape)
@@ -31,6 +47,7 @@ def main():
     plt.ylabel('Y')
     plt.show()
 
+    print("TRAINING NETWORK")
     NN.train_network(network_input, targets)
     print(NN.predict(network_input).shape)
     plt.imshow(NN.predictions.reshape(200, 200), cmap='gray')
@@ -40,10 +57,3 @@ def main():
 
 main()
 print("FINISHED TEST")
-"""
-if __name__ == '__test_':
-    main()
-
-
-"""
-
