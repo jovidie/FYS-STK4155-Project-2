@@ -18,12 +18,14 @@ class NeuralNetwork:
                  layer_output_sizes, 
                  activation_funcs, 
                  cost_function,
-                 optimizer = None):
+                 optimizer = None,
+                 lmb = 0):
         self.network_input_size = network_input_size
         self.layer_output_sizes = layer_output_sizes
         self.activation_funcs = activation_funcs
         self.cost_function = cost_function
         self.optimizer = optimizer
+        self.lmb = lmb
         self.create_layers_batch()
 
     def create_layers_batch(self):
@@ -43,11 +45,20 @@ class NeuralNetwork:
             i_size = layer_output_size
 
     def _cost(self, x, targets, layers = None):
+
+
         if layers is None:
             layers = self.layers
         predictions = self.feed_forward_batch(x, layers)
-        return self.cost_function(predictions, targets)
-
+        base_cost = self.cost_function(predictions, targets)
+        
+        # L2 regularization term
+        l2_term = 0
+        for W, b in layers:
+            l2_term += np.sum(W**2)
+        l2_term *= (self.lmb / 2.0)
+        
+        return base_cost + l2_term
 
 
     def feed_forward_batch(self, x, layers=None):
@@ -145,7 +156,7 @@ class NeuralNetwork:
             layers_grad = gradient_func(train_input, train_targets, self.layers)
             j=0
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
-                W -= self._train(W_g, learning_rate, i+1, current_layer=j, current_var=0)
+                W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
                 j+=1
     def train_network_sgd(self, train_input, train_targets, learning_rate=0.001, epochs = 100, batch_size = 5):
@@ -171,7 +182,7 @@ class NeuralNetwork:
             layers_grad = gradient_func(xi, yi, self.layers)
             j=0
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
-                W -= self._train(W_g, learning_rate, i+1, current_layer=j, current_var=0)
+                W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
                 j+=1
 
