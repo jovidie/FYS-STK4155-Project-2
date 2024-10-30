@@ -149,8 +149,8 @@ class NeuralNetwork:
             layers_grad = gradient_func(train_input, train_targets, self.layers)
             j=0
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
-                W -= self._train(W_g, learning_rate, i, current_layer=j, current_var=0)
-                b -= self._train(b_g, learning_rate, i, current_layer=j, current_var=1)
+                W -= self._train(W_g, learning_rate, i+1, current_layer=j, current_var=0)
+                b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
                 j+=1
 
 

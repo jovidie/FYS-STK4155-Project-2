@@ -81,7 +81,7 @@ out = nn.feed_forward_batch(X_train)
 
 print("MSE before training", mse(out, y_train))
 
-nn.train_network(X_train, y_train, learning_rate=0.001, epochs=1000)
+nn.train_network(X_train, y_train, learning_rate=0.5, epochs=1000)
 out = nn.feed_forward_batch(X_train)
 
 print("MSE after training", mse(out, y_train))

@@ -29,7 +29,6 @@ class ADAM:
             self.first_moment = first_moment
             self.second_moment = second_moment
         else:
-            print(current_layer, current_var)
             moment1 = self.first_moment[current_layer][current_var]
             moment2 = self.second_moment[current_layer][current_var]
             first_moment = self.beta1*moment1 + (1-self.beta1)*grad
