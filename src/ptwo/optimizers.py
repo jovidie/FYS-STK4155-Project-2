@@ -8,19 +8,26 @@ class ADAM:
         if layers is None:
             self.first_moment = 0.0
             self.second_moment = 0.0
+            self.has_layers = False
         else:
-            self.first_moment = []
-            self.second_moment = []
-            for W, b in layers:
-                Ws = np.zeros(W.shape)
-                bs = np.zeros(b.shape)
-                self.first_moment.append([Ws, bs])
-                self.second_moment.append([Ws, bs])
+            self.initialize_layers(layers)
 
+    def initialize_layers(self, layers):
+        self.first_moment = []
+        self.second_moment = []
+        for W, b in layers:
+            Ws = np.zeros(W.shape)
+            bs = np.zeros(b.shape)
+            self.first_moment.append([Ws, bs])
+            self.second_moment.append([Ws, bs])
+        self.has_layers = True
 
-    def reset(self):
-        self.first_moment = 0.0
-        self.second_moment = 0.0
+    def reset(self, layers = None):
+        if layers is None:
+            self.first_moment = 0.0
+            self.second_moment = 0.0
+        else:
+            self.initialize_layers(layers)
 
     def calculate(self, learning_rate, grad, current_iter, current_layer = None, current_var = None):
         if current_layer is None:
@@ -46,16 +53,39 @@ class ADAM:
 
 
 class AdaGrad:
-    def __init__(self, delta = 1e-8):
+    def __init__(self, layers = None, delta = 1e-8):
         self.delta = delta
-        self.Giter = 0.0
 
-    def reset(self):
-        self.Giter = 0.0
+        if layers is None:
+            self.Giter = 0.0
+            self.has_layers = False
+        else:
+            self.initialize_layers()
+
+    def initialize_layers(self, layers):
+        self.Giter = []
+        for W, b in layers:
+            Ws = np.zeros(W.shape)
+            bs = np.zeros(b.shape)
+            self.Giter.append([Ws, bs])
+        self.has_layers = True
     
-    def calculate(self, learning_rate, grad, current_iter):
-        self.Giter += grad*grad
-        update = learning_rate * grad / (self.delta + np.sqrt(self.Giter))
+    def reset(self, layers = None):
+        if layers is None:
+            self.Giter = 0.0
+        else:
+            self.initialize_layers()
+    
+    def calculate(self, learning_rate, grad, current_iter, current_layer = None, current_var = None):
+        if current_layer is None:
+            Giter = self.Giter + grad*grad
+            self.Giter = Giter
+        else:
+            current_Giter = self.Giter[current_layer][current_var]
+            Giter = current_Giter + grad*grad
+            self.Giter[current_layer][current_var] = Giter
+
+        update = learning_rate * grad / (self.delta + np.sqrt(Giter))
         return update
 
 

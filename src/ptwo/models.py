@@ -127,6 +127,8 @@ class NeuralNetwork:
             update = learning_rate * grad #+ self.momentum * self.momentum_change
             self.momentum_change = update
         else:
+            if not self.optimizer.has_layers:
+                self.optimizer.initialize_layers(self.layers)
             update = self.optimizer.calculate(learning_rate, grad, current_iter, current_layer, current_var)
 
         return update
