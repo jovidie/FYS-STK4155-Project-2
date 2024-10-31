@@ -6,10 +6,13 @@ class NeuralNetwork:
     """
     Neural Network model
     Args: 
-    - network_input: the design matrix/variables we wish to predict from
+    - network_input_size: number of data points, typically the first dimension of the design matrix
     - targets: the golden truth
     - layer_output_sizes = size of layers, number of layers is determined by len(layer_output sizes)
-    - activation_funcs is the sigma() function which makes sigma(z) = a
+    - activation_funcs: a list of activation functions for the hidden and output layers
+    - cost_function: cost function for the output, must be a function C(predicts, targets) that returns a single number
+    - optimizer: an instance of an optimizer object Momentum, ADAM, AdaGrad or RMSProp (optional)
+    - lmb: L2 regularization parameter (default 0)
     """
     def __init__(self, 
                  network_input_size, 
@@ -43,8 +46,6 @@ class NeuralNetwork:
             i_size = layer_output_size
 
     def _cost(self, x, targets, layers = None):
-
-
         if layers is None:
             layers = self.layers
         predictions = self.feed_forward_batch(x, layers)
@@ -61,10 +62,11 @@ class NeuralNetwork:
 
     def feed_forward_batch(self, x, layers=None):
         """
-        Function that transforms input data into target predictions based on current weights and biases
+        Function that transforms input data into predictions based on current weights and biases
         Args: 
-        x is the input data to be transformed
-        returns nothing, saves predictions as instance variable
+        - x: input data to be transformed
+        - layers: defaults to self.layers, necessary for automatic differentiation
+        returns predictions from the output layer
         """
         if layers is None:
             layers = self.layers
@@ -74,6 +76,10 @@ class NeuralNetwork:
             a = activation_func(z)
         return a
     
+    def get_cost(self, inputs, targets):
+        predictions = self.feed_forward_batch(inputs)
+        return self.cost_function(predictions, targets)
+
     # TODO - fix proba
     def predict_proba(self, x):
         probs = self.feed_forward_batch(x)
@@ -87,43 +93,20 @@ class NeuralNetwork:
         self.predictions = probs
         return np.argmax(probs, axis = 1)
     
-    def accuracy(self, x, targets):
+    def accuracy(self, input, targets):
         """
+        Calculate accuracy for a classification with one hot predictions. Feeds the data through
+        the neural network and compares the output with the targets
+        Args:
+        - input: input data
+        - targets: target data
         """
-        predictions = self.feed_forward_batch(x)
+        predictions = self.feed_forward_batch(input)
         one_hot_predictions = np.zeros(predictions.shape)
         for i, prediction in enumerate(predictions):
             one_hot_predictions[i, np.argmax(prediction)] = 1
         self.prediction_accuracy = accuracy_score(one_hot_predictions, targets)
-    
-    # Suggested cost from week 42 exercises -> cost should probably be considered as an argument
-    def _cross_entropy(self, predict, target):
-        """
-        """
-        return np.sum(-target * np.log(predict))
-    
-    def _binary_cross_entropy(self, predict, target):
-        """
-        Loss function used in binary classification when target variable has two possible 
-        outcomes: 1 or 0, 
-        Args: 
-        - predict is the prediction we have from input
-        - target are the targets we know to match input
-        """
-        return np.mean((predict*np.log(target)) + ((1 - predict) * np.log(1 - target)))
-    
-    # Suggested cost from week 42 exercises
-    def _cost_bce(self):
-        """
-        #TODO 
-        Cost function, uses the cost function parameter given in the constructor to find the gradients
-        during backpropagarion. 
-
-        Binary classification: should have binarty cross entropy as a cost function (or loss function)
-        Non-binary classificatio: could have other loss functions; cross entropy, MSE, etc.
-        """
-        self.train_prediction = self.feed_forward_batch(self.train_input, self.layers)
-        return self._binary_cross_entropy(self.train_predict, self.train_target)
+        return self.prediction_accuracy
 
     def _train(self, grad, learning_rate, current_iter, current_layer = None, current_var = None):
         if self.optimizer is None:
@@ -135,17 +118,26 @@ class NeuralNetwork:
 
         return update
 
-    def train_network(self, train_input, train_targets, learning_rate=0.001, epochs=100): #TODO add cost
+    def train_network(self, train_input, train_targets, learning_rate=0.001, epochs=100, batch_size = None): #TODO add cost
         """
         This function performs the back-propagation step to adjust the weights and biases
-        for a default of 100 epochs with a default learning rate of 0.001. 
+        for a default of 100 epochs with a default learning rate of 0.001. If no batch size
+        is specified (default) it will run regular gradient descent (GD), if batch size is specified
+        it wil run stochastic gradient descent (SGD) with the specified batch size.
         Args: 
         - train_input: the input variable x we use to predict y, should be a selection of data
         - train_targets: the matching golden truth to the train_input
-        - cost: a selected cost function #TODO
+        - cost: a selected cost function C(predict, target)
         - learning rate: determines the stepsize we take towards reaching the optimal W and b
         - epochs: number of iterations in one training cycle to reach optimal W and b
+        - batch_size: batch size to use for SGD
         """
+        if batch_size is None:
+            self._train_network_gd(train_input, train_targets, learning_rate, epochs)
+        else:
+            self._train_network_sgd(train_input, train_targets, learning_rate, epochs, batch_size)
+    
+    def _train_network_gd(self, train_input, train_targets, learning_rate, epochs):
         self.train_input = train_input
         self.train_targets = train_targets
         gradient_func = grad(self._cost, 2)
@@ -157,14 +149,13 @@ class NeuralNetwork:
                 W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
                 j+=1
-    def train_network_sgd(self, train_input, train_targets, learning_rate=0.001, epochs = 100, batch_size = 5):
-        # feel free to implement this differently
-        # i.e. as part of the other train_network function
+
+    def _train_network_sgd(self, train_input, train_targets, learning_rate, epochs, batch_size):
         self.train_input = train_input
         self.train_targets = train_targets
         n = train_input.shape[0]
+        n_output = train_targets.shape[1]
         n_batches = int(n / batch_size)
-
         gradient_func = grad(self._cost, 2)
         xy = np.column_stack([train_input,train_targets]) # for shuffling x and y together
 
@@ -174,8 +165,8 @@ class NeuralNetwork:
             np.random.shuffle(xy)
             for _ in range(n_batches):
                 random_index = batch_size * np.random.randint(n_batches)
-                xi = xy[random_index:random_index+batch_size, :-1]
-                yi = xy[random_index:random_index+batch_size, -1:]
+                xi = xy[random_index:random_index+batch_size, :-n_output]
+                yi = xy[random_index:random_index+batch_size, -n_output:]
 
             layers_grad = gradient_func(xi, yi, self.layers)
             j=0
@@ -374,21 +365,26 @@ class GradientDescent:
             update = self.optimizer.calculate(self.learning_rate, grad, current_iter)
 
         return update
+    def descend(self, X, y, epochs=100, batch_size=None):
+        if self.theta is None:
+            self._initialize_vars(X)
+        if batch_size is None:
+            self._descend_gd(X, y, epochs)
+        else:
+            self._descend_sgd(X, y, epochs, batch_size)
 
-    def descend(self, X, y, n_iter=500):
-        self._initialize_vars(X)
-        for i in range(n_iter):
+    def _descend_gd(self, X, y, epochs):
+        for i in range(epochs):
             if self.scheduler is not None:
                 self.learning_rate = self.scheduler(i+1)
             grad = self.gradient(X, y, self.theta)
             update = self._gd(grad, i+1)
             self.theta -= update
 
-    def descend_stochastic(self, X, y, n_epochs = 50, batch_size = 5):
-        self._initialize_vars(X)
+    def _descend_sgd(self, X, y, epochs, batch_size):
         n_batches = int(self.n / batch_size)
         xy = np.column_stack([X,y]) # for shuffling x and y together
-        for i in range(n_epochs):
+        for i in range(epochs):
             if self.optimizer is not None:
                 self.optimizer.reset()
             np.random.shuffle(xy)
@@ -398,7 +394,7 @@ class GradientDescent:
                 random_index = batch_size * np.random.randint(n_batches)
                 xi = xy[random_index:random_index+batch_size, :-1]
                 yi = xy[random_index:random_index+batch_size, -1:]
-                grad = (1/batch_size) * self.gradient(X, y, self.theta)
+                grad = (1/batch_size) * self.gradient(xi, yi, self.theta)
                 update = self._gd(grad, current_iter = j+1)
                 self.theta -= update
 

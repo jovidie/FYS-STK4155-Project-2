@@ -1,17 +1,12 @@
 from ptwo.models import NeuralNetwork
-from ptwo.activators import sigmoid, ReLU
+from ptwo.activators import sigmoid, ReLU, softmax
 from ptwo.optimizers import ADAM, AdaGrad, RMSProp, Momentum
+from ptwo.costfuns import mse, cross_entropy
 
 import autograd.numpy as np
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.model_selection import train_test_split
 
-def ReLU(z):
-    return np.where(z > 0, z, 0)
-
-
-def mse(predict, target):
-    return np.mean((predict - target) ** 2)
 
 # generate data
 
@@ -45,130 +40,186 @@ input_size = X_train.shape[1]
 layer_output_sizes = [10, 1]
 activation_funs = [ReLU, lambda x: x]
 
-nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse)
+print(" ------------------")
+print("| Gradient descent |")
+print(" ------------------")
 
-out = nn.feed_forward_batch(X_train)
+nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse)
 
 print("No optimizer")
-print("MSE before training", mse(out, y_train))
+print("Train MSE before training", nn.get_cost(X_train, y_train))
 
 nn.train_network(X_train, y_train, learning_rate=0.001, epochs=1000)
-out = nn.feed_forward_batch(X_train)
 
-print("MSE after training", mse(out, y_train))
+print("Train MSE after training", nn.get_cost(X_train, y_train))
+print("Test MSE after training", nn.get_cost(X_test, y_test))
 
 print("-----------------------------")
 print("With momentum:")
 gamma = 0.3
-nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=Momentum(gamma))
+nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse, optimizer=Momentum(gamma))
 
-out = nn.feed_forward_batch(X_train)
+print("Train MSE before training", nn.get_cost(X_train, y_train))
 
-print("MSE before training", mse(out, y_train))
+print("MSE before training", mse(X_train, y_train))
 
 nn.train_network(X_train, y_train, learning_rate=0.001, epochs=1000)
-out = nn.feed_forward_batch(X_train)
 
-print("MSE after training", mse(out, y_train))
+print("Train MSE after training", nn.get_cost(X_train, y_train))
+print("Test MSE after training", nn.get_cost(X_test, y_test))
 
 
 print("-----------------------------")
 print("With ADAM optimizer:")
 
-nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=ADAM())
+nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse, optimizer=ADAM())
 
-out = nn.feed_forward_batch(X_train)
-
-print("MSE before training", mse(out, y_train))
+print("MSE before training", mse(X_train, y_train))
 
 nn.train_network(X_train, y_train, learning_rate=0.5, epochs=1000)
-out = nn.feed_forward_batch(X_train)
-
-print("MSE after training", mse(out, y_train))
+print("Train MSE after training", nn.get_cost(X_train, y_train))
+print("Test MSE after training", nn.get_cost(X_test, y_test))
 print("-----------------------------")
 
 print("With AdaGrad optimizer")
-nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=AdaGrad())
+nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse, optimizer=AdaGrad())
 
-out = nn.feed_forward_batch(X_train)
-
-print("MSE before training", mse(out, y_train))
+print("MSE before training", mse(X_train, y_train))
 
 nn.train_network(X_train, y_train, learning_rate=0.5, epochs=1000)
-out = nn.feed_forward_batch(X_train)
-print("MSE after training", mse(out, y_train))
+print("Train MSE after training", nn.get_cost(X_train, y_train))
+print("Test MSE after training", nn.get_cost(X_test, y_test))
 
 print("-----------------------------")
 
 print("With RMSProp optimizer")
 rho = 0.99
-nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=RMSProp(rho))
+nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse, optimizer=RMSProp(rho))
 
-out = nn.feed_forward_batch(X_train)
-
-print("MSE before training", mse(out, y_train))
+print("MSE before training", mse(X_train, y_train))
 
 nn.train_network(X_train, y_train, learning_rate=0.01, epochs=1000)
-out = nn.feed_forward_batch(X_train)
-print("MSE after training", mse(out, y_train))
+print("Train MSE after training", nn.get_cost(X_train, y_train))
+print("Test MSE after training", nn.get_cost(X_test, y_test))
 
 print(" -----------------------------")
 print("| Stochastic gradient descent |")
 print(" -----------------------------")
 
 print("No optimizer")
-rho = 0.99
-nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse)
+nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse)
 
-out = nn.feed_forward_batch(X_train)
-
-print("MSE before training", mse(out, y_train))
-nn.train_network_sgd(X_train, y_train, learning_rate=0.001, epochs=1000)
+print("MSE before training", mse(X_train, y_train))
+nn.train_network(X_train, y_train, learning_rate=0.001, epochs=1000, batch_size=5)
 print(nn.optimizer)
-out = nn.feed_forward_batch(X_train)
-
-print("MSE after training", mse(out, y_train))
+print("Train MSE after training", nn.get_cost(X_train, y_train))
+print("Test MSE after training", nn.get_cost(X_test, y_test))
 
 print("-----------------------------")
 print("With momentum:")
 gamma = 0.3
-nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=Momentum(gamma))
+nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse, optimizer=Momentum(gamma))
 
-out = nn.feed_forward_batch(X_train)
+print("MSE before training", mse(X_train, y_train))
 
-print("MSE before training", mse(out, y_train))
-
-nn.train_network_sgd(X_train, y_train, learning_rate=0.001, epochs=1000)
-out = nn.feed_forward_batch(X_train)
-
-print("MSE after training", mse(out, y_train))
+nn.train_network(X_train, y_train, learning_rate=0.001, epochs=1000, batch_size=5)
+print("Train MSE after training", nn.get_cost(X_train, y_train))
+print("Test MSE after training", nn.get_cost(X_test, y_test))
 
 print("-----------------------------")
 print("With ADAM:")
 gamma = 0.3
-nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=ADAM())
+nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse, optimizer=ADAM())
 
-out = nn.feed_forward_batch(X_train)
+print("MSE before training", mse(X_train, y_train))
 
-print("MSE before training", mse(out, y_train))
-
-nn.train_network_sgd(X_train, y_train, learning_rate=0.01, epochs=1000)
-out = nn.feed_forward_batch(X_train)
-
-print("MSE after training", mse(out, y_train))
+nn.train_network(X_train, y_train, learning_rate=0.01, epochs=1000, batch_size=5)
+print("Train MSE after training", nn.get_cost(X_train, y_train))
+print("Test MSE after training", nn.get_cost(X_test, y_test))
 
 
 
 print("-----------------------------")
-print("With ADAM and L2 regularization (experimental):")
+print("With ADAM and L2 regularization:")
 gamma = 0.3
-nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse, optimizer=ADAM(), lmb=0.1)
+nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse, optimizer=ADAM(), lmb=0.1)
 
-out = nn.feed_forward_batch(X_train)
+print("MSE before training", mse(X_train, y_train))
 
-print("MSE before training", mse(out, y_train))
+nn.train_network(X_train, y_train, learning_rate=0.01, epochs=1000, batch_size=5)
+print("Train MSE after training", nn.get_cost(X_train, y_train))
+print("Test MSE after training", nn.get_cost(X_test, y_test))
 
-nn.train_network_sgd(X_train, y_train, learning_rate=0.01, epochs=1000)
-out = nn.feed_forward_batch(X_train)
+print(" -------------------------------------")
+print("| Classification on the iris data set |")
+print(" -------------------------------------")
 
-print("MSE after training", mse(out, y_train))
+from sklearn import datasets
+from sklearn.metrics import accuracy_score
+
+# load data
+iris = datasets.load_iris()
+inputs = iris.data
+
+targets = np.zeros((len(iris.data), 3))
+for i, t in enumerate(iris.target):
+    targets[i, t] = 1
+
+network_input_size = inputs.shape[1]
+layer_output_sizes = [8, 3]
+activation_funcs = [sigmoid, softmax]
+
+input_train, input_test, target_train, target_test = train_test_split(inputs, targets, test_size=0.8)
+
+# test neural networks
+print("Regular GD")
+nn = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, cross_entropy)
+
+print("Accuracy before training")
+print(nn.accuracy(input_train, target_train))
+
+nn.train_network(input_train, target_train, learning_rate=0.001, epochs=1000)
+
+print("Accuracy after training")
+print(nn.accuracy(input_train, target_train))
+print("Test accuracy")
+print(nn.accuracy(input_test, target_test))
+
+print("-------------------------------")
+print("SGD")
+nn = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, cross_entropy)
+print("Accuracy before training")
+print(nn.accuracy(input_train, target_train))
+
+nn.train_network(input_train, target_train, learning_rate=0.01, epochs=1000, batch_size=5)
+
+print("Accuracy after training")
+print(nn.accuracy(input_train, target_train))
+print("Test accuracy")
+print(nn.accuracy(input_test, target_test))
+
+print("-------------------------------")
+print("GD with regularization")
+nn = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, cross_entropy, lmb=0.1)
+print("Accuracy before training")
+print(nn.accuracy(input_train, target_train))
+
+nn.train_network(input_train, target_train, learning_rate=0.001, epochs=1000)
+
+print("Accuracy after training")
+print(nn.accuracy(input_train, target_train))
+print("Test accuracy")
+print(nn.accuracy(input_test, target_test))
+
+print("-------------------------------")
+print("SGD with regularization and ADAM")
+nn = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, cross_entropy, optimizer=ADAM(), lmb=0.1)
+print("Accuracy before training")
+print(nn.accuracy(input_train, target_train))
+
+nn.train_network(input_train, target_train, learning_rate=0.01, epochs=1000)
+
+print("Accuracy after training")
+print(nn.accuracy(input_train, target_train))
+print("Test accuracy")
+print(nn.accuracy(input_test, target_test))
