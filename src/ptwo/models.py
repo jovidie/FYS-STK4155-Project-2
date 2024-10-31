@@ -367,14 +367,14 @@ class GradientDescent:
 
         return update
     def descend(self, X, y, epochs=100, batch_size=None):
-            
+        if self.theta is None:
+            self._initialize_vars(X)
         if batch_size is None:
             self._descend_gd(X, y, epochs)
         else:
             self._descend_sgd(X, y, epochs, batch_size)
 
     def _descend_gd(self, X, y, epochs):
-        self._initialize_vars(X)
         for i in range(epochs):
             if self.scheduler is not None:
                 self.learning_rate = self.scheduler(i+1)
@@ -383,7 +383,6 @@ class GradientDescent:
             self.theta -= update
 
     def _descend_sgd(self, X, y, epochs, batch_size):
-        self._initialize_vars(X)
         n_batches = int(self.n / batch_size)
         xy = np.column_stack([X,y]) # for shuffling x and y together
         for i in range(epochs):
