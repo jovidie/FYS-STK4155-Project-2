@@ -149,7 +149,7 @@ class NeuralNetwork:
                 W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
                 j+=1
-                
+
     def _train_network_sgd(self, train_input, train_targets, learning_rate, epochs, batch_size):
         self.train_input = train_input
         self.train_targets = train_targets
@@ -366,21 +366,27 @@ class GradientDescent:
             update = self.optimizer.calculate(self.learning_rate, grad, current_iter)
 
         return update
+    def descend(self, X, y, epochs=100, batch_size=None):
+            
+        if batch_size is None:
+            self._descend_gd(X, y, epochs)
+        else:
+            self._descend_sgd(X, y, epochs, batch_size)
 
-    def descend(self, X, y, n_iter=500):
+    def _descend_gd(self, X, y, epochs):
         self._initialize_vars(X)
-        for i in range(n_iter):
+        for i in range(epochs):
             if self.scheduler is not None:
                 self.learning_rate = self.scheduler(i+1)
             grad = self.gradient(X, y, self.theta)
             update = self._gd(grad, i+1)
             self.theta -= update
 
-    def descend_stochastic(self, X, y, n_epochs = 50, batch_size = 5):
+    def _descend_sgd(self, X, y, epochs, batch_size):
         self._initialize_vars(X)
         n_batches = int(self.n / batch_size)
         xy = np.column_stack([X,y]) # for shuffling x and y together
-        for i in range(n_epochs):
+        for i in range(epochs):
             if self.optimizer is not None:
                 self.optimizer.reset()
             np.random.shuffle(xy)
