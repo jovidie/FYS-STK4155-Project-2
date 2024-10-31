@@ -3,7 +3,7 @@ scikit-learn
 scipy
 matplotlib
 seaborn
-#imageio
+imageio
 ipython
 jax[cpu]
 autograd
