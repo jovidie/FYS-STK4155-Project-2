@@ -401,7 +401,7 @@ class GradientDescent:
                 random_index = batch_size * np.random.randint(n_batches)
                 xi = xy[random_index:random_index+batch_size, :-1]
                 yi = xy[random_index:random_index+batch_size, -1:]
-                grad = (1/batch_size) * self.gradient(X, y, self.theta)
+                grad = (1/batch_size) * self.gradient(xi, yi, self.theta)
                 update = self._gd(grad, current_iter = j+1)
                 self.theta -= update
 
