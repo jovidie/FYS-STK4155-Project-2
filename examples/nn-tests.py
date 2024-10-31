@@ -1,17 +1,12 @@
 from ptwo.models import NeuralNetwork
 from ptwo.activators import sigmoid, ReLU
 from ptwo.optimizers import ADAM, AdaGrad, RMSProp, Momentum
+from ptwo.costfuns import mse, cross_entropy
 
 import autograd.numpy as np
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.model_selection import train_test_split
 
-def ReLU(z):
-    return np.where(z > 0, z, 0)
-
-
-def mse(predict, target):
-    return np.mean((predict - target) ** 2)
 
 # generate data
 
@@ -117,13 +112,12 @@ print("| Stochastic gradient descent |")
 print(" -----------------------------")
 
 print("No optimizer")
-rho = 0.99
 nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, mse)
 
 out = nn.feed_forward_batch(X_train)
 
 print("MSE before training", mse(out, y_train))
-nn.train_network_sgd(X_train, y_train, learning_rate=0.001, epochs=1000)
+nn.train_network(X_train, y_train, learning_rate=0.001, epochs=1000, batch_size=5)
 print(nn.optimizer)
 out = nn.feed_forward_batch(X_train)
 
@@ -138,7 +132,7 @@ out = nn.feed_forward_batch(X_train)
 
 print("MSE before training", mse(out, y_train))
 
-nn.train_network_sgd(X_train, y_train, learning_rate=0.001, epochs=1000)
+nn.train_network(X_train, y_train, learning_rate=0.001, epochs=1000, batch_size=5)
 out = nn.feed_forward_batch(X_train)
 
 print("MSE after training", mse(out, y_train))
@@ -152,7 +146,7 @@ out = nn.feed_forward_batch(X_train)
 
 print("MSE before training", mse(out, y_train))
 
-nn.train_network_sgd(X_train, y_train, learning_rate=0.01, epochs=1000)
+nn.train_network(X_train, y_train, learning_rate=0.01, epochs=1000, batch_size=5)
 out = nn.feed_forward_batch(X_train)
 
 print("MSE after training", mse(out, y_train))
@@ -168,7 +162,24 @@ out = nn.feed_forward_batch(X_train)
 
 print("MSE before training", mse(out, y_train))
 
-nn.train_network_sgd(X_train, y_train, learning_rate=0.01, epochs=1000)
+nn.train_network(X_train, y_train, learning_rate=0.01, epochs=1000, batch_size=5)
 out = nn.feed_forward_batch(X_train)
 
 print("MSE after training", mse(out, y_train))
+
+print(" -------------------------------------")
+print("| Classification on the iris data set |")
+print(" -------------------------------------")
+
+nn = NeuralNetwork(X_train.shape[1], layer_output_sizes, activation_funs, cross_entropy)
+
+out = nn.feed_forward_batch(X_train)
+
+print("MSE before training", mse(out, y_train))
+nn.train_network(X_train, y_train, learning_rate=0.001, epochs=1000, batch_size=5)
+print(nn.optimizer)
+out = nn.feed_forward_batch(X_train)
+
+print("MSE after training", cross_entropy(out, y_train))
+
+

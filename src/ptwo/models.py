@@ -138,17 +138,26 @@ class NeuralNetwork:
 
         return update
 
-    def train_network(self, train_input, train_targets, learning_rate=0.001, epochs=100): #TODO add cost
+    def train_network(self, train_input, train_targets, learning_rate=0.001, epochs=100, batch_size = None): #TODO add cost
         """
         This function performs the back-propagation step to adjust the weights and biases
-        for a default of 100 epochs with a default learning rate of 0.001. 
+        for a default of 100 epochs with a default learning rate of 0.001. If no batch size
+        is specified (default) it will run regular gradient descent (GD), if batch size is specified
+        it wil run stochastic gradient descent (SGD) with the specified batch size.
         Args: 
         - train_input: the input variable x we use to predict y, should be a selection of data
         - train_targets: the matching golden truth to the train_input
-        - cost: a selected cost function #TODO
+        - cost: a selected cost function C(predict, target)
         - learning rate: determines the stepsize we take towards reaching the optimal W and b
         - epochs: number of iterations in one training cycle to reach optimal W and b
+        - batch_size: batch size to use for SGD
         """
+        if batch_size is None:
+            self._train_network_gd(train_input, train_targets, learning_rate, epochs)
+        else:
+            self._train_network_sgd(train_input, train_targets, learning_rate, epochs, batch_size)
+    
+    def _train_network_gd(self, train_input, train_targets, learning_rate, epochs):
         self.train_input = train_input
         self.train_targets = train_targets
         gradient_func = grad(self._cost, 2)
@@ -159,7 +168,7 @@ class NeuralNetwork:
                 W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
                 j+=1
-    def train_network_sgd(self, train_input, train_targets, learning_rate=0.001, epochs = 100, batch_size = 5):
+    def _train_network_sgd(self, train_input, train_targets, learning_rate, epochs, batch_size):
         # feel free to implement this differently
         # i.e. as part of the other train_network function
         self.train_input = train_input
