@@ -97,6 +97,7 @@ class NeuralNetwork:
         for i, prediction in enumerate(predictions):
             one_hot_predictions[i, np.argmax(prediction)] = 1
         self.prediction_accuracy = accuracy_score(one_hot_predictions, targets)
+        return self.prediction_accuracy
     
     # Suggested cost from week 42 exercises -> cost should probably be considered as an argument
     def _cross_entropy(self, predict, target):
