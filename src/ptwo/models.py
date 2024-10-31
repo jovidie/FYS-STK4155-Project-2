@@ -7,11 +7,13 @@ class NeuralNetwork:
     Neural Network model
 
     Args: 
-    - network_input: the design matrix/variables we wish to predict from
+    - network_input_size: number of data points, typically the first dimension of the design matrix
     - targets: the golden truth
     - layer_output_sizes = size of layers, number of layers is determined by len(layer_output sizes)
-    - activation_funcs is the sigma() function which makes sigma(z) = a
-    
+    - activation_funcs: a list of activation functions for the hidden and output layers
+    - cost_function: cost function for the output, must be a function C(predicts, targets) that returns a single number
+    - optimizer: an instance of an optimizer object Momentum, ADAM, AdaGrad or RMSProp (optional)
+    - lmb: L2 regularization parameter (default 0)
     """
     def __init__(self, 
                  network_input_size, 
@@ -45,8 +47,6 @@ class NeuralNetwork:
             i_size = layer_output_size
 
     def _cost(self, x, targets, layers = None):
-
-
         if layers is None:
             layers = self.layers
         predictions = self.feed_forward_batch(x, layers)
@@ -63,10 +63,11 @@ class NeuralNetwork:
 
     def feed_forward_batch(self, x, layers=None):
         """
-        Function that transforms input data into target predictions based on current weights and biases
+        Function that transforms input data into predictions based on current weights and biases
         Args: 
-        x is the input data to be transformed
-        returns nothing, saves predictions as instance variable
+        - x: input data to be transformed
+        - layers: defaults to self.layers, necessary for automatic differentiation
+        returns predictions from the output layer
         """
         if layers is None:
             layers = self.layers
@@ -89,45 +90,20 @@ class NeuralNetwork:
         self.predictions = probs
         return np.argmax(probs, axis = 1)
     
-    def accuracy(self, x, targets):
+    def accuracy(self, input, targets):
         """
+        Calculate accuracy for a classification with one hot predictions. Feeds the data through
+        the neural network and compares the output with the targets
+        Args:
+        - input: input data
+        - targets: target data
         """
-        predictions = self.feed_forward_batch(x)
+        predictions = self.feed_forward_batch(input)
         one_hot_predictions = np.zeros(predictions.shape)
         for i, prediction in enumerate(predictions):
             one_hot_predictions[i, np.argmax(prediction)] = 1
         self.prediction_accuracy = accuracy_score(one_hot_predictions, targets)
         return self.prediction_accuracy
-    
-    # Suggested cost from week 42 exercises -> cost should probably be considered as an argument
-    def _cross_entropy(self, predict, target):
-        """
-        """
-        return np.sum(-target * np.log(predict))
-    
-    def _binary_cross_entropy(self, predict, target):
-        """
-        Loss function used in binary classification when target variable has two possible 
-        outcomes: 1 or 0, 
-        Args: 
-        - predict is the prediction we have from input
-        - target are the targets we know to match input
-        """
-        return np.mean((predict*np.log(target)) + ((1 - predict) * np.log(1 - target)))
-    
-
-    # Suggested cost from week 42 exercises
-    def _cost_bce(self):
-        """
-        #TODO 
-        Cost function, uses the cost function parameter given in the constructor to find the gradients
-        during backpropagarion. 
-
-        Binary classification: should have binarty cross entropy as a cost function (or loss function)
-        Non-binary classificatio: could have other loss functions; cross entropy, MSE, etc.s
-        """
-        self.train_prediction = self.feed_forward_batch(self.train_input, self.layers)
-        return self._binary_cross_entropy(self.train_predict, self.train_target)
 
     def _train(self, grad, learning_rate, current_iter, current_layer = None, current_var = None):
         if self.optimizer is None:
@@ -169,6 +145,7 @@ class NeuralNetwork:
                 W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
                 j+=1
+                
     def _train_network_sgd(self, train_input, train_targets, learning_rate, epochs, batch_size):
         self.train_input = train_input
         self.train_targets = train_targets
