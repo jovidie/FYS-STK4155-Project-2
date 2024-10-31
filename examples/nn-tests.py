@@ -188,18 +188,55 @@ activation_funcs = [sigmoid, softmax]
 
 input_train, input_test, target_train, target_test = train_test_split(inputs, targets, test_size=0.8)
 
-
 # test neural networks
+print("Regular GD")
 nn = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, cross_entropy)
-out = nn.feed_forward_batch(inputs)
+
 print("Accuracy before training")
 print(nn.accuracy(input_train, target_train))
 
 nn.train_network(input_train, target_train, learning_rate=0.001, epochs=1000)
-out = nn.feed_forward_batch(inputs)
 
 print("Accuracy after training")
 print(nn.accuracy(input_train, target_train))
 print("Test accuracy")
 print(nn.accuracy(input_test, target_test))
 
+print("-------------------------------")
+print("SGD")
+nn = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, cross_entropy)
+print("Accuracy before training")
+print(nn.accuracy(input_train, target_train))
+
+nn.train_network(input_train, target_train, learning_rate=0.01, epochs=1000, batch_size=5)
+
+print("Accuracy after training")
+print(nn.accuracy(input_train, target_train))
+print("Test accuracy")
+print(nn.accuracy(input_test, target_test))
+
+print("-------------------------------")
+print("GD with regularization")
+nn = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, cross_entropy, lmb=0.1)
+print("Accuracy before training")
+print(nn.accuracy(input_train, target_train))
+
+nn.train_network(input_train, target_train, learning_rate=0.001, epochs=1000)
+
+print("Accuracy after training")
+print(nn.accuracy(input_train, target_train))
+print("Test accuracy")
+print(nn.accuracy(input_test, target_test))
+
+print("-------------------------------")
+print("SGD with regularization and ADAM")
+nn = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, cross_entropy, optimizer=ADAM(), lmb=0.1)
+print("Accuracy before training")
+print(nn.accuracy(input_train, target_train))
+
+nn.train_network(input_train, target_train, learning_rate=0.01, epochs=1000)
+
+print("Accuracy after training")
+print(nn.accuracy(input_train, target_train))
+print("Test accuracy")
+print(nn.accuracy(input_test, target_test))

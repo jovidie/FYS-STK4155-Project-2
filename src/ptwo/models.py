@@ -170,13 +170,11 @@ class NeuralNetwork:
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
                 j+=1
     def _train_network_sgd(self, train_input, train_targets, learning_rate, epochs, batch_size):
-        # feel free to implement this differently
-        # i.e. as part of the other train_network function
         self.train_input = train_input
         self.train_targets = train_targets
         n = train_input.shape[0]
+        n_output = train_targets.shape[1]
         n_batches = int(n / batch_size)
-
         gradient_func = grad(self._cost, 2)
         xy = np.column_stack([train_input,train_targets]) # for shuffling x and y together
 
@@ -186,8 +184,8 @@ class NeuralNetwork:
             np.random.shuffle(xy)
             for _ in range(n_batches):
                 random_index = batch_size * np.random.randint(n_batches)
-                xi = xy[random_index:random_index+batch_size, :-1]
-                yi = xy[random_index:random_index+batch_size, -1:]
+                xi = xy[random_index:random_index+batch_size, :-n_output]
+                yi = xy[random_index:random_index+batch_size, -n_output:]
 
             layers_grad = gradient_func(xi, yi, self.layers)
             j=0
