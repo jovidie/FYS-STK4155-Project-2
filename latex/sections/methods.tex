@@ -9,6 +9,20 @@ Janita, Even writes about GD and SGD?
 \subsection{Regression vs. Classification}\label{ssec:regression_classification}
 
 
+%------------ Logistic Regression -----------------------------
+\subsection{Logistic Regression}\label{ssec:logreg}
+Logistic regression is a method of classification, which estimates the probability of being in a certain class. In contrast to linear regression methods, where the outcome is continuous function, the outcome of logistic regression is a linear classifier which gives a decision boundary between classes. This method is often used as a baseline model, particularly in problems in the nature of binary classification, which is what we will focus on.
+
+The sigmoid function is used to fit the model, and is written as
+\begin{equation}\label{eq:sigmoid}
+    p(z) = \frac{1}{1 + \exp{-z}} , 
+\end{equation}
+where $z$ is the model's prediction. We define the cost function as the log-likelihood in Equation \eqref{eq:log_likelihood}, which is derived from the Maximum Likelihood Principle.
+\begin{equation}\label{eq:log_likelihood}
+    \mathcal{C}(\mathbf{\beta}) = - \sum_{i=1}^{n} (y_{i} (\beta_{0} + \beta_{1} x_{i}) - \log (1 + \exp{\beta_{0} + \beta_{1} x_{i}})))
+\end{equation}
+
+
 %------------ Gradient Descent --------------------------------
 \subsection{Gradient Descent}\label{ssec:gradient_descent}
 
@@ -48,20 +62,37 @@ While gradient descent effectively minimizes the cost function given the startin
 
 %------------ Feed-Forward Neural Network ---------------------
 \subsection{Feed-Forward Neural Network}\label{ssec:ffnn}
+In recent years, neural networks have shown promise in solving both regression and classification problems. They and have evolved into several types of networks, with the simplest one called feed-forward neural network (FFNN). In FFNNs, information moves through the layers in one direction, and the network is said to be fully connected if each neuron in a layer is connected to all neurons in the next layer, illustrated in Figure \ref{fig:ffnn}. 
 
-
-\begin{figure}[h]
+\begin{figure}[h!]
     \centering
     \resizebox{0.9\linewidth}{!}
     {\input{latex/sections/tikz/ffnn}}
     %\includegraphics[width=0.5\linewidth]{}
-    \caption{Illustration of a feed forward neural network with one input layer, three hidden layers, and one output layer, where $n$, $m$ and $k$ indicate the number of neurons in the respective layer.}
-    \label{fig:enter-label}
+    \caption{Illustration of a feed-forward neural network with one input layer, three hidden layers, and one output layer, where $n$, $m$ and $k$ indicate the number of neurons in the respective layer.}
+    \label{fig:ffnn}
 \end{figure}
+The architecture of a neural network is often determined by the problem to be solved. According to the universal approximation theorem, a FFNN with a minimum of one input layer, one hidden layer with a non-linear activation function, and one linear output layer, is sufficient to approximate a continuous function \cite[194]{Goodfellow:2016:deep_learning}. 
+
+The output of a hidden layer can be written as 
+\begin{equation}\label{eq:ffnn}
+    \mathbf{h} = a \Big( \mathbf{W}^{T} \mathbf{x} + \mathbf{b} \Big) ,
+\end{equation}
+where $a$ is a non-linear activation function, $\mathbf{W}$ is the weight matrix, $\mathbf{x}$ is input, and $\mathbf{b}$ is the bias. 
+
+\subsubsection{Weights and biases}\label{sssec:weights_biases}
+The technique used to initialize the weights and biases in the FFNN can be vital for how fast the network learns. For a less ideal method, the network may need more iterations to find an optimal solution. Whereas a clever initialization may reduce the number of iteration needed, as the weight are some of the hyper-parameters that needs tuning. 
+
+\subsubsection{Activation functions}\label{sssec:activation_functions}
 
 
-%------------ Logistic Regression -----------------------------
-\subsection{Logistic Regression}\label{ssec:logreg}
+\subsubsection{Cost functions}\label{sssec:cost_functions}
+
+
+\subsubsection{Forward propagation}\label{sssec:forward_propagation}
+
+
+\subsubsection{Back-propagation}\label{sssec:backpropagation}
 
 
 %------------ Data --------------------------------------------
