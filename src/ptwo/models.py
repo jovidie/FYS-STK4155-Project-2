@@ -77,6 +77,10 @@ class NeuralNetwork:
             a = activation_func(z)
         return a
     
+    def get_cost(self, inputs, targets):
+        predictions = self.feed_forward_batch(inputs)
+        return self.cost_function(predictions, targets)
+
     # TODO - fix proba
     def predict_proba(self, x):
         probs = self.feed_forward_batch(x)
