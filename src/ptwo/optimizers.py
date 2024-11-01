@@ -1,7 +1,7 @@
 import numpy as np
 
 class Momentum:
-    def __init__(self, gamma, layers = None):
+    def __init__(self, gamma=0.3, layers = None):
         self.gamma = gamma
         if layers is None:
             self.change = 0.0
@@ -123,7 +123,7 @@ class AdaGrad:
 
 
 class RMSProp:
-    def __init__(self, rho, layers = None, delta = 1e-8):
+    def __init__(self, rho=0.99, layers = None, delta = 1e-8):
         self.rho = rho
         self.delta = delta
         if layers is None:
