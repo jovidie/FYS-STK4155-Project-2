@@ -5,7 +5,6 @@ from autograd import grad
 class NeuralNetwork:
     """
     Neural Network model
-
     Args: 
     - network_input_size: number of data points, typically the first dimension of the design matrix
     - targets: the golden truth
@@ -33,7 +32,7 @@ class NeuralNetwork:
     def create_layers_batch(self):
         """
         Function that creates all the NN layers based on layer_output_sizes 
-        Args:   
+        Args:
         input size of network: determines first layer size
         layer output size: Output sizes of the rest of the layers, where the last layer has to match target size
         returns nothing, saves layers as instance variable
@@ -52,13 +51,15 @@ class NeuralNetwork:
         predictions = self.feed_forward_batch(x, layers)
         base_cost = self.cost_function(predictions, targets)
         
+        """
         # L2 regularization term
         l2_term = 0
         for W, b in layers:
             l2_term += np.sum(W**2)
         l2_term *= (self.lmb / 2.0)
+        """
         
-        return base_cost + l2_term
+        return base_cost # + l2_term
 
 
     def feed_forward_batch(self, x, layers=None):
@@ -80,8 +81,7 @@ class NeuralNetwork:
     def get_cost(self, inputs, targets):
         predictions = self.feed_forward_batch(inputs)
         return self.cost_function(predictions, targets)
-
-    # TODO - fix proba
+    
     def predict_proba(self, x):
         probs = self.feed_forward_batch(x)
         self.predictions = probs
@@ -90,9 +90,9 @@ class NeuralNetwork:
     def predict(self, x):
         """
         """
-        probs = self.feed_forward_batch(x)
-        self.predictions = probs
-        return np.argmax(probs, axis = 1)
+        pred = self.feed_forward_batch(x)
+        self.predictions = pred
+        return pred
     
     def accuracy(self, input, targets):
         """
@@ -116,7 +116,6 @@ class NeuralNetwork:
             if not self.optimizer.has_layers:
                 self.optimizer.initialize_layers(self.layers)
             update = self.optimizer.calculate(learning_rate, grad, current_iter, current_layer, current_var)
-
         return update
 
     def train_network(self, train_input, train_targets, learning_rate=0.001, epochs=100, batch_size = None): #TODO add cost
@@ -146,8 +145,8 @@ class NeuralNetwork:
             layers_grad = gradient_func(train_input, train_targets, self.layers)
             j=0
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
-                W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
-                b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
+                W -= self._train(W_g + self.lmb, learning_rate, i + 1, current_layer = j, current_var = 0)
+                b -= self._train(b_g, learning_rate, i + 1, current_layer = j, current_var = 1)
                 j+=1
 
     def _train_network_sgd(self, train_input, train_targets, learning_rate, epochs, batch_size):
@@ -173,7 +172,7 @@ class NeuralNetwork:
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
                 W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
-                j+=1
+                j += 1
 
 # Retrieved from additionweek42.ipynb
 class LogisticRegression:
@@ -202,7 +201,6 @@ class LogisticRegression:
         linear_model = X @ self.beta_logreg
         y_predicted = self.sigmoid(linear_model)
         return [1 if i >= 0.5 else 0 for i in y_predicted]
-    
 
 # Not necessary with both, condence classes into one
 class LogReg:

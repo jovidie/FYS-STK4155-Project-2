@@ -6,6 +6,7 @@ seaborn
 imageio
 ipython
 jax[cpu]
+autograd
 jaxlib
 jaxtyping
 notebook
