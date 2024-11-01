@@ -12,6 +12,7 @@ import seaborn as sns
 
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.model_selection import train_test_split
+from imageio import imread
 
 from ptwo.utils import calculate_polynomial, franke_function
 from ptwo.models import GradientDescent
@@ -383,7 +384,7 @@ n_iter = 200
 lmbs=np.logspace(-8,1, 8)
 
 mses = eta_lambda_grid(
-    X_train, X_test, y_train, y_test,
+    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
     learning_rates, lmbs, n_iter, optimizer=ADAM(), batch_size = 5
 )
 plt.title("ADAM")
@@ -397,7 +398,7 @@ n_iter = 200
 lmbs=np.logspace(-8,1, 8)
 
 mses = eta_lambda_grid(
-    X_train, X_test, y_train, y_test,
+    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
     learning_rates, lmbs, n_iter, optimizer=AdaGrad(), batch_size = 5
 )
 
@@ -412,7 +413,7 @@ n_iter = 200
 lmbs=np.logspace(-8,1, 8)
 
 mses = eta_lambda_grid(
-    X_train, X_test, y_train, y_test,
+    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
     learning_rates, lmbs, n_iter, optimizer=RMSProp(), batch_size = 5
 )
 
@@ -422,15 +423,118 @@ lambda_lr_heatmap(mses, lmbs, learning_rates)
 
 ```{python}
 np.random.seed(34)
-learning_rates = np.logspace(-8,-3, 8)
+learning_rates = np.logspace(-8,-5, 8)
 n_iter = 200
 lmbs=np.logspace(-8,1, 8)
 
 mses = eta_lambda_grid(
-    X_train, X_test, y_train, y_test,
+    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
     learning_rates, lmbs, n_iter, optimizer=Momentum(), batch_size = 5
 )
 
 plt.title("Momentum")
 lambda_lr_heatmap(mses, lmbs, learning_rates)
+```
+
+# Terrain data
+
+Import the data from project 1. But scaling with std this time.
+
+```{python}
+terrain_full = imread('../../data/SRTM_data_Norway_2.tif')
+# subset to a manageable size
+terrain1 = terrain_full[1050:1250, 500:700]
+
+x_1d = np.arange(terrain1.shape[1])
+y_1d = np.arange(terrain1.shape[0])
+# create grid
+x_2d, y_2d = np.meshgrid(x_1d,y_1d)
+
+# flatten the data and features
+xy = np.column_stack((x_2d.flatten(), y_2d.flatten()))
+max_poly = 10
+X = PolynomialFeatures(max_poly).fit_transform(xy)
+
+y = terrain1.flatten()
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
+y_test = y_test[:,np.newaxis]
+y_train = y_train[:,np.newaxis]
+
+scalerX = StandardScaler(with_std = True)
+X_train_scaled = scalerX.fit_transform(X_train)
+X_test_scaled = scalerX.transform(X_test)
+
+scalery = StandardScaler(with_std = True)
+y_train_scaled = scalery.fit_transform(y_train)
+y_test_scaled = scalery.transform(y_test)
+```
+
+We start with the optimal parameters we found in project 1, which was polynomial degree 10 and $\lambda=10^{-4}$
+
+```{python}
+learning_rate=0.01
+n_iter = 1000
+lmb=1e-4
+grad = grad_ridge(lmb)
+gd = GradientDescent(learning_rate, grad,  optimizer = Momentum())
+gd.descend(X_train_scaled, y_train_scaled, n_iter)
+print(gd.theta)
+pred = X_test_scaled@gd.theta
+print(mse(pred, y_test_scaled))
+```
+
+
+```{python}
+np.random.seed(8654)
+learning_rates = np.logspace(-4, 1, 5)
+n_iter = 50
+lmbs=np.logspace(-8,1, 5)
+
+mses = eta_lambda_grid(
+    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
+    learning_rates, lmbs, n_iter, optimizer = ADAM(), batch_size = 36
+)
+plt.title("ADAM")
+lambda_lr_heatmap(mses, lmbs, learning_rates)
+```
+
+
+```{python}
+np.random.seed(8654)
+learning_rates = np.logspace(-5, -1, 5)
+n_iter = 50
+lmbs=np.logspace(-8,1, 5)
+
+mses = eta_lambda_grid(
+    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
+    learning_rates, lmbs, n_iter, optimizer = Momentum(0.5), batch_size=32
+)
+plt.title("SGD Momentum")
+lambda_lr_heatmap(mses, lmbs, learning_rates)
+```
+
+
+```{python}
+np.random.seed(9)
+learning_rate=0.03
+n_iter = 100
+lmb=1.78e-6
+grad = grad_ridge(lmb)
+#grad = grad_OLS()
+gd = GradientDescent(learning_rate, grad,  optimizer = ADAM())
+gd.descend(X_train_scaled, y_train_scaled, n_iter, batch_size = 32)
+pred = X_test_scaled@gd.theta
+print(mse(pred, y_test_scaled))
+```
+
+
+```{python}
+X_scaled = scalerX.fit_transform(X)
+pred = X_scaled@gd.theta
+y_predict = pred.reshape(200,200)
+plt.imshow(y_predict, cmap='gray')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.show()
 ```
