@@ -13,5 +13,10 @@ def binary_cross_entropy(predict, target):
     Args: 
     - predict is the prediction we have from input
     - target are the targets we know to match input
-    """
-    return np.mean((predict*np.log(target)) + ((1 - predict) * np.log(1 - target)))
+"""
+    return - np.mean(target * np.log(predict) + (1 - target) * np.log(1 - predict))
+
+# just to check if our autograd grad() works as it should
+def mse_der(predict, target):
+    n = len(target)
+    return (2/n) * (predict-target)

@@ -20,16 +20,20 @@ class NeuralNetwork:
                  activation_funcs, 
                  cost_function,
                  optimizer = None,
-                 lmb = 0):
+                 lmb = 0, 
+                 target_means = None):
         self.network_input_size = network_input_size
         self.layer_output_sizes = layer_output_sizes
         self.activation_funcs = activation_funcs
-        self.cost_function = cost_function
         self.optimizer = optimizer
         self.lmb = lmb
+        self.target_means = target_means
         self.create_layers_batch()
+        self.cost_function = cost_function
 
     def create_layers_batch(self):
+        # https://cs.stackexchange.com/questions/88360/neural-network-shape-structure
+        # Neural net should have a pyramid shape
         """
         Function that creates all the NN layers based on layer_output_sizes 
         Args:
@@ -38,12 +42,18 @@ class NeuralNetwork:
         returns nothing, saves layers as instance variable
         """
         self.layers = []
+        numb_layers = len(self.layer_output_sizes)
         i_size = self.network_input_size
+        lay = 0
         for layer_output_size in self.layer_output_sizes:
             W = np.random.randn(i_size, layer_output_size)
             b = np.random.randn(layer_output_size)
+            # https://stackoverflow.com/questions/44883861/initial-bias-values-for-a-neural-network
+            if self.target_means != None and lay == numb_layers-1: 
+                b = self.target_means
             self.layers.append((W, b))
             i_size = layer_output_size
+            lay += 1
 
     def _cost(self, x, targets, layers = None):
         if layers is None:
@@ -51,15 +61,13 @@ class NeuralNetwork:
         predictions = self.feed_forward_batch(x, layers)
         base_cost = self.cost_function(predictions, targets)
         
-        """
         # L2 regularization term
         l2_term = 0
         for W, b in layers:
             l2_term += np.sum(W**2)
         l2_term *= (self.lmb / 2.0)
-        """
-        
-        return base_cost # + l2_term
+
+        return base_cost  + l2_term
 
 
     def feed_forward_batch(self, x, layers=None):
@@ -113,12 +121,10 @@ class NeuralNetwork:
         if self.optimizer is None:
             update = learning_rate * grad
         else:
-            if not self.optimizer.has_layers:
-                self.optimizer.initialize_layers(self.layers)
             update = self.optimizer.calculate(learning_rate, grad, current_iter, current_layer, current_var)
         return update
 
-    def train_network(self, train_input, train_targets, learning_rate=0.001, epochs=100, batch_size = None): #TODO add cost
+    def train_network(self, train_input, train_targets, learning_rate=0.001, epochs=100, batch_size = None, verbose = False): #TODO add cost
         """
         This function performs the back-propagation step to adjust the weights and biases
         for a default of 100 epochs with a default learning rate of 0.001. If no batch size
@@ -133,21 +139,28 @@ class NeuralNetwork:
         - batch_size: batch size to use for SGD
         """
         if batch_size is None:
-            self._train_network_gd(train_input, train_targets, learning_rate, epochs)
+            self._train_network_gd(train_input, train_targets, learning_rate, epochs, verbose)
         else:
+            if not self.optimizer.has_layers:
+                self.optimizer.initialize_layers(self.layers)
             self._train_network_sgd(train_input, train_targets, learning_rate, epochs, batch_size)
     
-    def _train_network_gd(self, train_input, train_targets, learning_rate, epochs):
+    def _train_network_gd(self, train_input, train_targets, learning_rate, epochs, verbose):
         self.train_input = train_input
         self.train_targets = train_targets
         gradient_func = grad(self._cost, 2)
         for i in range(epochs):
             layers_grad = gradient_func(train_input, train_targets, self.layers)
-            j=0
+            j = 0
+            if i % 100 == 0 and verbose: #printer ut info pr. tiende epoke
+                print("EPOCH:", i)
+                #print("COST FUNCTION:", self.cost_function(self.predict(train_input), train_targets, self.layers))
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
                 W -= self._train(W_g + self.lmb, learning_rate, i + 1, current_layer = j, current_var = 0)
                 b -= self._train(b_g, learning_rate, i + 1, current_layer = j, current_var = 1)
                 j+=1
+        print("FINISHED TRAINING")
+            
 
     def _train_network_sgd(self, train_input, train_targets, learning_rate, epochs, batch_size):
         self.train_input = train_input
@@ -164,11 +177,11 @@ class NeuralNetwork:
             np.random.shuffle(xy)
             for _ in range(n_batches):
                 random_index = batch_size * np.random.randint(n_batches)
-                xi = xy[random_index:random_index+batch_size, :-n_output]
-                yi = xy[random_index:random_index+batch_size, -n_output:]
+                xi = xy[random_index : random_index+batch_size,           : -n_output]
+                yi = xy[random_index : random_index+batch_size, -n_output : ]
 
             layers_grad = gradient_func(xi, yi, self.layers)
-            j=0
+            j = 0
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
                 W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
                 b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)

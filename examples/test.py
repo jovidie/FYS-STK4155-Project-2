@@ -1,36 +1,22 @@
 print("TEST RUNNING")
 
 from ptwo.models import NeuralNetwork
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from ptwo.activators import sigmoid, ReLU
 from ptwo.optimizers import ADAM
 from imageio import imread
 import autograd.numpy as np
 import matplotlib.pyplot as plt
-from ptwo.costfuns import mse
-
-
+from ptwo.costfuns import mse, mse_der
 
 def main():
-
-    def binary_cross_entropy(predict, target):
-        """
-        Loss function used in binary classification when target variable has two possible 
-        outcomes: 1 or 0, 
-        Args: 
-        - predict is the prediction we have from input
-        - target are the targets we know to match input
-    """
-        return - np.mean(target * np.log(predict) + (1 - target) * np.log(1 - predict))
-
+    fig, axs = plt.subplots(1, 3)
     # data prepping: 
     print("PREPPING DATA")
     terrain_full = imread('./data/SRTM_data_Norway_2.tif')
-    terrain1 = terrain_full[1050:1250, 500:700]
-    plt.imshow(terrain1, cmap='gray')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.show()
+    terrain1 = terrain_full[1050:1100, 500:550]
+    axs[0].imshow(terrain1, cmap='gray')
+    axs[0].set_title("Targets")
 
     # this is maybe not neccessary 
     x_1d = np.arange(terrain1.shape[1])
@@ -47,9 +33,9 @@ def main():
     # network prepping: 
     network_input = xy
     network_input_size = xy.shape[1]
-    layer_output_sizes = [5, 10, 15, 1]
-    activation_funcs = [ReLU, ReLU, sigmoid,lambda x: x]
-    NN = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, mse, optimizer=ADAM())
+    layer_output_sizes = [int(targets.shape[0]/0.8), 10,  1]
+    activation_funcs = [sigmoid, sigmoid, lambda x: x]
+    NN = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, mse, target_means = np.mean(targets))
 
     print("Checking if cost-function is allright")
     print("MSE before training:", NN.get_cost(network_input, targets))
@@ -57,16 +43,17 @@ def main():
     NN.predict(network_input)
 
     print("TESTING NETWORK")
-    plt.imshow(NN.predictions.reshape(200, 200), cmap='gray')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.show()
+    axs[1].imshow(NN.predictions.reshape(terrain1.shape), cmap='gray')
+    axs[1].set_title("FFNN before training")
 
     print("TRAINING NETWORK")
-    NN.train_network(network_input, targets, learning_rate=0.01, epochs=10000)
-    plt.imshow(NN.predictions.reshape(200, 200), cmap='gray')
-    plt.xlabel('X')
-    plt.ylabel('Y')
+    NN.train_network(network_input, targets, learning_rate=0.01, epochs=1000, verbose = True)
+    NN.predict(network_input)
+    axs[2].imshow(NN.predictions.reshape(terrain1.shape), cmap='gray')
+    axs[2].set_title("FFNN after training")
+    fig.supxlabel('X')
+    fig.supylabel('Y')
+    fig.suptitle('Performance on FFNN, MSE cost function')
     plt.show()
 
 main()

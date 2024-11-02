@@ -9,9 +9,6 @@ from sklearn.model_selection import train_test_split
 
 
 # generate data
-
-
-
 print(" -------------------------------------")
 print("| Classification on the iris data set |")
 print(" -------------------------------------")
