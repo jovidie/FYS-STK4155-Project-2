@@ -33,7 +33,7 @@ def main():
     # network prepping: 
     network_input = xy
     network_input_size = xy.shape[1]
-    layer_output_sizes = [1000, 100, 20, 10, 5,  1]
+    layer_output_sizes = [1000, 100, 20, 10, 5,  1] # pyramid structure
     layer_output_sizes = [20, 10,  1]
     activation_funcs = [sigmoid, sigmoid, sigmoid, sigmoid, sigmoid, lambda x: x]
     activation_funcs = [sigmoid, sigmoid, lambda x: x]
