@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from ptwo.costfuns import mse, mse_der
 
 def main():
-    fig, axs = plt.subplots(1, 3)
+    fig, axs = plt.subplots(1, 4)
     # data prepping: 
     print("PREPPING DATA")
     terrain_full = imread('./data/SRTM_data_Norway_2.tif')
@@ -33,7 +33,9 @@ def main():
     # network prepping: 
     network_input = xy
     network_input_size = xy.shape[1]
-    layer_output_sizes = [int(targets.shape[0]/0.8), 10,  1]
+    layer_output_sizes = [1000, 100, 20, 10, 5,  1]
+    layer_output_sizes = [20, 10,  1]
+    activation_funcs = [sigmoid, sigmoid, sigmoid, sigmoid, sigmoid, lambda x: x]
     activation_funcs = [sigmoid, sigmoid, lambda x: x]
     NN = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, mse, target_means = np.mean(targets))
 
@@ -47,13 +49,19 @@ def main():
     axs[1].set_title("FFNN before training")
 
     print("TRAINING NETWORK")
-    NN.train_network(network_input, targets, learning_rate=0.01, epochs=1000, verbose = True)
+    NN.train_network(network_input, targets, learning_rate=0.01, epochs=10000, verbose = True)
     NN.predict(network_input)
     axs[2].imshow(NN.predictions.reshape(terrain1.shape), cmap='gray')
     axs[2].set_title("FFNN after training")
     fig.supxlabel('X')
     fig.supylabel('Y')
     fig.suptitle('Performance on FFNN, MSE cost function')
+
+
+    axs[3].plot(NN.cost_evolution)
+    axs[3].set_title("MSE evolution pr 100 epoch")
+    axs[3].set_ylabel("MSE")
+    axs[3].set_xlabel("Epoch (per 100)")
     plt.show()
 
 main()

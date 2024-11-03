@@ -138,6 +138,7 @@ class NeuralNetwork:
         - epochs: number of iterations in one training cycle to reach optimal W and b
         - batch_size: batch size to use for SGD
         """
+        self.cost_evolution = []
         if batch_size is None:
             self._train_network_gd(train_input, train_targets, learning_rate, epochs, verbose)
         else:
@@ -146,6 +147,7 @@ class NeuralNetwork:
             self._train_network_sgd(train_input, train_targets, learning_rate, epochs, batch_size)
     
     def _train_network_gd(self, train_input, train_targets, learning_rate, epochs, verbose):
+        
         self.train_input = train_input
         self.train_targets = train_targets
         gradient_func = grad(self._cost, 2)
@@ -154,7 +156,8 @@ class NeuralNetwork:
             j = 0
             if i % 100 == 0 and verbose: #printer ut info pr. tiende epoke
                 print("EPOCH:", i)
-                #print("COST FUNCTION:", self.cost_function(self.predict(train_input), train_targets, self.layers))
+                #print("COST FUNCTION:", self.get_cost(train_input, train_targets))
+                self.cost_evolution.append(self.get_cost(train_input, train_targets))
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
                 W -= self._train(W_g + self.lmb, learning_rate, i + 1, current_layer = j, current_var = 0)
                 b -= self._train(b_g, learning_rate, i + 1, current_layer = j, current_var = 1)
@@ -162,7 +165,7 @@ class NeuralNetwork:
         print("FINISHED TRAINING")
             
 
-    def _train_network_sgd(self, train_input, train_targets, learning_rate, epochs, batch_size):
+    def _train_network_sgd(self, train_input, train_targets, learning_rate, epochs, batch_size, verbose = False):
         self.train_input = train_input
         self.train_targets = train_targets
         n = train_input.shape[0]
@@ -174,6 +177,10 @@ class NeuralNetwork:
         for i in range(epochs):
             if self.optimizer is not None:
                 self.optimizer.reset(self.layers)
+            if i % 100 == 0 and verbose: #printer ut info pr. tiende epoke
+                print("EPOCH:", i)
+                #print("COST FUNCTION:", self.get_cost(train_input, train_targets))
+                self.cost_evolution.append(self.get_cost(train_input, train_targets))
             np.random.shuffle(xy)
             for _ in range(n_batches):
                 random_index = batch_size * np.random.randint(n_batches)
@@ -341,19 +348,6 @@ class LogReg:
         z = self.add_bias(X)
         return self.forward(z)
     
-"""
-# Example usage
-if __name__ == "__main__":
-    # Sample data
-    X = np.array([[0, 0], [1, 0], [0, 1], [1, 1]])
-    y = np.array([0, 0, 0, 1])  # This is an AND gate
-    model = LogisticRegression(learning_rate=0.01, num_iterations=1000)
-    model.GDfit(X, y)
-    predictions = model.predict(X)
-    print("Predictions:", predictions)
-
-"""
-
 
 class GradientDescent:
     def __init__(self, learning_rate, gradient, optimizer = None, scheduler = None):
