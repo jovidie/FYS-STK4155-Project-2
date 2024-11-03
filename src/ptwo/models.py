@@ -1,6 +1,7 @@
 import autograd.numpy as np
 from sklearn.metrics import accuracy_score
 from autograd import grad
+from sklearn.utils import resample
 
 class NeuralNetwork:
     """
@@ -21,7 +22,7 @@ class NeuralNetwork:
                  cost_function,
                  optimizer = None,
                  lmb = 0, 
-                 target_means = None):
+                 target_means = None, classification = False):
         self.network_input_size = network_input_size
         self.layer_output_sizes = layer_output_sizes
         self.activation_funcs = activation_funcs
@@ -30,6 +31,7 @@ class NeuralNetwork:
         self.target_means = target_means
         self.create_layers_batch()
         self.cost_function = cost_function
+        self.classification = classification
 
     def create_layers_batch(self):
         # https://cs.stackexchange.com/questions/88360/neural-network-shape-structure
@@ -119,7 +121,7 @@ class NeuralNetwork:
 
     def _train(self, grad, learning_rate, current_iter, current_layer = None, current_var = None):
         if self.optimizer is None:
-            assert float(0) not in grad, f"\nGradient is zero, exiting program\n\nGRADIENTS BELOW:\n{grad}\n\n see self._train() method in NN for assertion."
+            #assert np.sum(grad) != 0, f"\nGradient is zero, exiting program\n\nGRADIENTS BELOW:\n{grad}\n\n see self._train() method in NN for assertion."
             return learning_rate * grad
         else:
             try:
@@ -147,7 +149,7 @@ class NeuralNetwork:
         if batch_size is None:
             self._train_network_gd(train_input, train_targets, learning_rate, epochs, verbose)
         else:
-            self._train_network_sgd(train_input, train_targets, learning_rate, epochs, verbose, batch_size)
+            self._train_network_sgd(train_input, train_targets, learning_rate, epochs, batch_size, verbose)
         print("FINISHED TRAINING")
     
     def _train_network_gd(self, train_input, train_targets, learning_rate, epochs, verbose):
@@ -161,7 +163,8 @@ class NeuralNetwork:
                 print("EPOCH:", i)
                 print("COST FUNCTION:", self.get_cost(train_input, train_targets))
                 self.cost_evolution.append(self.get_cost(train_input, train_targets))
-                self.accuracy_evolution.append(self._accuracy(train_input, train_targets))
+                if self.classification: 
+                    self.accuracy_evolution.append(self._accuracy(train_input, train_targets))
                 
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
                 W -= self._train(W_g + self.lmb, learning_rate, i + 1, current_layer = j, current_var = 0)
@@ -175,52 +178,44 @@ class NeuralNetwork:
         input_rows = train_input.shape[0]
         n_batches = int(input_rows / batch_size)
         gradient_func = grad(self._cost, 2)
-        indexes = range(input_rows)
-        shuffled_indexes = np.random.Generator.shuffle(indexes, axis = 0) # shuffling rows of input
-
-        #splitting into batches: 
-        index_batches = np.array_split(shuffled_indexes, n_batches, axis = 0) # splitting up random indexes into even-ish batches
-
-        for indexes in index_batches: 
-            x_batch  = train_input[indexes, :]
-            y_batch = train_targets[indexes, :]
-
-            # epochs 
-            i = 0 
-            convergence_not_reached = True
-            while i < epochs and convergence_not_reached: 
-
-                # what is this?
-                if self.optimizer is not None:
-                    self.optimizer.reset(self.layers)
-        
-                layers_grad = gradient_func(x_batch, y_batch, self.layers)
-                print("layers grad")
-                print(len(layers_grad))
-                print("xi and yi below")
-                print(x_batch.shape)
-                print("")
-                print(y_batch.shape)
-                j = 0
-                for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
-                    print("first")
-                    old_W = W
-                    W -= self._train(W_g + self.lmb, learning_rate, i + 1, current_layer = j, current_var = 0)
-                    if np.sum(W) == np.sum(old_W):
-                        print("Not updating parameters in SGD correctly, exiting training ")
-                        return 0
-                    
-                    b -= self._train(b_g, learning_rate, i + 1, current_layer = j, current_var = 1)
-                    j += 1
-                    
-                if i % 10 == 0 and verbose: #printer ut info pr. x-te epoke
-                    cost = self.get_cost(train_input, train_targets)
-                    print("EPOCH:", i)
-                    print("COST FUNCTION:", cost)
-                    self.cost_evolution.append(self.get_cost(train_input, train_targets))
+        inds = np.arange(input_rows)
+        rng = np.random.default_rng(12345)
+        # epochs 
+        i = 0 
+        convergence_not_reached = True
+        while i < epochs and convergence_not_reached: 
+            if i % 100 == 0 and verbose: #printer ut info pr. x-te epoke
+                cost = self.get_cost(train_input, train_targets)
+                print("EPOCH:", i)
+                print("COST FUNCTION:", cost)
+                self.cost_evolution.append(self.get_cost(train_input, train_targets))
+                if self.classification: 
                     self.accuracy_evolution.append(self._accuracy(train_input, train_targets))
-                    if cost < 10**-5:
-                        convergence_not_reached = False
+
+            # what is this?
+            if self.optimizer is not None:
+                self.optimizer.reset(self.layers)
+
+            #splitting into batches: 
+            rng.shuffle(inds) # shuffling rows of input
+            index_batches = np.array_split(inds, n_batches) # splitting up random indexes into even-ish batches
+
+            for indexes in index_batches: 
+                x_batch = train_input[indexes, : ]
+                y_batch = train_targets[indexes, :]
+
+    
+            layers_grad = gradient_func(x_batch, y_batch, self.layers)
+            j = 0
+            for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
+                W -= self._train(W_g + self.lmb, learning_rate, i + 1, current_layer = j, current_var = 0)
+                b -= self._train(b_g, learning_rate, i + 1, current_layer = j, current_var = 1)
+                j += 1
+                
+            if cost < 10**-5:
+                convergence_not_reached = False
+                print("Converged at epoch", i)
+                break
             i += 1
 
 # Retrieved from additionweek42.ipynb

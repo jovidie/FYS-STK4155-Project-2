@@ -63,30 +63,31 @@ def main():
     NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, cost_function = binary_cross_entropy)
     print(f"Predicting test set with randomly initialized layers and weights:\n {NN.predict(test_in)[:10, :10]}")
     print("And train set:\n", NN.predict(train_in)[:10, :10])
-
-    NN.train_network(train_in, train_o, epochs = 500, learning_rate = 0.1, verbose = True, batch_size = 100)
     
+
+#-------------------------------------------------------------------------------------------------------------------------------
+# GD, no optimizer
+
     # training neural network
     epochs = 500
     lrates = np.linspace(0, 0.9, 10)# "RMSprop", "AdaGrad", "ADAM"]
     fig, axs = plt.subplots(1,2)
-    plt.savefig("./latex/figures/gd_autodiff_w_learningrates.pdf", bbox_inches = "tight")
 
     print("\n----------------------------------------------------------------------------------------")
-    print("[   Exploring NN with GD and automatic differentiation across different learning rates   ] ")
+    print("[  Exploring NN with GD and automatic differentiation across different learning rates   ] ")
     print("----------------------------------------------------------------------------------------\n")
 
     for lrate in lrates: 
-        print(f"\n\n ------------ Training network with {epochs} epochs and {lrate} learning rate ------------\n")
+        print(f"\n\n ------------ Training network with {epochs} epochs and {round(lrate, 2)} learning rate ------------\n")
         np.random.seed(42)
-        NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, cost_function = binary_cross_entropy)
+        NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, cost_function = binary_cross_entropy, classification = True)
         NN.train_network(train_in, train_o, epochs = epochs, learning_rate = lrate, verbose = True)
         #print(f"Predicting on some of test set after traning:\n {NN.predict(test_in)[:10, :10]}")
         #print("And some of train set:\n", NN.predict(train_in)[:10, :10])
 
         # plotting per learning rate
-        axs[0].plot(range(0, epochs, 100), NN.cost_evolution, label = f"bcr cost, lr: {lrate}")
-        axs[1].plot(range(0, epochs, 100), NN.accuracy_evolution, label = f"train accuracy, lr: {lrate}")
+        axs[0].plot(NN.cost_evolution, label = f"bcr cost, lr: {round(lrate, 2)}") #range(0, epochs, 100)
+        axs[1].plot(NN.accuracy_evolution, label = f"train accuracy, lr: {round(lrate, 2)}")
 
     axs[0].set_title("Loss")
     axs[0].set_ylabel("Binary cross entropy")
@@ -97,8 +98,45 @@ def main():
     axs[1].axhline(1, ls = ":")
     axs[0].legend()
     axs[1].legend()
-    fig.suptitle(f"Binary cross entropy and accuracy across {epochs} epochs for several learning rates")
+    fig.suptitle(f"Loss function and accuracy, GD w/{epochs} epochs - no gradient optimizer")
     plt.savefig("./latex/figures/gd_autodiff_w_learningrates.pdf", bbox_inches = "tight")
+    plt.show()
+
+#-------------------------------------------------------------------------------------------------------------------------------
+# SGD, no optimizer
+
+    # training neural network
+    epochs = 500
+    lrates = np.linspace(0, 0.9, 10)# "RMSprop", "AdaGrad", "ADAM"]
+    fig, axs = plt.subplots(1,2)
+
+    print("\n----------------------------------------------------------------------------------------")
+    print("[  Exploring NN with SGD and automatic differentiation across different learning rates  ] ")
+    print("----------------------------------------------------------------------------------------\n")
+
+    for lrate in lrates: 
+        print(f"\n\n ------------ Training network with {epochs} epochs and {round(lrate, 2)} learning rate ------------\n")
+        np.random.seed(42)
+        NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, cost_function = binary_cross_entropy, classification = True)
+        NN.train_network(train_in, train_o, epochs = epochs, learning_rate = lrate, verbose = True, batch_size = 150)
+        #print(f"Predicting on some of test set after traning:\n {NN.predict(test_in)[:10, :10]}")
+        #print("And some of train set:\n", NN.predict(train_in)[:10, :10])
+
+        # plotting per learning rate
+        axs[0].plot(NN.cost_evolution, label = f"bcr cost, lr: {round(lrate,2)}") #range(0, epochs, 100)
+        axs[1].plot(NN.accuracy_evolution, label = f"train accuracy, lr: {round(lrate, 2)}")
+
+    axs[0].set_title("Loss")
+    axs[0].set_ylabel("Binary cross entropy")
+    axs[0].set_xlabel("Epochs")
+    axs[1].set_title("Accuracy")
+    axs[1].set_xlabel("Epochs")
+    axs[1].set_ylabel("Accuracy")
+    axs[1].axhline(1, ls = ":")
+    axs[0].legend()
+    axs[1].legend()
+    fig.suptitle(f"Loss function and accuracy, SGD w/{epochs} epochs - no gradient optimizer")
+    plt.savefig("./latex/figures/sgd_autodiff_w_learningrates.pdf", bbox_inches = "tight")
     plt.show()
 
 
