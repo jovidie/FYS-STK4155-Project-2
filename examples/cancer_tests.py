@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from ptwo.models import NeuralNetwork
 from ptwo.activators import sigmoid, ReLU, softmax
 from ptwo.costfuns import binary_cross_entropy
+from ptwo.optimizers import RMSProp, Momentum, AdaGrad, ADAM
 
 
 def main():
@@ -63,81 +64,247 @@ def main():
     NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, cost_function = binary_cross_entropy)
     print(f"Predicting test set with randomly initialized layers and weights:\n {NN.predict(test_in)[:10, :10]}")
     print("And train set:\n", NN.predict(train_in)[:10, :10])
+    fig, axs = plt.subplots(1,2)
     
 
 #-------------------------------------------------------------------------------------------------------------------------------
 # GD, no optimizer
-
-    # training neural network
     epochs = 500
-    lrates = np.linspace(0, 0.9, 10)# "RMSprop", "AdaGrad", "ADAM"]
-    fig, axs = plt.subplots(1,2)
+    lrates = np.linspace(0, 0.9, 10)
 
-    print("\n----------------------------------------------------------------------------------------")
-    print("[  Exploring NN with GD and automatic differentiation across different learning rates   ] ")
-    print("----------------------------------------------------------------------------------------\n")
+    def gd_test(fig, axs, epochs = 500, lrates = np.linspace(0, 0.9, 10), display_data = True):
 
-    for lrate in lrates: 
-        print(f"\n\n ------------ Training network with {epochs} epochs and {round(lrate, 2)} learning rate ------------\n")
-        np.random.seed(42)
-        NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, cost_function = binary_cross_entropy, classification = True)
-        NN.train_network(train_in, train_o, epochs = epochs, learning_rate = lrate, verbose = True)
-        #print(f"Predicting on some of test set after traning:\n {NN.predict(test_in)[:10, :10]}")
-        #print("And some of train set:\n", NN.predict(train_in)[:10, :10])
+        print("\n----------------------------------------------------------------------------------------")
+        print("[  Exploring NN with GD and automatic differentiation across different learning rates   ] ")
+        print("----------------------------------------------------------------------------------------\n")
 
-        # plotting per learning rate
-        axs[0].plot(NN.cost_evolution, label = f"bcr cost, lr: {round(lrate, 2)}") #range(0, epochs, 100)
-        axs[1].plot(NN.accuracy_evolution, label = f"train accuracy, lr: {round(lrate, 2)}")
+        for lrate in lrates: 
+            print(f"\n\n ------------ Training network with {epochs} epochs and {round(lrate, 2)} learning rate ------------\n")
+            np.random.seed(42)
+            NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, cost_function = binary_cross_entropy, classification = True)
+            NN.train_network(train_in, train_o, epochs = epochs, learning_rate = lrate, verbose = True)
+            #print(f"Predicting on some of test set after traning:\n {NN.predict(test_in)[:10, :10]}")
+            #print("And some of train set:\n", NN.predict(train_in)[:10, :10])
 
-    axs[0].set_title("Loss")
-    axs[0].set_ylabel("Binary cross entropy")
-    axs[0].set_xlabel("Epochs")
-    axs[1].set_title("Accuracy")
-    axs[1].set_xlabel("Epochs")
-    axs[1].set_ylabel("Accuracy")
-    axs[1].axhline(1, ls = ":")
-    axs[0].legend()
-    axs[1].legend()
-    fig.suptitle(f"Loss function and accuracy, GD w/{epochs} epochs - no gradient optimizer")
-    plt.savefig("./latex/figures/gd_autodiff_w_learningrates.pdf", bbox_inches = "tight")
-    plt.show()
+            # plotting per learning rate
+            axs[0].plot(NN.cost_evolution, label = f"bcr cost, lr: {round(lrate, 2)}") #range(0, epochs, 100)
+            axs[1].plot(NN.accuracy_evolution, label = f"train accuracy, lr: {round(lrate, 2)}")
+
+        if display_data:
+            axs[0].set_title("Loss")
+            axs[0].set_ylabel("Binary cross entropy")
+            axs[0].set_xlabel("Epochs")
+            axs[1].set_title("Accuracy")
+            axs[1].set_xlabel("Epochs")
+            axs[1].set_ylabel("Accuracy")
+            axs[1].axhline(1, ls = ":")
+            axs[0].legend()
+            axs[1].legend()
+            fig.suptitle(f"Loss function and accuracy, GD w/{epochs} epochs - no gradient optimizer")
+            plt.savefig("./latex/figures/gd_autodiff_w_learningrates.pdf", bbox_inches = "tight")
+            plt.show()
+    
+    #gd_test(fig, axs)
 
 #-------------------------------------------------------------------------------------------------------------------------------
 # SGD, no optimizer
-
-    # training neural network
     epochs = 500
-    lrates = np.linspace(0, 0.9, 10)# "RMSprop", "AdaGrad", "ADAM"]
-    fig, axs = plt.subplots(1,2)
+    lrates = np.linspace(0, 0.9, 10)
 
-    print("\n----------------------------------------------------------------------------------------")
-    print("[  Exploring NN with SGD and automatic differentiation across different learning rates  ] ")
-    print("----------------------------------------------------------------------------------------\n")
+    def sgd_test(fig, axs, epochs = 500, lrates = np.linspace(0, 0.9, 10), display_data = True):
+        # training neural network
 
-    for lrate in lrates: 
-        print(f"\n\n ------------ Training network with {epochs} epochs and {round(lrate, 2)} learning rate ------------\n")
-        np.random.seed(42)
-        NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, cost_function = binary_cross_entropy, classification = True)
-        NN.train_network(train_in, train_o, epochs = epochs, learning_rate = lrate, verbose = True, batch_size = 150)
-        #print(f"Predicting on some of test set after traning:\n {NN.predict(test_in)[:10, :10]}")
-        #print("And some of train set:\n", NN.predict(train_in)[:10, :10])
+        print("\n----------------------------------------------------------------------------------------")
+        print("[  Exploring NN with SGD and automatic differentiation across different learning rates  ] ")
+        print("----------------------------------------------------------------------------------------\n")
 
-        # plotting per learning rate
-        axs[0].plot(NN.cost_evolution, label = f"bcr cost, lr: {round(lrate,2)}") #range(0, epochs, 100)
-        axs[1].plot(NN.accuracy_evolution, label = f"train accuracy, lr: {round(lrate, 2)}")
+        for lrate in lrates: 
+            print(f"\n\n ------------ Training network with {epochs} epochs and {round(lrate, 2)} learning rate ------------\n")
+            np.random.seed(42)
+            NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, cost_function = binary_cross_entropy, classification = True)
+            NN.train_network(train_in, train_o, epochs = epochs, learning_rate = lrate, verbose = True, batch_size = 150)
+            #print(f"Predicting on some of test set after traning:\n {NN.predict(test_in)[:10, :10]}")
+            #print("And some of train set:\n", NN.predict(train_in)[:10, :10])
 
-    axs[0].set_title("Loss")
-    axs[0].set_ylabel("Binary cross entropy")
-    axs[0].set_xlabel("Epochs")
-    axs[1].set_title("Accuracy")
-    axs[1].set_xlabel("Epochs")
-    axs[1].set_ylabel("Accuracy")
-    axs[1].axhline(1, ls = ":")
-    axs[0].legend()
-    axs[1].legend()
-    fig.suptitle(f"Loss function and accuracy, SGD w/{epochs} epochs - no gradient optimizer")
-    plt.savefig("./latex/figures/sgd_autodiff_w_learningrates.pdf", bbox_inches = "tight")
-    plt.show()
+            # plotting per learning rate
+            axs[0].plot(NN.cost_evolution, label = f"bcr cost, lr: {round(lrate,2)}") #range(0, epochs, 100)
+            axs[1].plot(NN.accuracy_evolution, label = f"train accuracy, lr: {round(lrate, 2)}")
+
+        if display_data:
+            axs[0].set_title("Loss")
+            axs[0].set_ylabel("Binary cross entropy")
+            axs[0].set_xlabel("Epochs")
+            axs[1].set_title("Accuracy")
+            axs[1].set_xlabel("Epochs")
+            axs[1].set_ylabel("Accuracy")
+            axs[1].axhline(1, ls = ":")
+            axs[0].legend()
+            axs[1].legend()
+            fig.suptitle(f"Loss function and accuracy, SGD w/{epochs} epochs - no gradient optimizer")
+            plt.savefig("./latex/figures/sgd_autodiff_w_learningrates.pdf", bbox_inches = "tight")
+            plt.show()
+
+    #sgd_test(fig, axs)
+
+#-------------------------------------------------------------------------------------------------------------------------------
+# SGD with RMSprop
+
+    def rmsprop_sgd_test(fig, axs, epochs = 500, lrates = [0.1], display_data = True):
+        # training neural network
+        rho = 0.99
+
+        print("\n----------------------------------------------------------------------------------------")
+        print("[  Exploring NN with SGD and RMSProp + autodiff] ")
+        print("----------------------------------------------------------------------------------------\n")
+
+        for lrate in lrates: 
+            print(f"\n\n ------------ Training network with {epochs} epochs and {round(lrate, 2)} learning rate ------------\n")
+            np.random.seed(42)
+            NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, optimizer = RMSProp(rho), cost_function = binary_cross_entropy, classification = True)
+            NN.train_network(train_in, train_o, epochs = epochs, learning_rate = lrate, verbose = True, batch_size = 150)
+            #print(f"Predicting on some of test set after traning:\n {NN.predict(test_in)[:10, :10]}")
+            #print("And some of train set:\n", NN.predict(train_in)[:10, :10])
+
+            # plotting per learning rate
+            axs[0].plot(NN.cost_evolution, label = f"bcr cost, lr: {round(lrate,2)}") #range(0, epochs, 100)
+            axs[1].plot(NN.accuracy_evolution, label = f"train accuracy, lr: {round(lrate, 2)}")
+
+        if display_data:
+            axs[0].set_title("Loss")
+            axs[0].set_ylabel("Binary cross entropy")
+            axs[0].set_xlabel("Epochs")
+            axs[1].set_title("Accuracy")
+            axs[1].set_xlabel("Epochs")
+            axs[1].set_ylabel("Accuracy")
+            axs[1].axhline(1, ls = ":")
+            axs[0].legend()
+            axs[1].legend()
+            fig.suptitle(f"Loss function and accuracy, RMSProp SGD w/{epochs} epochs - no gradient optimizer")
+            plt.savefig("./latex/figures/rmsprop_sgd_autodiff_w_learningrates.pdf", bbox_inches = "tight")
+            plt.show()
+
+    #rmsprop_sgd_test(fig, axs)
+
+#-------------------------------------------------------------------------------------------------------------------------------
+# SGD with Momentum
+
+    def momentum_sgd_test(fig, axs, epochs = 500, lrates = [0.1], display_data = True):
+        # training neural network
+
+        print("\n----------------------------------------------------------------------------------------")
+        print("[  Exploring NN with SGD and Momentum + autodiff] ")
+        print("----------------------------------------------------------------------------------------\n")
+
+        for lrate in lrates: 
+            print(f"\n\n ------------ Training network with {epochs} epochs and {round(lrate, 2)} learning rate ------------\n")
+            np.random.seed(42)
+            NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, optimizer = Momentum(), cost_function = binary_cross_entropy, classification = True)
+            NN.train_network(train_in, train_o, epochs = epochs, learning_rate = lrate, verbose = True, batch_size = 150)
+            #print(f"Predicting on some of test set after traning:\n {NN.predict(test_in)[:10, :10]}")
+            #print("And some of train set:\n", NN.predict(train_in)[:10, :10])
+
+            # plotting per learning rate
+            axs[0].plot(NN.cost_evolution, label = f"bcr cost, lr: {round(lrate,2)}") #range(0, epochs, 100)
+            axs[1].plot(NN.accuracy_evolution, label = f"train accuracy, lr: {round(lrate, 2)}")
+
+        if display_data:
+            axs[0].set_title("Loss")
+            axs[0].set_ylabel("Binary cross entropy")
+            axs[0].set_xlabel("Epochs")
+            axs[1].set_title("Accuracy")
+            axs[1].set_xlabel("Epochs")
+            axs[1].set_ylabel("Accuracy")
+            axs[1].axhline(1, ls = ":")
+            axs[0].legend()
+            axs[1].legend()
+            fig.suptitle(f"Loss function and accuracy, Momentum SGD w/{epochs} epochs - no gradient optimizer")
+            plt.savefig("./latex/figures/momentum_sgd_autodiff_w_learningrates.pdf", bbox_inches = "tight")
+            plt.show()
+
+    #momentum_sgd_test(fig, axs)
+
+#-------------------------------------------------------------------------------------------------------------------------------
+# SGD with AdaGrad
+
+    def adagrad_sgd_test(fig, axs, epochs = 500, lrates = [0.1], display_data = True):
+        # training neural network
+
+        print("\n----------------------------------------------------------------------------------------")
+        print("[            Exploring NN with SGD and AdaGrad + autodiff              ] ")
+        print("----------------------------------------------------------------------------------------\n")
+
+        for lrate in lrates: 
+            print(f"\n\n ------------ Training network with {epochs} epochs and {round(lrate, 2)} learning rate ------------\n")
+            np.random.seed(42)
+            NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, optimizer = AdaGrad(), cost_function = binary_cross_entropy, classification = True)
+            NN.train_network(train_in, train_o, epochs = epochs, learning_rate = lrate, verbose = True, batch_size = 150)
+            #print(f"Predicting on some of test set after traning:\n {NN.predict(test_in)[:10, :10]}")
+            #print("And some of train set:\n", NN.predict(train_in)[:10, :10])
+
+            # plotting per learning rate
+            axs[0].plot(NN.cost_evolution, label = f"bcr cost, lr: {round(lrate,2)}") #range(0, epochs, 100)
+            axs[1].plot(NN.accuracy_evolution, label = f"train accuracy, lr: {round(lrate, 2)}")
+
+        if display_data:
+            axs[0].set_title("Loss")
+            axs[0].set_ylabel("Binary cross entropy")
+            axs[0].set_xlabel("Epochs")
+            axs[1].set_title("Accuracy")
+            axs[1].set_xlabel("Epochs")
+            axs[1].set_ylabel("Accuracy")
+            axs[1].axhline(1, ls = ":")
+            axs[0].legend()
+            axs[1].legend()
+            fig.suptitle(f"Loss function and accuracy, AdaGrad SGD w/{epochs} epochs - no gradient optimizer")
+            plt.savefig("./latex/figures/adagrad_sgd_autodiff_w_learningrates.pdf", bbox_inches = "tight")
+            plt.show()
+
+    #adagrad_sgd_test(fig, axs)
+
+#-------------------------------------------------------------------------------------------------------------------------------
+# SGD with ADAM
+
+    def adam_sgd_test(fig, axs, epochs = 500, lrates = [0.1], display_data = True):
+        # training neural network
+
+        print("\n----------------------------------------------------------------------------------------")
+        print("[                    Exploring NN with SGD and ADAM + autodiff                          ] ")
+        print("----------------------------------------------------------------------------------------\n")
+
+        for lrate in lrates: 
+            print(f"\n\n ------------ Training network with {epochs} epochs and {round(lrate, 2)} learning rate ------------\n")
+            np.random.seed(42)
+            NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, optimizer = ADAM(), cost_function = binary_cross_entropy, classification = True)
+            NN.train_network(train_in, train_o, epochs = epochs, learning_rate = lrate, verbose = True, batch_size = 150)
+            #print(f"Predicting on some of test set after traning:\n {NN.predict(test_in)[:10, :10]}")
+            #print("And some of train set:\n", NN.predict(train_in)[:10, :10])
+
+            # plotting per learning rate
+            axs[0].plot(NN.cost_evolution, label = f"bcr cost, lr: {round(lrate,2)}") #range(0, epochs, 100)
+            axs[1].plot(NN.accuracy_evolution, label = f"train accuracy, lr: {round(lrate, 2)}")
+
+        if display_data:
+            axs[0].set_title("Loss")
+            axs[0].set_ylabel("Binary cross entropy")
+            axs[0].set_xlabel("Epochs")
+            axs[1].set_title("Accuracy")
+            axs[1].set_xlabel("Epochs")
+            axs[1].set_ylabel("Accuracy")
+            axs[1].axhline(1, ls = ":")
+            axs[0].legend()
+            axs[1].legend()
+            fig.suptitle(f"Loss function and accuracy, ADAM SGD w/{epochs} epochs - no gradient optimizer")
+            plt.savefig("./latex/figures/adam_sgd_autodiff_w_learningrates.pdf", bbox_inches = "tight")
+            plt.show()
+
+    #adam_sgd_test(fig, axs)
+
+    #all_tests = [gd_test, sgd_test, momentum_sgd_test, rmsprop_sgd_test, adagrad_sgd_test, adam_sgd_test]
+
+    #for ind, test in enumerate(all_tests):
+    #    test(fig, axs, epochs = 500, lrates = [0.9], display_data = False)
+    #    if ind == len(all_tests)-1:
+    #        test(fig, axs, epochs = 500, lrates = [0.9], display_data = True)
 
 
 main()

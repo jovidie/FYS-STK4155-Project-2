@@ -104,7 +104,7 @@ class NeuralNetwork:
         self.predictions = pred
         return pred
     
-    def _accuracy(self, input, targets):
+    def accuracy(self, input, targets):
         """
         Calculate accuracy for a classification with one hot predictions. Feeds the data through
         the neural network and compares the output with the targets
@@ -146,6 +146,8 @@ class NeuralNetwork:
         """
         self.cost_evolution = []
         self.accuracy_evolution = []
+        if self.optimizer is not None:
+            self.optimizer.initialize_layers(self.layers)
         if batch_size is None:
             self._train_network_gd(train_input, train_targets, learning_rate, epochs, verbose)
         else:
@@ -164,7 +166,7 @@ class NeuralNetwork:
                 print("COST FUNCTION:", self.get_cost(train_input, train_targets))
                 self.cost_evolution.append(self.get_cost(train_input, train_targets))
                 if self.classification: 
-                    self.accuracy_evolution.append(self._accuracy(train_input, train_targets))
+                    self.accuracy_evolution.append(self.accuracy(train_input, train_targets))
                 
             for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
                 W -= self._train(W_g + self.lmb, learning_rate, i + 1, current_layer = j, current_var = 0)
@@ -184,17 +186,19 @@ class NeuralNetwork:
         i = 0 
         convergence_not_reached = True
         while i < epochs and convergence_not_reached: 
+
+            # printing data as we go:
             if i % 100 == 0 and verbose: #printer ut info pr. x-te epoke
                 cost = self.get_cost(train_input, train_targets)
                 print("EPOCH:", i)
                 print("COST FUNCTION:", cost)
                 self.cost_evolution.append(self.get_cost(train_input, train_targets))
                 if self.classification: 
-                    self.accuracy_evolution.append(self._accuracy(train_input, train_targets))
+                    self.accuracy_evolution.append(self.accuracy(train_input, train_targets))
 
             # what is this?
-            if self.optimizer is not None:
-                self.optimizer.reset(self.layers)
+            #if self.optimizer is not None:
+            #    self.optimizer.reset(self.layers)
 
             #splitting into batches: 
             rng.shuffle(inds) # shuffling rows of input
@@ -203,19 +207,19 @@ class NeuralNetwork:
             for indexes in index_batches: 
                 x_batch = train_input[indexes, : ]
                 y_batch = train_targets[indexes, :]
-
-    
-            layers_grad = gradient_func(x_batch, y_batch, self.layers)
-            j = 0
-            for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
-                W -= self._train(W_g + self.lmb, learning_rate, i + 1, current_layer = j, current_var = 0)
-                b -= self._train(b_g, learning_rate, i + 1, current_layer = j, current_var = 1)
-                j += 1
-                
-            if cost < 10**-5:
-                convergence_not_reached = False
-                print("Converged at epoch", i)
-                break
+                layers_grad = gradient_func(x_batch, y_batch, self.layers)
+                j = 0
+                for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
+                    W -= self._train(W_g + self.lmb, learning_rate, i + 1, current_layer = j, current_var = 0)
+                    b -= self._train(b_g, learning_rate, i + 1, current_layer = j, current_var = 1)
+                    j += 1
+                    
+                #if cost < 10**-5:
+                #    convergence_not_reached = False
+                #    print("Converged at epoch", i)
+                #    break
+            
+            #increase epoch
             i += 1
 
 # Retrieved from additionweek42.ipynb
