@@ -154,7 +154,7 @@ def main():
         rho = 0.99
 
         print("\n----------------------------------------------------------------------------------------")
-        print("[  Exploring NN with SGD and RMSProp + autodiff] ")
+        print("[                   Exploring NN with SGD and RMSProp + autodiff                     ] ")
         print("----------------------------------------------------------------------------------------\n")
 
         for lrate in lrates: 
@@ -192,7 +192,7 @@ def main():
         # training neural network
 
         print("\n----------------------------------------------------------------------------------------")
-        print("[  Exploring NN with SGD and Momentum + autodiff] ")
+        print("[                  Exploring NN with SGD and Momentum + autodiff                        ] ")
         print("----------------------------------------------------------------------------------------\n")
 
         for lrate in lrates: 
@@ -230,7 +230,7 @@ def main():
         # training neural network
 
         print("\n----------------------------------------------------------------------------------------")
-        print("[            Exploring NN with SGD and AdaGrad + autodiff              ] ")
+        print("[                 Exploring NN with SGD and AdaGrad + autodiff                         ] ")
         print("----------------------------------------------------------------------------------------\n")
 
         for lrate in lrates: 
@@ -268,7 +268,7 @@ def main():
         # training neural network
 
         print("\n----------------------------------------------------------------------------------------")
-        print("[                    Exploring NN with SGD and ADAM + autodiff                          ] ")
+        print("[                    Exploring NN with SGD and ADAM + autodiff                         ] ")
         print("----------------------------------------------------------------------------------------\n")
 
         for lrate in lrates: 
@@ -299,10 +299,11 @@ def main():
 
     #adam_sgd_test(fig, axs)
 
-    #all_tests = [gd_test, sgd_test, momentum_sgd_test, rmsprop_sgd_test, adagrad_sgd_test, adam_sgd_test]
+    all_tests = [gd_test, sgd_test, momentum_sgd_test, rmsprop_sgd_test, adagrad_sgd_test, adam_sgd_test]
+    l_rate = [[x] for x in [0.9, 0.9, 0.1, 0.1, 0.1, 0.1]]
 
-    #for ind, test in enumerate(all_tests):
-    #    test(fig, axs, epochs = 500, lrates = [0.9], display_data = False)
+    for ind, test in enumerate(all_tests):
+        test(fig, axs, epochs = 1000, lrates = l_rate[ind], display_data = False)
     #    if ind == len(all_tests)-1:
     #        test(fig, axs, epochs = 500, lrates = [0.9], display_data = True)
 
