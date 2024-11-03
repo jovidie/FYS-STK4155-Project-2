@@ -139,11 +139,11 @@ class NeuralNetwork:
         - batch_size: batch size to use for SGD
         """
         self.cost_evolution = []
+        if self.optimizer is not None and not self.optimizer.has_layers:
+            self.optimizer.initialize_layers(self.layers)
         if batch_size is None:
             self._train_network_gd(train_input, train_targets, learning_rate, epochs, verbose)
         else:
-            if not self.optimizer.has_layers:
-                self.optimizer.initialize_layers(self.layers)
             self._train_network_sgd(train_input, train_targets, learning_rate, epochs, batch_size)
     
     def _train_network_gd(self, train_input, train_targets, learning_rate, epochs, verbose):
@@ -187,12 +187,12 @@ class NeuralNetwork:
                 xi = xy[random_index : random_index+batch_size,           : -n_output]
                 yi = xy[random_index : random_index+batch_size, -n_output : ]
 
-            layers_grad = gradient_func(xi, yi, self.layers)
-            j = 0
-            for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
-                W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
-                b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
-                j += 1
+                layers_grad = gradient_func(xi, yi, self.layers)
+                j = 0
+                for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
+                    W -= self._train(W_g + self.lmb, learning_rate, i+1, current_layer=j, current_var=0)
+                    b -= self._train(b_g, learning_rate, i+1, current_layer=j, current_var=1)
+                    j += 1
 
 # Retrieved from additionweek42.ipynb
 class LogisticRegression:
