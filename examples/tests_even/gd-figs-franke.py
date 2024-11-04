@@ -67,6 +67,35 @@ plt.yscale("log")
 plt.savefig("examples/tests_even/figs/Franke-learningrates-optimizers.pdf")
 plt.show()
 
+## SGD ##
+
+## TEST DIFFERENT OPTIMIZERS AND LEARNING RATES ##
+np.random.seed(924748201)
+learning_rates = np.logspace(-8,1, 20)
+optimizers = [Momentum, AdaGrad, ADAM, RMSProp]
+n_iter = 200
+lmb=1e-4
+grad = grad_ridge(lmb)
+batch_size=32
+
+mses = np.zeros( (len(learning_rates), len(optimizers)) )
+for j, optimizer in enumerate(optimizers):
+    for i, learning_rate in enumerate(learning_rates):
+        gd = GradientDescent(learning_rate, grad, optimizer=optimizer())
+        gd.descend(X_train_scaled, y_train_scaled, n_iter, batch_size=batch_size)
+        y_pred = X_test_scaled @ gd.theta
+        mses[i,j] = mse(y_pred, y_test_scaled)
+
+optimizer_names = ["Momentum", "AdaGrad", "ADAM", "RMSProp"]
+for j in range(len(optimizers)):
+    plt.plot(learning_rates, mses[:,j], label=optimizer_names[j])
+plt.legend()
+plt.xlabel(r"Learning rate $\eta$")
+plt.ylabel("Test MSE")
+plt.xscale("log")
+plt.yscale("log")
+plt.savefig("examples/tests_even/figs/Franke-learningrates-optimizers-sgd.pdf")
+plt.show()
 
 ## GRID SEARCH ##
 
