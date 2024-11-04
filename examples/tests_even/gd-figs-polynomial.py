@@ -84,3 +84,35 @@ plt.ylabel("Difference from true value")
 plt.axhline(0, linestyle = "--", color="grey")
 plt.savefig("examples/tests_even/figs/gradient-descent-momentum-polynomial-convergence.pdf")
 plt.show()
+
+## Same but ADAM
+
+learning_rate = 1
+n_iter = 1000
+grad = grad_OLS()
+momentum_gamma = 0.8
+
+gd = GradientDescent(learning_rate, grad, optimizer=ADAM())
+
+step_size = 10
+n_steps = int(n_iter / step_size)
+convergence = np.zeros((n_steps,X.shape[1]))
+print(convergence.shape)
+iters = np.zeros(n_steps)
+for i in range(n_steps):
+    gd.descend(X, y, epochs = step_size)
+    new_coef = gd.theta
+    convergence[i, :] = (poly_list.reshape(-1, 1) - new_coef).flatten()
+    iters[i] = i*step_size
+
+print(gd.theta)
+
+for i in range(X.shape[1]):
+    plt.plot(iters, convergence[:,i], label=fr"$\beta_{i}$")
+
+plt.legend()
+plt.xlabel("Number of iterations")
+plt.ylabel("Difference from true value")
+plt.axhline(0, linestyle = "--", color="grey")
+plt.savefig("examples/tests_even/figs/gradient-descent-ADAM-polynomial-convergence.pdf")
+plt.show()
