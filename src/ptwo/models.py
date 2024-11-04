@@ -181,7 +181,7 @@ class NeuralNetwork:
         n_batches = int(input_rows / batch_size)
         gradient_func = grad(self._cost, 2)
         inds = np.arange(input_rows)
-        rng = np.random.default_rng(12345)
+        rng = np.random.default_rng()
         # epochs 
         i = 0 
         convergence_not_reached = True
