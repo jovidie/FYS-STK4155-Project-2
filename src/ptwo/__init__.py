@@ -35,6 +35,6 @@ __all__ = [
     "calculate_polynomial",
     "franke_function",
     "GD_lambda_mse",
-    "",
-    ""
+    "eta_lambda_grid",
+    "lambda_lr_heatmap"
 ]
