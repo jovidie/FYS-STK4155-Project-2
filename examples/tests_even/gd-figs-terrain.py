@@ -41,6 +41,34 @@ scalery = StandardScaler(with_std = True)
 y_train_scaled = scalery.fit_transform(y_train)
 y_test_scaled = scalery.transform(y_test)
 
+
+# results from grid search applied to the terrain data
+# even though grid search is technically performed below here
+
+np.random.seed(2309148230)
+learning_rate=1.78e-3
+n_iter = 1000
+lmb=1.78e-6
+grad = grad_ridge(lmb)
+#grad = grad_OLS()
+gd = GradientDescent(learning_rate, grad,  optimizer = ADAM())
+gd.descend(X_train_scaled, y_train_scaled, n_iter, batch_size = 32)
+pred = X_test_scaled@gd.theta
+print(mse(pred, y_test_scaled))
+
+X_scaled = scalerX.fit_transform(X)
+pred = X_scaled@gd.theta
+y_predict = pred.reshape(200,200)
+plt.imshow(y_predict, cmap='gray')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.savefig("examples/tests_even/figs/gradient-descent-terrain-map.pdf")
+
+plt.show()
+
+# GRID SEARCH
+# TAKES VERY LONG TO RUN!
+
 np.random.seed(432787)
 learning_rates = np.logspace(-4, 1, 5)
 n_iter = 1000
