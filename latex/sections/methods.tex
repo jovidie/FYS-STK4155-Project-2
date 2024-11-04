@@ -27,9 +27,7 @@ where $z$ is the model's prediction. We define the cost function as the log-like
 \subsection{Gradient Descent}\label{ssec:gradient_descent}
 
 %% work-in-progress her, må samle tankene for å forklare dette på en god måte!
-For both regression and classification, we want to optimize a set of parameters $\theta$ given a cost function $C(X, \theta)$. This is ususally done by minimizing the cost function. One way of finding the minimum of the cost function given our parameters is by gradient descent (Algorithm \ref{alg:gd}). In gradient descent you start with a random set of parameters, and change these in small steps towards the optimal values by moving iteratively along a gradient \cite{Goodfellow:2016:deep_learning}. The step size is determined by the hyperparameter $\eta$, and is also called the learning rate. The gradient is found by calculating the first derivatives of the cost function with respect to the parameters, and evaluating these for each iteration. The algorithm is run either until some convergence criterion is reached (e.g., gradients approaching 0) it reaches the maximum number of iterations.
-
-While gradient descent effectively minimizes the cost function given the starting parameters, the algorithm can find a local minimum, rather than the lower global minimum. To avoid that the algorithm gets stuck in local minima, it is common to use a small random subset of your data each time you compute the gradients, rather than the full data. This method is known as stochastic gradient descent (Algorithm \ref{alg:sgd}).
+For both regression and classification, we want to optimize a set of parameters $\theta$ given a cost function $C(X, \theta)$. This is ususally done by minimizing the cost function. One way of finding the minimum of the cost function given our parameters is by gradient descent (GD) (Algorithm \ref{alg:gd}). In gradient descent you start with a random set of parameters, and change these in small steps towards the optimal values by moving iteratively along a gradient \cite{Goodfellow:2016:deep_learning}. The gradient is found by calculating the first derivatives of the cost function with respect to the parameters, and evaluating these for each iteration. The rate of descent for each parameter is ideally determined using Newton's method, but this requires the often prohibitively expensive operation of calculating the Hessian matrix \cite{battiti1992:newtons_method}. Instead, it is common use a fixed step size $\eta$, known as the learning rate of the model. The algorithm is run either until some convergence criterion is reached (e.g., gradients approaching 0) it reaches the maximum number of iterations.
 
 \begin{algorithm}
 \caption{Gradient descent}\label{alg:gd}
@@ -42,6 +40,8 @@ While gradient descent effectively minimizes the cost function given the startin
     \UNTIL{convergence}
 \end{algorithmic}
 \end{algorithm}
+
+While gradient descent effectively minimizes the cost function given the starting parameters, the algorithm can find a local minimum, rather than the lower global minimum. Additionally, gradient descent is computationally expensive for large data sets with many features. It is common to instead use a small random subset of your data each time you compute the gradients, rather than the full data, known as stochastic gradient descent (SGD, also known as mini-batch gradient descent) (Algorithm \ref{alg:sgd}). SGD increases the chance of avoiding local minima, and is more computationally efficient than GD \cite{Goodfellow:2016:deep_learning}.
 
 \begin{algorithm}
 \caption{Stochastic gradient descent with mini-batches}\label{alg:sgd}
@@ -59,6 +59,18 @@ While gradient descent effectively minimizes the cost function given the startin
     \ENDFOR
 \end{algorithmic}
 \end{algorithm}
+
+Rather than simply using the current gradient and a fixed learning rate $\eta$, it is common to also use information from the previous step when determining the size and direction of the current step. One way to do this is by adding the previous step along the gradient multiplied with a constant $\gamma$ to the current gradient step, as
+\begin{equation}
+    \mathbf{v}_{t} = \eta \nabla C(\boldsymbol{\theta}) + \gamma \mathbf{v}_{t-1}
+    \boldsymbol{\theta}_{t+1}= \boldsymbol{\theta}_t -\mathbf{v}_{t},
+\end{equation}
+where $\theta$ is the parameters, and $\mathbf{v}_t$ and $\mathbf{v}_{t-1}$ is the current and previous change in the gradient, respectively. This method is known as gradient descent with momentum, and can be used with both GD and SGD. Adding momentum changes both the direction and magnitude of the steps based on the previous gradients, and often improves convergence times \cite{Goodfellow:2016:deep_learning}.
+
+As the optimal learning rate for reaching a minimum often changes as you iterate, several algorithms exist to adaptively change the learning rate during gradient descent. 
+
+
+
 
 %------------ Feed-Forward Neural Network ---------------------
 \subsection{Feed-Forward Neural Network}\label{ssec:ffnn}
