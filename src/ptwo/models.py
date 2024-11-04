@@ -222,68 +222,83 @@ class NeuralNetwork:
             #increase epoch
             i += 1
 
-# Retrieved from additionweek42.ipynb
-class LogisticRegression:
-    def __init__(self, learning_rate=0.01, num_iterations=1000):
-        self.learning_rate = learning_rate
-        self.num_iterations = num_iterations
-        self.beta_logreg = None
-
-    def sigmoid(self, z):
-        return 1 / (1 + np.exp(-z))
-    
-    def GDfit(self, X, y):
-        n_data, num_features = X.shape
-        self.beta_logreg = np.zeros(num_features)
-
-        for _ in range(self.num_iterations):
-            linear_model = X @ self.beta_logreg
-            y_predicted = self.sigmoid(linear_model)
-
-            # Gradient calculation
-            gradient = (X.T @ (y_predicted - y))/n_data
-            # Update beta_logreg
-            self.beta_logreg -= self.learning_rate*gradient
-
-    def predict(self, X):
-        linear_model = X @ self.beta_logreg
-        y_predicted = self.sigmoid(linear_model)
-        return [1 if i >= 0.5 else 0 for i in y_predicted]
-
 # Not necessary with both, condence classes into one
-class LogReg:
-    def __init__(self, bias=-1):
-        self.bias = bias
-        self.weights = None
-        self.train_losses = []
-        self.train_accuracies = []
-        self.val_losses = []
-        self.val_accuracies = []
-        self.epochs_trained = None
+class LogisticRegression:
+    """Logistic regression model, fit data using either gradient or stochastic
+    gradient descent method. Predicts target probability using the sigmoid function,
+    and target class using a threshold."""
+    def __init__(self):
+        self._beta = None
     
-    @property
-    def epochs(self):
-        return self.epochs_trained
+    def _init_params(self, X):
+        self._m, self._n = X.shape      
+        self._beta = np.zeros(self._n)
 
-    @property
-    def losses(self):
-        return self.train_losses, self.val_losses
+    def _scheduler(self, t):
+        return self._batch_size/(t + self._n_epochs)
+
+    def _gd(self, X, y, n_epochs):
+        """Gradient descent solver method, to fit beta param.
+        
+        Args:
+            X (np.ndarray): array of input data
+            y (np.ndarray): array of target data
+            n_epochs (int): number of iterations of training to fit beta
+
+        Returns:
+            None
+        """
+        for i in range(n_epochs):
+            y_pred = self.forward(X)
+            grad = self.gradient(X, y, y_pred)
+            # Without optimizer
+            self._beta -= self._eta * grad
+
+
+    def _sgd(self, X, y, n_epochs, batch_size):
+        """Stochastic gradient descent solver method, to fit beta param.
+        
+        Args:
+            X (np.ndarray): array of input data
+            y (np.ndarray): array of target data
+            n_epochs (int): number of iterations of training to fit beta
+            batch_size (int): split data into batches of size 
+
+        Returns:
+            None
+        """
+        self._n_epochs = n_epochs
+        self._batch_size = batch_size
+        n_batches = int(self._m / batch_size)
+        # xy = np.column_stack([X,y]) 
+
+        for epoch in range(n_epochs):
+            for i in range(n_batches):
+                idx = batch_size*np.random.randint(n_batches)
+                xi = X[idx:idx+batch_size]
+                yi = y[idx:idx+batch_size]
+                y_pred = self.forward(xi)
+                grad = self.gradient(xi, yi, y_pred)
+                self._eta = self._scheduler(epoch*n_batches+i)
+                self._beta -= self._eta*grad
+
+
+    def sigmoid(self, X):
+        return 1 / (1 + np.exp(-X))
     
-    @property
-    def accuracies(self):
-        return self.train_accuracies, self.val_accuracies
+    def gradient(self, X, y, y_pred):
+        return (X.T @ (y_pred - y)) / self._m
+    
+    def forward(self, X):
+        """Transform input data using the sigmoid function.
 
-    @epochs.setter
-    def epochs(self, epoch):
-        self.epochs_trained = epoch
-
-    def add_bias(self, X):
-        N = X.shape[0]
-        biases = np.ones((N, 1)) * self.bias
-        return np.concatenate((biases, X), axis  = 1) 
-
-    def sigmoid(self, z):
-        return 1 / (1 + np.exp(-z))
+        Args: 
+            X (np.ndarray): input data to be transformed
+        
+        Returns:
+            np.ndarray of transformed values
+        """
+        return self.sigmoid(X @ self._beta)
     
     def accuracy(self, y_pred, y_true, threshold=0.5):
         y_cat = (y_pred > threshold).astype('int')
@@ -295,86 +310,37 @@ class LogReg:
             return loss_result
         # return - np.mean(y_true*np.log(y_pred) - (1 - y_true)*(1 - y_pred))
     
-    def fit(self, X_train, y_train, X_val=None, y_val=None, eta=0.01, n_epochs=1000, tol=0.01, n_epochs_no_update=10):
-        X_train = self.add_bias(X_train)  
+    def fit(self, X_train, y_train, batch_size=None, eta=0.01, n_epochs=1000):
+        """Train the model using either the gradient descent or stochastic 
+        gradient descent method.
         
-        m, n = X_train.shape      
-        self.weights = np.zeros(n)
+        Args:
+            X_train (np.ndarray): array of training input data
+            y_train (np.ndarray): array of training target data
+            batch_size (int): split data into batches of size, train using sgd
+            eta (float): learning rate
+            n_epochs (int): number of iterations of training to fit beta
 
-        prev_loss = n_epochs
-        no_update = 0
-
-        if X_val is None and y_val is None:
-            for epoch in range(n_epochs):
-                # y_pred = self.forward(X_train)
-                # Gradient
-                # g = (X_train.T @ (y_pred - y_train))/m
-                self.weights -= eta / m *  X_train.T @ (self.forward(X_train) - y_train)
-                y_pred = self.forward(X_train)
-
-                train_loss = self.loss(y_pred, y_train)
-                self.train_losses.append(train_loss)
-                train_acc = self.accuracy(y_pred, y_train)
-                self.train_accuracies.append(train_acc)
-
-                loss_update = prev_loss - train_loss
-                if loss_update < tol:
-                    no_update += 1
-                else:
-                    no_update = 0
-                
-                prev_loss = self.train_losses[-1]
-
-                if no_update >= n_epochs_no_update:
-                    self.epochs_trained = epoch + 1
-                    # print(f"Break after {self.epochs}")
-                    break
-
+        Returns:
+            None
+        """
+        if self._beta is None:
+            self._init_params(X_train) 
+        
+        if batch_size is None:
+            self._gd(X_train, y_train, n_epochs)
+        
         else:
-            X_val = self.add_bias(X_val)
-            for epoch in range(n_epochs):
-                self.weights -= eta / m *  X_train.T @ (self.forward(X_train) - y_train)
+            self._sgd(X_train, y_train, n_epochs, batch_size)
 
-                y_out = self.forward(X_train)
-
-                train_loss = self.loss(y_out, y_train)
-                self.train_losses.append(train_loss)
-                train_acc = self.accuracy(y_out, y_train)
-                self.train_accuracies.append(train_acc)
-
-                y_pred = self.forward(X_val)
-                
-                val_loss = self.loss(y_pred, y_val)
-                self.val_losses.append(val_loss)
-
-                val_acc = self.accuracy(y_pred, y_val)
-                self.val_accuracies.append(val_acc)
-
-                loss_update = prev_loss - val_loss
-                if loss_update < tol:
-                    no_update += 1
-                else:
-                    no_update = 0
-                
-                prev_loss = self.train_losses[-1]
-
-                if no_update >= n_epochs_no_update:
-                    self.epochs_trained = epoch + 1
-                    # print(f"Break after {self.epochs}")
-                    break
-
-
-    def forward(self, X):
-        return self.sigmoid(X @ self.weights)
     
     def predict(self, X, threshold=0.5):
-        z = self.add_bias(X)
-        score = self.forward(z)
+        score = self.forward(X)
         return (score>threshold).astype('int')
     
+
     def predict_proba(self, X):
-        z = self.add_bias(X)
-        return self.forward(z)
+        return self.forward(X)
     
 
 class GradientDescent:
