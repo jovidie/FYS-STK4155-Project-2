@@ -1,6 +1,9 @@
 import autograd.numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from ptwo.models import GradientDescent
+from ptwo.gradients import grad_ridge
+from ptwo.costfuns import mse
 
 def calculate_polynomial(x, *args):
     """
