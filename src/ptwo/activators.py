@@ -5,8 +5,9 @@ def ReLU(z):
     return np.where(z > 0, z, 0)
 
 def leaky_ReLU(z):
-    # TODO
-    return 0
+    # week 42 notes
+    delta = 10e-4
+    return np.where(z > np.zeros(z.shape), z, delta * z)
 
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
