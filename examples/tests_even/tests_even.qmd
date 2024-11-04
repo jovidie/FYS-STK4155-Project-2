@@ -269,7 +269,7 @@ z = franke_function(x1, x2) #+ np.random.normal(0,0.1,x1.shape)
 x1x2 = np.column_stack((x1.flatten(), x2.flatten()))
 max_poly = 10
 X_feat = PolynomialFeatures(max_poly).fit_transform(x1x2)
-X = X_feat[:, 1:]
+X = X_feat[:, 1:] # remove intercept
 y = z.flatten()
 
 np.random.seed(42)
@@ -309,7 +309,7 @@ print(gd.theta)
 
 ```{python}
 np.random.seed(3489)
-learning_rates = np.logspace(-8,-3, 12)
+learning_rates = np.logspace(-8,1, 50)
 optimizers = [Momentum, AdaGrad, ADAM, RMSProp]
 n_iter = 1000
 lmb=1e-4
@@ -327,7 +327,7 @@ for j, optimizer in enumerate(optimizers):
 
 ```{python}
 optimizer_names = ["Momentum", "AdaGrad", "ADAM", "RMSProp"]
-for j in range(1,len(optimizers)):
+for j in range(len(optimizers)):
     plt.plot(learning_rates, mses[:,j], label=optimizer_names[j])
 plt.legend()
 plt.xscale("log")
@@ -335,7 +335,7 @@ plt.yscale("log")
 plt.show()
 ```
 
-Seems a bit random how learning rate affects the mse, other than that the optimum seems to be quite low for this data.
+Learning rates above $10^{-1}$ seems to give the best results for AdaGrad and ADAM. Overall, ADAM seems to produce the best results.
 
 ## Learning rate and $\lambda$ grid search
 
@@ -379,27 +379,44 @@ def lambda_lr_heatmap(mses, lmbs, learning_rates, lmb_label_res=3, lr_label_res=
 
 ```{python}
 np.random.seed(8654)
-learning_rates = np.logspace(-8,-5, 8)
-n_iter = 200
+learning_rates = np.logspace(-4, 1, 8)
+n_iter = 1000
 lmbs=np.logspace(-8,1, 8)
 
 mses = eta_lambda_grid(
     X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
-    learning_rates, lmbs, n_iter, optimizer=ADAM(), batch_size = 5
+    learning_rates, lmbs, n_iter, optimizer=ADAM()
 )
-plt.title("ADAM")
+plt.title(fr"ADAM, GD")
 lambda_lr_heatmap(mses, lmbs, learning_rates)
 ```
 
 ```{python}
-np.random.seed(34)
-learning_rates = np.logspace(-8,-5, 8)
+np.random.seed(8654)
+learning_rates = np.logspace(-4, 1, 8)
 n_iter = 200
+lmbs=np.logspace(-8,1, 8)
+batch_size = 32
+
+mses = eta_lambda_grid(
+    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
+    learning_rates, lmbs, n_iter, optimizer=ADAM(), batch_size=batch_size
+)
+plt.title(f"ADAM, SGD, batch size = {batch_size}")
+lambda_lr_heatmap(mses, lmbs, learning_rates)
+```
+
+GD and SGD performs roughly the same, but with different optima (min MSE 0.12 vs. 0.13). UPDATE: increasing number of iterations in GD significantly improved performance, GD now outperforms SGD with almost an order of magnitude!
+
+```{python}
+np.random.seed(34)
+learning_rates = np.logspace(-4,1, 8)
+n_iter = 1000
 lmbs=np.logspace(-8,1, 8)
 
 mses = eta_lambda_grid(
     X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
-    learning_rates, lmbs, n_iter, optimizer=AdaGrad(), batch_size = 5
+    learning_rates, lmbs, n_iter, optimizer=AdaGrad()
 )
 
 plt.title("AdaGrad")
@@ -408,13 +425,31 @@ lambda_lr_heatmap(mses, lmbs, learning_rates)
 
 ```{python}
 np.random.seed(34)
-learning_rates = np.logspace(-8,-5, 8)
+learning_rates = np.logspace(-4,1, 8)
 n_iter = 200
+lmbs=np.logspace(-8,1, 8)
+batch_size = 32
+
+mses = eta_lambda_grid(
+    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
+    learning_rates, lmbs, n_iter, optimizer=AdaGrad(), batch_size=batch_size
+)
+
+plt.title(f"AdaGrad, SGD batch size = {batch_size}")
+lambda_lr_heatmap(mses, lmbs, learning_rates)
+```
+
+For AdaGrad, SGD performs better than GD, bringing it to around the same performance as ADAM with SGD.
+
+```{python}
+np.random.seed(34)
+learning_rates = np.logspace(-4,1, 8)
+n_iter = 1000
 lmbs=np.logspace(-8,1, 8)
 
 mses = eta_lambda_grid(
     X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
-    learning_rates, lmbs, n_iter, optimizer=RMSProp(), batch_size = 5
+    learning_rates, lmbs, n_iter, optimizer=RMSProp()
 )
 
 plt.title("RMSProp")
@@ -423,18 +458,54 @@ lambda_lr_heatmap(mses, lmbs, learning_rates)
 
 ```{python}
 np.random.seed(34)
-learning_rates = np.logspace(-8,-5, 8)
+learning_rates = np.logspace(-4,1, 8)
 n_iter = 200
+lmbs=np.logspace(-8,1, 8)
+batch_size = 32
+
+mses = eta_lambda_grid(
+    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
+    learning_rates, lmbs, n_iter, optimizer=RMSProp(), batch_size=batch_size
+)
+
+plt.title(f"RMSProp, SGD batch size = {batch_size}")
+lambda_lr_heatmap(mses, lmbs, learning_rates)
+```
+
+Same for RMSProp as for AdaGrad, SGD outperforms regular GD, and matches ADAM with SGD
+
+```{python}
+np.random.seed(34)
+learning_rates = np.logspace(-4,-2, 8)
+n_iter = 1000
 lmbs=np.logspace(-8,1, 8)
 
 mses = eta_lambda_grid(
     X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
-    learning_rates, lmbs, n_iter, optimizer=Momentum(), batch_size = 5
+    learning_rates, lmbs, n_iter, optimizer=Momentum(),
 )
 
 plt.title("Momentum")
 lambda_lr_heatmap(mses, lmbs, learning_rates)
 ```
+
+```{python}
+np.random.seed(34)
+learning_rates = np.logspace(-4,-2, 8)
+n_iter = 1000
+lmbs=np.logspace(-8,1, 8)
+batch_size=32
+
+mses = eta_lambda_grid(
+    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
+    learning_rates, lmbs, n_iter, optimizer=Momentum(), batch_size=batch_size
+)
+
+plt.title(f"Momentum, batch size = {batch_size}")
+lambda_lr_heatmap(mses, lmbs, learning_rates)
+```
+
+Momentum fails above learning rate 
 
 # Terrain data
 
