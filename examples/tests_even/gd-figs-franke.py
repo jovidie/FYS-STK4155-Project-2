@@ -79,6 +79,17 @@ mses = eta_lambda_grid(
     X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
     learning_rates, lmbs, n_iter, optimizer=ADAM()
 )
-plt.title(fr"ADAM, GD")
-plt.savefig("examples/tests_even/figs/Franke-grid-search-gd-adam.pdf")
-lambda_lr_heatmap(mses, lmbs, learning_rates)
+lambda_lr_heatmap(mses, lmbs, learning_rates, filename="examples/tests_even/figs/Franke-grid-search-gd-adam.pdf")
+
+np.random.seed(865489724)
+learning_rates = np.logspace(-3, 1, 8)
+n_iter = 200
+lmbs=np.logspace(-8,1, 8)
+batch_size=32
+
+
+mses = eta_lambda_grid(
+    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
+    learning_rates, lmbs, n_iter, optimizer=ADAM(), batch_size=batch_size
+)
+lambda_lr_heatmap(mses, lmbs, learning_rates, filename="examples/tests_even/figs/Franke-grid-search-sgd-adam.pdf")

@@ -56,7 +56,7 @@ def eta_lambda_grid(
         mses[:,i] = mse_eta
     return mses
 
-def lambda_lr_heatmap(mses, lmbs, learning_rates, lmb_label_res=3, lr_label_res=3):
+def lambda_lr_heatmap(mses, lmbs, learning_rates, lmb_label_res=3, lr_label_res=3, filename=None):
     lmb_lab = ["{0:.2e}".format(x) for x in lmbs]
     lr_lab = ["{0:.2e}".format(x) for x in learning_rates]
 
@@ -65,4 +65,6 @@ def lambda_lr_heatmap(mses, lmbs, learning_rates, lmb_label_res=3, lr_label_res=
     plt.yticks(np.arange(len(lmbs))[1::lr_label_res] + 0.5, lmb_lab[1::lr_label_res])
     plt.xlabel(r"Learning rate $\eta$")
     plt.ylabel(r"$\lambda$")
+    if filename is not None:
+        plt.savefig(filename)
     plt.show()
