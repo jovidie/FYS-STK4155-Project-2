@@ -113,6 +113,33 @@ The technique used to initialize the weights and biases in the FFNN can be vital
 
 %------------ Data --------------------------------------------
 \subsection{Data}\label{ssec:data}
+%
+\paragraph{Topographical data}
+We obtained geographical data of the Stavanger area, Norway, from EarthExplorer (\footnote{\url{https://earthexplorer.usgs.gov/}}, 
+via \footnote{\url{https://github.com/CompPhysics/MachineLearning/tree/master/doc/Projects/2023/Project1/DataFiles}}). 
+The data contained a 200x200 grid of altitudes (m) of the area, with arbitrary x- and y-coordinates that we used as our features. 
+We constructed a design matrix with polynomial features in the same manner as with synthetic data, and split the data in 80:20 training 
+and data set using \texttt{train\_test\_split}. We scaled the data by standard normalization. We chose to scale since some linear regression 
+models such as Lasso and Ridge perform better when all features are on a similar scale \supercite{raschka2019}. 
+
+%
+\paragraph{Wisconsin breast cancer data}
+The Wisconsin data set \cite{bc_wisconsin} is considered to be a benchmark data set for testing novel or existing machine learning methods on, and there is 
+extensive documentation on previously explored machine learning methods on the data that can be found here: 
+\cite{wisconsin_example1}, \cite{wisconsin_example2} and \cite{wisconsin_example3}.
+
+As described in the original article which produced the data \cite{first_wisconsin}, it consists of a 30 features describing biopsied cell nuclei from 
+a total of 569 samples. To produce the data, non-invasive fine needle aspirations of tumors were put on glass and stained, 
+then pictures were taken of each sample. The features were then derived from each image with a "computer diagnostic system" that 
+analyzed the images and computed an extensive set of nuclei features such as radius, perimeter, area, smoothness, concavity, symmetry and texture. 
+
+The authors Nick Street and William H. Wolberg from the original paper performed a classification using a variant on the Multisurface 
+Method, where they reached an accuracy of 97$\%$ after a ten-fold cross validation process with a sensitivity of 0.9 and a specificity of 0.86. 
+These terms are important to include in any analysis on medicinal data as the implementation of computer aided diagnosis in clinical practice 
+needs to be thoughourly documented and understood by physicians beforehand. Sensitivity is described as $\frac{correct positive}{total positive}$, 
+while the specificity is $\frac{correct negativ}{total negative}$
+
+
 
 
 %------------ Tools -------------------------------------------
