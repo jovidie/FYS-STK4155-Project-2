@@ -1,6 +1,11 @@
 import autograd.numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from ptwo.models import GradientDescent
+from ptwo.gradients import grad_ridge
+from ptwo.costfuns import mse
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def set_plt_params():
@@ -47,3 +52,39 @@ def franke_function(x,y):
     term3 = 0.5*np.exp(-(9*x-7)**2/4.0 - 0.25*((9*y-3)**2))
     term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
     return term1 + term2 + term3 + term4
+
+# utilities for doing and plotting grid search with gradient descent
+
+def GD_lambda_mse(
+    X_train, X_test, y_train, y_test, learning_rate, lmbs, n_iter, batch_size=None, optimizer=None, gradient_fun=grad_ridge):
+    mses=np.zeros(len(lmbs))
+    for i in range(len(lmbs)):
+        gd = GradientDescent(learning_rate, gradient_fun(lmbs[i]), optimizer=optimizer)
+        gd.descend(X_train, y_train, n_iter, batch_size)
+        y_pred = X_test @ gd.theta
+        mses[i] = mse(y_test, y_pred)
+    return mses
+
+def eta_lambda_grid(
+    X_train, X_test, y_train, y_test, learning_rates, lmbs, n_iter, batch_size=None, optimizer=None, gradient_fun=grad_ridge
+    ):
+    mses = np.zeros( (len(lmbs), len(learning_rates)) )
+    for i in range(len(learning_rates)):
+        mse_eta = GD_lambda_mse(
+            X_train, X_test, y_train, y_test, learning_rate=learning_rates[i], lmbs=lmbs, n_iter=n_iter, batch_size=batch_size, optimizer=optimizer, gradient_fun=gradient_fun
+            )
+        mses[:,i] = mse_eta
+    return mses
+
+def lambda_lr_heatmap(mses, lmbs, learning_rates, lmb_label_res=3, lr_label_res=3, filename=None):
+    lmb_lab = ["{0:.2e}".format(x) for x in lmbs]
+    lr_lab = ["{0:.2e}".format(x) for x in learning_rates]
+
+    sns.heatmap(mses, annot=True)
+    plt.xticks(np.arange(len(learning_rates))[1::lmb_label_res] + 0.5, lr_lab[1::lmb_label_res])
+    plt.yticks(np.arange(len(lmbs))[1::lr_label_res] + 0.5, lmb_lab[1::lr_label_res])
+    plt.xlabel(r"Learning rate $\eta$")
+    plt.ylabel(r"$\lambda$")
+    if filename is not None:
+        plt.savefig(filename)
+    plt.show()

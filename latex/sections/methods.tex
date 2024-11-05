@@ -34,10 +34,11 @@ For both regression and classification, we want to optimize a set of parameters 
 \begin{algorithmic}[1]
     \STATE Initialize parameters $\theta = \theta_0$
     \STATE Choose a learning rate $\eta > 0$
-    \REPEAT
+    \STATE Set number of iterations K
+    \FOR{iteration $=1$ to K}
         \STATE Compute the gradient $\nabla C(\theta)$
         \STATE Update the parameters: $\theta \leftarrow \theta - \eta \nabla C(\theta)$
-    \UNTIL{convergence}
+    \ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
@@ -53,7 +54,7 @@ While gradient descent effectively minimizes the cost function given the startin
     \FOR{epoch $= 1$ to $K$}
         \STATE Shuffle the training data
         \FOR{each mini-batch \( \mathcal{B}_i \) of size $m$}
-            \STATE Compute the gradient: $\nabla_{\mathcal{B}_i} C(\theta)$
+            \STATE Compute the gradient: $\frac{1}{m}\nabla_{\mathcal{B}_i} C(\theta)$
             \STATE Update the parameters: $\theta \leftarrow \theta - \eta \nabla_{\mathcal{B}_i} C(\theta)$
         \ENDFOR
     \ENDFOR
@@ -63,11 +64,14 @@ While gradient descent effectively minimizes the cost function given the startin
 Rather than simply using the current gradient and a fixed learning rate $\eta$, it is common to also use information from the previous step when determining the size and direction of the current step. One way to do this is by adding the previous step along the gradient multiplied with a constant $\gamma$ to the current gradient step, as
 \begin{equation}
     \mathbf{v}_{t} = \eta \nabla C(\boldsymbol{\theta}) + \gamma \mathbf{v}_{t-1}
+\end{equation}
+\begin{equation}
     \boldsymbol{\theta}_{t+1}= \boldsymbol{\theta}_t -\mathbf{v}_{t},
 \end{equation}
+    
 where $\theta$ is the parameters, and $\mathbf{v}_t$ and $\mathbf{v}_{t-1}$ is the current and previous change in the gradient, respectively. This method is known as gradient descent with momentum, and can be used with both GD and SGD. Adding momentum changes both the direction and magnitude of the steps based on the previous gradients, and often improves convergence times \cite{Goodfellow:2016:deep_learning}.
 
-As the optimal learning rate for reaching a minimum often changes as you iterate, several algorithms exist to adaptively change the learning rate during gradient descent. 
+As the optimal learning rate for reaching a minimum often changes as you iterate, several algorithms (optimizers) exist to adaptively change the learning rate during gradient descent. Three common optimizers are AdaGrad \cite{duchi2011:adagrad}, RMSProp \cite{hinton2012:rmsprop}, and ADAM \cite{kingma2017:adam}. These methods all scale the learning rate using the accumulated square gradients during the course of training. While AdaGrad simply divides the learning rate by the square root of the summed square gradients, RMSProp implements a decay rate so the more recent gradients have a larger contribution than earier ones. ADAM can be seen as an implementation of RMSProp with momentum, but that also rescales the gradients and applies bias-correction before scaling the learning rate \cite{Goodfellow:2016:deep_learning}. RMSProp and ADAM tends to outperform AdaGrad, and is frequently used in machine learning \cite{Goodfellow:2016:deep_learning}.
 
 
 
@@ -113,4 +117,4 @@ The technique used to initialize the weights and biases in the FFNN can be vital
 
 %------------ Tools -------------------------------------------
 \subsection{Tools}\label{ssec:tools}
-The models were implemented in \verb|Python|, and the figures produced using the \verb|matplotlib| library, and stylized using \verb|seaborn|.
+The models were implemented in \verb|Python| version 3.12, and the figures produced using the \verb|matplotlib| library, and stylized using \verb|seaborn|. The FFNN was implemented from scratch, using the \verb|autograd| library \cite{maclaurin2015:autograd} for computing the gradients.

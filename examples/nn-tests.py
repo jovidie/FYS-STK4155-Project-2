@@ -110,7 +110,7 @@ print("No optimizer")
 nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse)
 
 print("MSE before training", mse(X_train, y_train))
-nn.train_network(X_train, y_train, learning_rate=0.001, epochs=1000, batch_size=5)
+nn.train_network(X_train, y_train, learning_rate=0.001, epochs=100, batch_size=5)
 print(nn.optimizer)
 print("Train MSE after training", nn.get_cost(X_train, y_train))
 print("Test MSE after training", nn.get_cost(X_test, y_test))
@@ -122,7 +122,7 @@ nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse, optimiz
 
 print("MSE before training", mse(X_train, y_train))
 
-nn.train_network(X_train, y_train, learning_rate=0.001, epochs=1000, batch_size=5)
+nn.train_network(X_train, y_train, learning_rate=0.001, epochs=100, batch_size=5)
 print("Train MSE after training", nn.get_cost(X_train, y_train))
 print("Test MSE after training", nn.get_cost(X_test, y_test))
 
@@ -133,7 +133,7 @@ nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse, optimiz
 
 print("MSE before training", mse(X_train, y_train))
 
-nn.train_network(X_train, y_train, learning_rate=0.01, epochs=1000, batch_size=5)
+nn.train_network(X_train, y_train, learning_rate=0.01, epochs=100, batch_size=5)
 print("Train MSE after training", nn.get_cost(X_train, y_train))
 print("Test MSE after training", nn.get_cost(X_test, y_test))
 
@@ -146,7 +146,7 @@ nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse, optimiz
 
 print("MSE before training", mse(X_train, y_train))
 
-nn.train_network(X_train, y_train, learning_rate=0.01, epochs=1000, batch_size=5)
+nn.train_network(X_train, y_train, learning_rate=0.01, epochs=100, batch_size=5)
 print("Train MSE after training", nn.get_cost(X_train, y_train))
 print("Test MSE after training", nn.get_cost(X_test, y_test))
 
@@ -191,7 +191,7 @@ nn = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, cro
 print("Accuracy before training")
 print(nn.accuracy(input_train, target_train))
 
-nn.train_network(input_train, target_train, learning_rate=0.01, epochs=1000, batch_size=5)
+nn.train_network(input_train, target_train, learning_rate=0.01, epochs=300, batch_size=5)
 
 print("Accuracy after training")
 print(nn.accuracy(input_train, target_train))
@@ -217,7 +217,8 @@ nn = NeuralNetwork(network_input_size, layer_output_sizes, activation_funcs, cro
 print("Accuracy before training")
 print(nn.accuracy(input_train, target_train))
 
-nn.train_network(input_train, target_train, learning_rate=0.01, epochs=1000)
+nn.train_network(input_train, target_train, learning_rate=0.01, epochs=300)
+
 
 print("Accuracy after training")
 print(nn.accuracy(input_train, target_train))

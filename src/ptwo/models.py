@@ -181,7 +181,7 @@ class NeuralNetwork:
         n_batches = int(input_rows / batch_size)
         gradient_func = grad(self._cost, 2)
         inds = np.arange(input_rows)
-        rng = np.random.default_rng(12345)
+        rng = np.random.default_rng()
         # epochs 
         i = 0 
         convergence_not_reached = True
@@ -210,8 +210,8 @@ class NeuralNetwork:
                 layers_grad = gradient_func(x_batch, y_batch, self.layers)
                 j = 0
                 for (W, b), (W_g, b_g) in zip(self.layers, layers_grad):
-                    W -= self._train(W_g + self.lmb, learning_rate, i + 1, current_layer = j, current_var = 0)
-                    b -= self._train(b_g, learning_rate, i + 1, current_layer = j, current_var = 1)
+                    W -= self._train((1/batch_size)*(W_g + self.lmb), learning_rate, i + 1, current_layer = j, current_var = 0)
+                    b -= self._train((1/batch_size)*b_g, learning_rate, i + 1, current_layer = j, current_var = 1)
                     j += 1
                     
                 #if cost < 10**-5:
