@@ -306,11 +306,10 @@ class LogisticRegression:
         y_cat = (y_pred > threshold).astype('int')
         return np.mean(y_cat == y_true)
     
-    def loss(self, y_pred, y_true):
+    def cost(self, y_pred, y_true):
         with np.errstate(divide='ignore', invalid='ignore'):
-            loss_result = -np.max(y_true*np.log(y_pred) + (1 - y_true)*np.log(1 - y_pred))
-            return loss_result
-        # return - np.mean(y_true*np.log(y_pred) - (1 - y_true)*(1 - y_pred))
+            result = - np.mean(y_true*np.log(y_pred) + (1 - y_true)*np.log(1 - y_pred))
+            return result
     
     def fit(self, X_train, y_train, batch_size=None, optimizer=None, eta=0.01, n_epochs=1000):
         """Train the model using either the gradient descent or stochastic 
@@ -341,7 +340,8 @@ class LogisticRegression:
     
     def predict(self, X, threshold=0.5):
         score = self.forward(X)
-        return (score>threshold).astype('int')
+        self._y_pred = (score>threshold).astype('int')
+        return self._y_pred
     
 
     def predict_proba(self, X):
