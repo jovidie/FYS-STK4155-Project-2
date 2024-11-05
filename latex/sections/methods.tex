@@ -120,18 +120,11 @@ however it's now more common as the final activation layer in binary classificat
 
 2. \textbf{Softmax (for matrix input):}
 The softmax activation functions has the same use-case as the sigmoidal, but for non-binary classification cases. 
-For an input \( z \), which can be either a vector or a matrix, the softmax function is defined as:
-\[
-\text{softmax}(z_i) = \frac{e^{z_i - \max(z)}}{\sum_{j} e^{z_j - \max(z)}}
-\]
-where \(\max(z)\) is applied across the elements in \( z \) to improve numerical stability.
 
-For a matrix \( z \) with rows representing sets of scores, the softmax function can be applied to each row \( z_{i,:} \) as:
+For a matrix \( z \) with rows representing sets of scores, the softmax function is computed as:
 \[
-\text{softmax}(z_{i,j}) = \frac{e^{z_{i,j} - \max(z_{i,:})}}{\sum_{k} e^{z_{i,k} - \max(z_{i,:})}}
+\text{softmax}(z_{i,j}) = \frac{e^{z_{i,j} - \max(z_{:,j})}}{\sum_{k} e^{z_{k,j} - \max(z_{:,j})}}
 \]
-where \( \max(z_{i,:}) \) denotes the maximum value within the \( i \)-th row.
-
 
 3. \textbf{ReLU (Rectified Linear Unit):}
 The ReLU activation function is a simple non-saturating activation function that is useful to prevent gradients from vanishing during backpropagation, 
