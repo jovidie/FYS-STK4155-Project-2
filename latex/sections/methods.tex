@@ -101,6 +101,51 @@ The technique used to initialize the weights and biases in the FFNN can be vital
 
 \subsubsection{Activation functions}\label{sssec:activation_functions}
 
+Activation functions in neural networks are meant to represent neuronal firing, a process which in simplified terms is either on or off. Thus, the output 
+of an activation function is going to be between 0 and 1, depending on the input. If 0, the neuron can be considered "dead" and will not contribute 
+to the final prediction. If 1, the neuron is completely "on" and will pass on the information to the next node as described in Eq. (\cite{ffnn}). 
+
+Here we separate between sigmoidal nonlinearities and rectified linear hidden units (ReLU). The latter is shown to give better results in many cases 
+\cite{relu_best_ever}, but is not suitable as the final layer activation function. Sigmoidal nonlinear activation functions have been shown to 
+cause vanishing gradients, as discussed in \ref{subsec:backpropagation}, but they are the golden standard as the final activation function. 
+
+In our network, we choose between four different activation functions as presented below: 
+
+1. \textbf{Sigmoid:}
+The sigmoidal or logistic activation function is a saturating function that was previously used for all layers in early neural networks, 
+however it's now more common as the final activation layer in binary classification networks.
+\[
+\sigma(z) = \frac{1}{1 + e^{-z}}
+\]
+
+2. \textbf{Softmax (for matrix input):}
+The softmax activation functions has the same use-case as the sigmoidal, but for non-binary classification cases. 
+\[
+\text{softmax}(z_{i,j}) = \frac{e^{z_{i,j} - \max(z_{i,:})}}{\sum_{k} e^{z_{i,k} - \max(z_{i,:})}}
+\]
+
+3. \textbf{ReLU (Rectified Linear Unit):}
+The ReLU activation function is a simple non-saturating activation function that is useful to prevent gradients from vanishing during backpropagation, 
+but it can also suffer from dead neurons when the output is 0, which makes it hard to update the weights during backpropagation.  
+\[
+\text{ReLU}(z) = 
+\begin{cases} 
+   z & \text{if } z > 0 \\
+   0 & \text{otherwise}
+\end{cases}
+\]
+
+4. \textbf{Leaky ReLU:}
+The leaky ReLU is a version of the ReLU above which was developed by A.L.Maas, A.Y.Hannum and A.Y.Ng \cite{relu_best_ever}. The $\delta$ coefficient avoids
+setting each neuron to an absolute 0, which avoids the issue of dead neurons during backpropagation.
+\[
+\text{Leaky\_ReLU}(z) = 
+\begin{cases} 
+   z & \text{if } z > 0 \\
+   \delta \cdot z & \text{otherwise}
+\end{cases}
+\]
+
 
 \subsubsection{Cost functions}\label{sssec:cost_functions}
 
@@ -109,6 +154,8 @@ The technique used to initialize the weights and biases in the FFNN can be vital
 
 
 \subsubsection{Back-propagation}\label{sssec:backpropagation}
+
+Something about vanishing gradients...
 
 
 %------------ Data --------------------------------------------
@@ -122,10 +169,9 @@ We constructed a design matrix with polynomial features in the same manner as wi
 and data set using \texttt{train\_test\_split}. We scaled the data by standard normalization. We chose to scale since some linear regression 
 models such as Lasso and Ridge perform better when all features are on a similar scale \supercite{raschka2019}. 
 
-%
 \paragraph{Wisconsin breast cancer data}
-The Wisconsin data set \cite{bc_wisconsin} is considered to be a benchmark data set for testing novel or existing machine learning methods on, and there is 
-extensive documentation on previously explored machine learning methods on the data that can be found here: 
+The Wisconsin data set \cite{bc_wisconsin} is considered to be a benchmark data set for testing novel or existing machine learning methods on, and 
+there is extensive documentation on previously explored machine learning methods on the data that can be found here: 
 \cite{wisconsin_example1}, \cite{wisconsin_example2} and \cite{wisconsin_example3}.
 
 As described in the original article which produced the data \cite{first_wisconsin}, it consists of a 30 features describing biopsied cell nuclei from 
@@ -138,10 +184,7 @@ Method, where they reached an accuracy of 97$\%$ after a ten-fold cross validati
 These terms are important to include in any analysis on medicinal data as the implementation of computer aided diagnosis in clinical practice 
 needs to be thoughourly documented and understood by physicians beforehand. Sensitivity is described as $\frac{correct positive}{total positive}$, 
 while the specificity is $\frac{correct negativ}{total negative}$
-
-
-
-
+%
 %------------ Tools -------------------------------------------
 \subsection{Tools}\label{ssec:tools}
 The models were implemented in \verb|Python| version 3.12, and the figures produced using the \verb|matplotlib| library, and stylized using \verb|seaborn|. The FFNN was implemented from scratch, using the \verb|autograd| library \cite{maclaurin2015:autograd} for computing the gradients.
