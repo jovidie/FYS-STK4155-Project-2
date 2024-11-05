@@ -1,4 +1,6 @@
+import git
 import autograd.numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from ptwo.models import GradientDescent
@@ -71,3 +73,18 @@ def lambda_lr_heatmap(mses, lmbs, learning_rates, lmb_label_res=3, lr_label_res=
     if filename is not None:
         plt.savefig(filename)
     plt.show()
+
+
+def preprocess_cancer_data():
+    ROOT = git.Repo(".", search_parent_directories=True).working_dir
+    filename = "wisconsin_breast_cancer_data.csv"
+    df = pd.read_csv(f'{ROOT}/data/{filename}')
+
+    # Clean up
+    not_include = ["id", "diagnosis", "Unnamed: 32"]
+    input_features = np.array(df[df.columns.difference(not_include)])
+    target_feature = df.diagnosis
+    # Transform to binary
+    target_feature.replace({"M":1, "B":0}, inplace=True)
+
+    return df, input_features, target_feature
