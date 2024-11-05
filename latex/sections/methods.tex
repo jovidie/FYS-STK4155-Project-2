@@ -120,11 +120,18 @@ however it's now more common as the final activation layer in binary classificat
 
 2. \textbf{Softmax (for matrix input):}
 The softmax activation functions has the same use-case as the sigmoidal, but for non-binary classification cases. 
-
-For a matrix \( z \) with rows representing sets of scores, the softmax function is computed as:
+The softmax activation functions has the same use-case as the sigmoidal, but for non-binary classification cases. 
+For an input \( z \), which can be either a vector or a matrix, the softmax function is defined as:
 \[
-\text{softmax}(z_{i,j}) = \frac{e^{z_{i,j} - \max(z_{:,j})}}{\sum_{k} e^{z_{k,j} - \max(z_{:,j})}}
+\text{softmax}(z_i) = \frac{e^{z_i - \max(z)}}{\sum_{j} e^{z_j - \max(z)}}
 \]
+where \(\max(z)\) is applied across the elements in \( z \) to improve numerical stability.
+
+For a matrix \( z \) with rows representing sets of scores, the softmax function is computedcan be applied to each row \( z_{i,:} \) as:
+\[
+\text{softmax}(z_{i,j}) = \frac{e^{z_{i,j} - \max(z_{:,ji,:})}}{\sum_{k} e^{z_{k,ji,k} - \max(z_{:,ji,:})}}
+\]
+where \( \max(z_{i,:}) \) denotes the maximum value within the \( i \)-th row.
 
 3. \textbf{ReLU (Rectified Linear Unit):}
 The ReLU activation function is a simple non-saturating activation function that is useful to prevent gradients from vanishing during backpropagation, 
@@ -169,7 +176,7 @@ via \footnote{\url{https://github.com/CompPhysics/MachineLearning/tree/master/do
 The data contained a 200x200 grid of altitudes (m) of the area, with arbitrary x- and y-coordinates that we used as our features. 
 We constructed a design matrix with polynomial features in the same manner as with synthetic data, and split the data in 80:20 training 
 and data set using \texttt{train\_test\_split}. We scaled the data by standard normalization. We chose to scale since some linear regression 
-models such as Lasso and Ridge perform better when all features are on a similar scale \supercite{raschka2019}. 
+models such as Lasso and Ridge perform better when all features are on a similar scale \superscite{raschka2019}. 
 
 \paragraph{Wisconsin breast cancer data}
 The Wisconsin data set \cite{bc_wisconsin} is considered to be a benchmark data set for testing novel or existing machine learning methods on, and 
