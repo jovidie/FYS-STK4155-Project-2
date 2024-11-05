@@ -279,8 +279,10 @@ class LogisticRegression:
                 yi = y[idx:idx+batch_size]
                 y_pred = self.forward(xi)
                 grad = self.gradient(xi, yi, y_pred)
-                self._eta = self._scheduler(epoch*n_batches+i)
+                self._eta = self._optimizer(grad)
+                # self._eta = self._scheduler(epoch*n_batches+i)
                 self._beta -= self._eta*grad
+                self._optimizer.reset()
 
 
     def sigmoid(self, X):
@@ -310,7 +312,7 @@ class LogisticRegression:
             return loss_result
         # return - np.mean(y_true*np.log(y_pred) - (1 - y_true)*(1 - y_pred))
     
-    def fit(self, X_train, y_train, batch_size=None, eta=0.01, n_epochs=1000):
+    def fit(self, X_train, y_train, batch_size=None, optimizer=None, eta=0.01, n_epochs=1000):
         """Train the model using either the gradient descent or stochastic 
         gradient descent method.
         
@@ -324,6 +326,9 @@ class LogisticRegression:
         Returns:
             None
         """
+        if optimizer is None:
+            self._optimizer = self._scheduler
+
         if self._beta is None:
             self._init_params(X_train) 
         
