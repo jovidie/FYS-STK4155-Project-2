@@ -11,7 +11,7 @@ from .gradients import grad_OLS, grad_ridge
 from .activators import ReLU, leaky_ReLU, softmax, softmax_vec, sigmoid
 from .costfuns import mse, cross_entropy, binary_cross_entropy
 from .utils import set_plt_params, calculate_polynomial, franke_function, GD_lambda_mse, eta_lambda_grid, lambda_lr_heatmap
-from .plot import plot_heatmap, plot_mse, plot_mse_r2
+from .plot import set_plt_params, plot_heatmap, plot_mse, plot_mse_r2
 
 __version__ = importlib.metadata.version(__package__)
 
@@ -39,6 +39,7 @@ __all__ = [
     "GD_lambda_mse",
     "eta_lambda_grid",
     "lambda_lr_heatmap", 
+    "set_plt_params",
     "plot_heatmap",
     "plot_mse",
     "plot_mse_r2"
