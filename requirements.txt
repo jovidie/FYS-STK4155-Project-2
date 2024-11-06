@@ -13,3 +13,4 @@ notebook
 numpy
 pandas
 tqdm
+GitPython
