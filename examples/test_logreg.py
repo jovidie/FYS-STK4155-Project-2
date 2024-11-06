@@ -36,7 +36,7 @@ def test_optimal_params_logreg():
 
             # print(y_hat.shape, y_pred.shape, y_test.shape)
 
-    plot_heatmap(etas, lmbdas, acc_test, figname="test_logreg.pdf")
+    plot_heatmap(etas, lmbdas, acc_test, figname="test_logreg")
 
 
 if __name__ == '__main__':
