@@ -1,4 +1,4 @@
-import git
+#import git
 import autograd.numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,6 +8,8 @@ from ptwo.gradients import grad_ridge
 from ptwo.costfuns import mse
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+pd.set_option('future.no_silent_downcasting', True)
 
 
 def calculate_polynomial(x, *args):

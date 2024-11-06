@@ -97,7 +97,23 @@ The output of a hidden layer can be written as
 where $a$ is a non-linear activation function, $\mathbf{W}$ is the weight matrix, $\mathbf{x}$ is input, and $\mathbf{b}$ is the bias. 
 
 \subsubsection{Weights and biases}\label{sssec:weights_biases}
-The technique used to initialize the weights and biases in the FFNN can be vital for how fast the network learns. For a less ideal method, the network may need more iterations to find an optimal solution. Whereas a clever initialization may reduce the number of iteration needed, as the weight are some of the hyper-parameters that needs tuning. 
+The technique used to initialize the weights and biases in the FFNN can be vital for how fast the network learns. 
+For a less ideal method, the network may need more iterations to find an optimal solution. 
+Whereas a clever initialization may reduce the number of iteration needed, as the weight are some of the 
+hyper-parameters that needs tuning. 
+
+For this project, we have chosen to initialize most of our biases as 0 across all layers, as this is common 
+practice in the field. Our model does however have the option to initialize the final bias vector as the mean 
+of the target's when doing regression modelling, as this is meant to give the backpropagation optimalization 
+process a head start when finding the optimal weights and biases during training, as described here: \cite{best_bias}
+
+Initialization of the weights depend on the activation layer present in the layer. When the activation 
+function was non-linear and sigmoidal (such as softmax and sigmoidal), weights were initialized after
+the Xavier/Gloriot Normal Initialization method \cite{xaviergloriot}. 
+
+After implementation of different linear activation functions (ReLU) however, we added the option to initialze
+weights following the He normal initialization concept described here: \cite{heman}, as this is supposed to 
+lead to faster convergence of the neural network. 
 
 \subsubsection{Activation functions}\label{sssec:activation_functions}
 

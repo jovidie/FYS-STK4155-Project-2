@@ -4,6 +4,11 @@ import autograd.numpy as np
 def ReLU(z):
     return np.where(z > 0, z, 0)
 
+def relu(x):
+	return np.maximum(10e-4*x, x)
+
+print(relu.__name__)
+
 def leaky_ReLU(z):
     # week 42 notes
     delta = 10e-4

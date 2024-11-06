@@ -47,9 +47,17 @@ class NeuralNetwork:
         numb_layers = len(self.layer_output_sizes)
         i_size = self.network_input_size
         lay = 0
-        for layer_output_size in self.layer_output_sizes:
-            W = np.random.randn(i_size, layer_output_size)
-            b = np.random.randn(layer_output_size)
+        func_names = [func.__name__.lower() for func in self.activation_funcs]
+        for ind, layer_output_size in enumerate(self.layer_output_sizes):
+            if "leaky_relu" == func_names[ind].lower() or "relu" == func_names[ind].lower() : 
+                # He-normal initalization for rectified linear units
+                W = np.random.randn(i_size, layer_output_size) * np.sqrt(2/i_size)
+            else:
+                # Xavier/Glorot initialization for sigmoidal non-linear activation functions
+                W = np.random.randn(i_size, layer_output_size) * np.sqrt(1/i_size)
+            #b = np.random.randn(layer_output_size)
+            # bias initialized as 0
+            b = np.zeros(layer_output_size)
             # https://stackoverflow.com/questions/44883861/initial-bias-values-for-a-neural-network
             if self.target_means != None and lay == numb_layers-1: 
                 b = self.target_means
