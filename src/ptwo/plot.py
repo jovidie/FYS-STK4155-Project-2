@@ -20,7 +20,7 @@ def set_plt_params():
     plt.rcParams.update(params)
 
 
-def plot_heatmap(etas, lmbdas, mse, figname=None):
+def plot_heatmap(etas, lmbdas, acc, figname=None):
     """Plot MSE in a heatmap as a function of lambda and learning rate.
     
     Args:
@@ -35,17 +35,17 @@ def plot_heatmap(etas, lmbdas, mse, figname=None):
     lmbdas = np.log10(lmbdas)
     lmbdas_, etas_ = np.meshgrid(lmbdas, etas)
 
-    idx = np.where(mse == mse.min())
+    idx = np.where(acc == acc.max())
 
     fig, ax = plt.subplots()
     c = sns.color_palette("mako", as_cmap=True)
-    cs = ax.contourf(lmbdas_, etas_, mse, levels=len(lmbdas), cmap=c)
+    cs = ax.contourf(lmbdas_, etas_, acc, levels=len(lmbdas), cmap=c)
 
     # Include point where optimal parameters are
     lmbda_opt = lmbdas[idx[1]]
     eta_opt = etas[idx[0]]
-    ax.plot(lmbda_opt, eta_opt, "X", label=rf"$\lambda = {lmbda_opt}$ \n$\eta = {eta_opt}$")
-    ax.legend(title=f"MSE = {mse.min():.4f}")
+    ax.plot(lmbda_opt, eta_opt, "X", label="Optimal") # $\lambda = {lmbda_opt}$ $\eta = {eta_opt}$
+    ax.legend(title=f"Accuracy = {acc.max():.4f}")
 
     fig.colorbar(cs, label="MSE")
 
