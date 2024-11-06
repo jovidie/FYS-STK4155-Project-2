@@ -25,7 +25,7 @@ We applied the gradient descent algorithm to data simulated from a third-degree 
     \label{fig:poly-converge-momentum}
 \end{figure}
 
-The choice of learning rate affected the performance of the model regardless of optimizer. For data generated from the Franke function \cite{franke1979} with added noise, the different optimizers had different optimal learning rates, but in general a learning rate between $10^{-3}$ and $1$ gave the best results (figure \ref{fig:franke-learningrate}). For this particular data GD outperformed SGD (APPENDIX). Overall, ADAM consistently gave the lowest mean squared error on the test data over the largest range of learning rates. Because of this, we chose to emphasize ADAM over the other optimizers when analyzing the terrain data.   
+The choice of learning rate affected the performance of the model regardless of optimizer. For data generated from the Franke function \cite{franke1979} with added noise, the different optimizers had different optimal learning rates, but in general a learning rate between $10^{-3}$ and $1$ gave the best results (figure \ref{fig:franke-learningrate}). For this particular data GD outperformed SGD (APPENDIX). Overall, ADAM consistently gave the lowest mean squared error on the test data over the largest range of learning rates. Because of this, we chose to emphasize ADAM over the other optimizers when analyzing the terrain data.
 
 \begin{figure}
     \centering
@@ -33,6 +33,17 @@ The choice of learning rate affected the performance of the model regardless of 
     \caption{How learning rates affect the mean squared error in gradient descent with momentum or different optimizers. The data was generated from the Franke function, with added noise. For the momentum algorithm the gradient descent was not completed for learning rates above $10^{-2}$ due to exploding gradients.}
     \label{fig:franke-learningrate}
 \end{figure}
+
+For gradient descent on the terrain data ...
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.99\linewidth]{examples/tests_even/figs/gradient-descent-terrain-map.pdf}
+    \caption{Prediction of the terrain data from project 1 using gradient descent with a ridge gradient.}
+    \label{fig:enter-label}
+\end{figure}
+
+
 
 - describe implementation\\
 - Show all the different optimizers etc\\

@@ -11,12 +11,16 @@ density in each country, with ranges from $52$ per $10 0000$ in Norway to $1.7$ 
 the access to expert physicians in any field is even lower and countries with low densities of physicians or expert physicians need better
 solutions. 
 
-One example of specialist shortage is the global issue with shortage on hisptopathologist. They are experts in diagnosing 
-diseases based on tissue sample slides. Computational scientists combined forces with histopathologist to create computer-aided 
+One example with a lack of specialist the global issue with shortage on hisptopathologist. They are experts in diagnosing 
+diseases based on tissue sample slides. In recent years, computational scientists have combined forces with histopathologist to create computer-aided 
 diagnosis (CAD) systems where they use deep learning such as convultional neural networks (CNN) or vision transformers (ViT)
 to train models that can pre-label massive amounts of data, in order to help with faster diagnosis \cite{histopath_AI}.
 
-Artificial neural networks are 
+Artificial neural networks are also commonly used to make predictions on datasets that are not images, but rather a design matrix with a set of features.
+The now famous ANN's consists of a set of nodes, or neurons. These neurons have their name from the very process they wish to simulate, which is the
+human intelligence or brain. In 1939, Alan Turing was the first person to present the idea of an intelligent machine \cite{turing_36}, and the first mention of a 
+neural network is found in McCulling and Pitt's article from 1943 in "A Logical Calculus of Ideas Immanent in Nervous Activity" \cite{mccu_pitt}. 
+Allthough developement and use of AI is considered to come in waves, we're currently in the very middle of the third and largest AI "boom". 
 
 In this project, we create an artificial neural network (ANN) with five different optimizers, and we explore how the ANN performs on the 
 Whisconsin Breast Cancer data set. The dataset is a benchmark for classification of breast cancer, and is commonly used to test machine learning 
@@ -26,6 +30,14 @@ In this project, we create an artificial neural network from scratch, as well as
 in order to explore how our ANN compares to simpler or similar logistic regression models. We also explore how our ANN compares to previously 
 explored linear regression methods from Project 1. Finally, we use our ANN on the Wisconsin Breast Cancer Dataset to predict if a
 tumor is bening or malignant. 
+
+Throughout our Method section, you'll find a thoughrough documentation of the mathmatical basis of different optimizers
+that we have used, as well as information on logistic regression for classification and comprehensive walk-through of how most ANN's today are structured.
+We also present our terrain data and cancer data in a Data subsection. Our results in the Results section mainly focus on the use of our ANN 
+in regression on terrain data and other tests, and finally we use the ANN as a classifier on the Wisconsin Breast Cancer Data. We summarize all our 
+findings and reflect briefly on them in our Conclusion section. 
+
+All code can be found in our Github: 
 
 
 
