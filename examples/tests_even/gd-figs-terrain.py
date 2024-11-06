@@ -69,25 +69,25 @@ plt.show()
 # GRID SEARCH
 # TAKES VERY LONG TO RUN!
 
-np.random.seed(432787)
-learning_rates = np.logspace(-4, 1, 5)
-n_iter = 1000
-lmbs=np.logspace(-8,1, 5)
+# np.random.seed(432787)
+# learning_rates = np.logspace(-4, 1, 5)
+# n_iter = 1000
+# lmbs=np.logspace(-8,1, 5)
 
-mses = eta_lambda_grid(
-    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
-    learning_rates, lmbs, n_iter, optimizer = ADAM()
-)
-lambda_lr_heatmap(mses, lmbs, learning_rates, filename="examples/tests_even/figs/terrain-gridsearch-gd.pdf")
+# mses = eta_lambda_grid(
+#     X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
+#     learning_rates, lmbs, n_iter, optimizer = ADAM()
+# )
+# lambda_lr_heatmap(mses, lmbs, learning_rates, filename="examples/tests_even/figs/terrain-gridsearch-gd.pdf")
 
 
-learning_rates = np.logspace(-4, 1, 5)
-n_iter = 200
-lmbs=np.logspace(-8,1, 5)
-batch_size=32
+# learning_rates = np.logspace(-4, 1, 5)
+# n_iter = 200
+# lmbs=np.logspace(-8,1, 5)
+# batch_size=32
 
-mses = eta_lambda_grid(
-    X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
-    learning_rates, lmbs, n_iter, optimizer = ADAM(), batch_size = batch_size
-)
-lambda_lr_heatmap(mses, lmbs, learning_rates, filename="examples/tests_even/figs/terrain-gridsearch-sgd.pdf")
+# mses = eta_lambda_grid(
+#     X_train_scaled, X_test_scaled, y_train_scaled, y_test_scaled,
+#     learning_rates, lmbs, n_iter, optimizer = ADAM(), batch_size = batch_size
+# )
+# lambda_lr_heatmap(mses, lmbs, learning_rates, filename="examples/tests_even/figs/terrain-gridsearch-sgd.pdf")

@@ -235,12 +235,13 @@ class LogisticRegression:
     """Logistic regression model, fit data using either gradient or stochastic
     gradient descent method. Predicts target probability using the sigmoid function,
     and target class using a threshold."""
-    def __init__(self):
+    def __init__(self, lmbda=0.0):
+        self._lmbda = lmbda
         self._beta = None
     
     def _init_params(self, X):
-        self._m, self._n = X.shape      
-        self._beta = np.zeros(self._n)
+        self._m, self._n = X.shape 
+        self._beta = np.random.randn(self._n)
 
     def _scheduler(self, t):
         return self._batch_size/(t + self._n_epochs)
@@ -289,8 +290,8 @@ class LogisticRegression:
                 grad = self.gradient(xi, yi, y_pred)
                 self._eta = self._optimizer(grad)
                 # self._eta = self._scheduler(epoch*n_batches+i)
-                self._beta -= self._eta*grad
-                self._optimizer.reset()
+                self._beta -= self._eta*grad 
+                # self._optimizer.reset()
 
 
     def sigmoid(self, X):
@@ -318,6 +319,13 @@ class LogisticRegression:
         with np.errstate(divide='ignore', invalid='ignore'):
             result = - np.mean(y_true*np.log(y_pred) + (1 - y_true)*np.log(1 - y_pred))
             return result
+        
+    def cost_reg(self, y_pred, y_true):
+        n = len(y_true)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            term = - np.sum(y_true*np.log(y_pred) + (1 - y_true)*np.log(1 - y_pred)) / n
+            l2 = self._lmbda * np.sum(self._beta*self._beta) / n
+            return term + l2
     
     def fit(self, X_train, y_train, batch_size=None, optimizer=None, eta=0.01, n_epochs=1000):
         """Train the model using either the gradient descent or stochastic 
@@ -333,6 +341,7 @@ class LogisticRegression:
         Returns:
             None
         """
+        self._eta = eta
         if optimizer is None:
             self._optimizer = self._scheduler
 
