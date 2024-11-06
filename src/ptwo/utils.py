@@ -75,16 +75,30 @@ def lambda_lr_heatmap(mses, lmbs, learning_rates, lmb_label_res=3, lr_label_res=
     plt.show()
 
 
-def preprocess_cancer_data():
+def preprocess_cancer_data(save=False):
     ROOT = git.Repo(".", search_parent_directories=True).working_dir
     filename = "wisconsin_breast_cancer_data.csv"
-    df = pd.read_csv(f'{ROOT}/data/{filename}')
+    df = pd.read_csv(f"{ROOT}/data/{filename}")
 
     # Clean up
     not_include = ["id", "diagnosis", "Unnamed: 32"]
-    input_features = np.array(df[df.columns.difference(not_include)])
+    input_features = df[df.columns.difference(not_include)]
     target_feature = df.diagnosis
     # Transform to binary
+    pd.set_option('future.no_silent_downcasting', True)
     target_feature.replace({"M":1, "B":0}, inplace=True)
 
-    return df, input_features, target_feature
+    if save:
+        dataset = pd.concat([input_features, target_feature], axis=1).reindex(input_features.index)
+        save_as = "wisconsin_breast_cancer_data_binary_target.csv"
+        dataset.to_csv(f"{ROOT}/data/{save_as}.csv")
+
+    else:
+        X = np.array(input_features)
+        y = np.array(target_feature)
+        return X, y
+    
+
+if __name__ == '__main__':
+    pass
+    # preprocess_cancer_data(save=True)
