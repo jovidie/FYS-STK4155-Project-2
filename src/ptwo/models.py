@@ -51,7 +51,7 @@ class NeuralNetwork:
         for ind, layer_output_size in enumerate(self.layer_output_sizes):
             if "leaky_relu" == func_names[ind].lower() or "relu" == func_names[ind].lower() : 
                 # He-normal initalization for rectified linear units
-                W = np.random.randn(i_size, layer_output_size) * np.sqrt(2/i_size)
+                W = np.random.randn(i_size, layer_output_size) * np.sqrt(2/i_size + layer_output_size)
             else:
                 # Xavier/Glorot initialization for sigmoidal non-linear activation functions
                 W = np.random.randn(i_size, layer_output_size) * np.sqrt(1/i_size)

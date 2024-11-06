@@ -2,11 +2,12 @@ from sklearn.neural_network import MLPClassifier
 import pandas as pd
 import autograd.numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 from ptwo.models import NeuralNetwork
-from ptwo.activators import sigmoid, ReLU, softmax, leaky_ReLU, relu
+from ptwo.activators import sigmoid
 from ptwo.costfuns import binary_cross_entropy
-from ptwo.optimizers import RMSProp, Momentum, AdaGrad, ADAM
+from ptwo.optimizers import ADAM
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 
 #importing data:
 data = pd.read_csv("./data/wisconsin_breast_cancer_data.csv")
@@ -37,23 +38,30 @@ test_in = standard_scaler.transform(test_in)
 #test_in = minmax_scaler.transform(test_in)
 
 #joint parameters
-epochs = 500
+np.random.seed(42)
+epochs = 1000
 lrate = 0.1
-layer_output_sizes = [100, 50,  2]
-activators = [sigmoid, sigmoid, sigmoid]
+layer_output_sizes = [100,  2]
+activators = [sigmoid, sigmoid]
 
 print(f"\n\n ------------ Building neural networks with {len(layer_output_sizes)} layer for Sklearn and own FFNN ------------ \n")
 #sklearn classifier: 
-clf = MLPClassifier(random_state = 1, max_iter = epochs, learning_rate_init = lrate)
+clf = MLPClassifier(max_iter = epochs, learning_rate_init = lrate)
 clf.fit(train_in, train_o)
-clf.predict_proba(test_in[:1])
-clf.predict(test_in[:5, :])
+clf_test_pred = clf.predict(test_in)
 clf.score(test_in, test_o)
 
 #our classifier
 print(f"\n\n ------------ Training network with {epochs} epochs and {round(lrate, 4)} learning rate ------------\n")
-np.random.seed(42)
 NN = NeuralNetwork(network_input_size = network_input.shape[1], layer_output_sizes = layer_output_sizes, activation_funcs = activators, optimizer = ADAM(), cost_function = binary_cross_entropy, classification = True)
 NN.predict(train_in)
 #print(NN.predictions)
 NN.train_network(train_in, train_o, epochs = epochs, learning_rate = lrate, verbose = True, batch_size = 150)
+test_pred = NN.predict(test_in)
+
+print("SKLEARN NN", clf.score(test_in, test_o))
+print("OUR NN", NN.accuracy(test_in, test_o))
+
+# confusion matrix - this doesnt work...
+conf = confusion_matrix(test_o, clf_test_pred)
+#ConfusionMatrixDisplay(test_o, clf_test_pred).plot(conf)
