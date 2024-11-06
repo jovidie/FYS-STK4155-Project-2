@@ -109,7 +109,9 @@ Here we separate between sigmoidal nonlinearities and rectified linear hidden un
 \cite{relu_best_ever}, but is not suitable as the final layer activation function. Sigmoidal nonlinear activation functions have been shown to 
 cause vanishing gradients, as discussed in \ref{subsec:backpropagation}, but they are the golden standard as the final activation function. 
 \\
+\\
 In our network, we choose between four different activation functions as presented below: 
+\\
 \\
 1. \textbf{Sigmoid:}
 The sigmoidal or logistic activation function is a saturating function that was previously used for all layers in early neural networks, 
@@ -118,19 +120,16 @@ however it's now more common as the final activation layer in binary classificat
 \sigma(z) = \frac{1}{1 + e^{-z}}
 \]
 \\
+\\
 2. \textbf{Softmax (for matrix input):}
 The softmax activation functions has the same use-case as the sigmoidal, but for non-binary classification cases. 
-For an input \( z \), which can be either a vector or a matrix, the softmax function is defined as:
-\[
-\text{softmax}(z_i) = \frac{e^{z_i - \max(z)}}{\sum_{j} e^{z_j - \max(z)}}
-\]
-where \(\max(z)\) is applied across the elements in \( z \) to improve numerical stability.
 
 For a matrix \( z \) with rows representing sets of scores, the softmax function can be applied to each row \( z_{i,:} \) as:
 \[
 \text{softmax}(z_{i,j}) = \frac{e^{z_{i,j} - \max(z_{i,:})}}{\sum_{k} e^{z_{i,k} - \max(z_{i,:})}}
 \]
-where \( \max(z_{i,:}) \) denotes the maximum value within the \( i \)-th row.
+where \( \max(z_{i,:}) \) is the maximum value in the \( i \)-th row.
+\\
 \\
 3. \textbf{ReLU (Rectified Linear Unit):}
 The ReLU activation function is a simple non-saturating activation function that is useful to prevent gradients from vanishing during backpropagation, 
@@ -145,7 +144,7 @@ but it can also suffer from dead neurons when the output is 0, which makes it ha
 \\
 4. \textbf{Leaky ReLU:}
 The leaky ReLU is a version of the ReLU above which was developed by A.L.Maas, A.Y.Hannum and A.Y.Ng \cite{relu_best_ever}. The $\delta$ coefficient avoids
-setting each neuron to an absolute 0, which avoids the issue of dead neurons during backpropagation.
+setting each neuron to an absolute 0, which dealss the issue of dead neurons during backpropagation.
 \[
 \text{Leaky\_ReLU}(z) = 
 \begin{cases} 
@@ -159,10 +158,9 @@ setting each neuron to an absolute 0, which avoids the issue of dead neurons dur
 Loss functions in neural networks are key to training the weights and biases in a network, as they are the initial function we aim to minimize. 
 Since the whole backpropagation step is essentially built around the derivative of our loss function, we provide a short summary of our choice of 
 loss functions and where we've applied them. 
-%
-Below we present the different loss functions used in the models: 
 \\
-1. **Mean Squared Error (MSE):**
+\\
+1. \textbf{Mean Squared Error (MSE):}
 We use the mean square error as the loss function in all of our regression cases to compare how the targets differ from the predictions, such
 as with the Topographical data preditions. 
    \[
@@ -173,26 +171,24 @@ as with the Topographical data preditions.
    - \( y \) are the target values.
    - \( n \) is the number of data points.
 \\
-2. **Cross-Entropy:**
-We use cross-entropy as the loss function for all classification cases with more than two outcomes (non-binary). Although none of our results include
+\\
+2. \textbf{Cross-Entropy:}
+We use cross-entropy (CE) as the loss function for all classification cases with more than two outcomes (non-binary). Although none of our results include
 details on this, the ANN was tested on the Iris dataset with a cross-entropy loss function. 
    \[
-   \text{CrossEntropy}(\hat{y}, y) = -\sum_{i=1}^{n} y_i \log(\hat{y}_i)
+   \text{CE}(\hat{y}, y) = -\sum_{i=1}^{n} y_i \log(\hat{y}_i)
    \]
-   where:
-   - \( y \) is the target vector.
-   - \( \hat{y} \) is the predicted probability.
-   - \( n \) is the total number of data points
+   where \( y \) is the target and \( \hat{y} \) is the prediction .
+   %
 \\
-3. **Binary Cross-Entropy:**
-We use binary cross entropu as the loss function for all binary classification cases, such as the Wisconsin Breast Cancer predictions. 
+\\
+3. \textbf{Binary Cross-Entropy:}
+We use binary cross entropy (bce) as the loss function for all binary classification cases, such as the Wisconsin Breast Cancer predictions. 
    \[
-   \text{BinaryCrossEntropy}(\hat{y}, y) = -\frac{1}{n} \sum_{i=1}^{n} \left( y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \right)
+   \text{BCE}(\hat{y}, y) = -\frac{1}{n} \sum_{i=1}^{n} \left( y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \right)
    \]
-   where:
-   - \( y \) is the binary target (0 or 1).
-   - \( \hat{y} \) is the predicted probability .
-   - \( n \) is the number of data points.
+%
+where \( y \) is the binary target and \( \hat{y} \) is the predicted probability.
 \\
 
 \subsubsection{Forward propagation}\label{sssec:forward_propagation}
