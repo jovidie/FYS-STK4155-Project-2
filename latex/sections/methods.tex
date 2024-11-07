@@ -88,13 +88,15 @@ In recent years, neural networks have shown promise in solving both regression a
     \caption{Illustration of a feed-forward neural network with one input layer, three hidden layers, and one output layer, where $n$, $m$ and $k$ indicate the number of neurons in the respective layer.}
     \label{fig:ffnn}
 \end{figure}
-The architecture of a neural network is often determined by the problem to be solved. According to the universal approximation theorem, a FFNN with a minimum of one input layer, one hidden layer with a non-linear activation function, and one linear output layer, is sufficient to approximate a continuous function \cite[194]{Goodfellow:2016:deep_learning}. 
+The architecture of a neural network is often determined by the problem to be solved. According to the universal 
+approximation theorem, a FFNN with a minimum of one input layer, one hidden layer with a non-linear activation 
+function, and one linear output layer, is sufficient to approximate a continuous function \cite[194]{Goodfellow:2016:deep_learning}. 
 
 The output of a hidden layer can be written as 
 \begin{equation}\label{eq:ffnn}
     \mathbf{h} = a \Big( \mathbf{W}^{T} \mathbf{x} + \mathbf{b} \Big) ,
 \end{equation}
-where $a$ is a non-linear activation function, $\mathbf{W}$ is the weight matrix, $\mathbf{x}$ is input, and $\mathbf{b}$ is the bias. 
+where $a$ is the activation function, $\mathbf{W}$ is the weight matrix, $\mathbf{x}$ is input, and $\mathbf{b}$ is the bias. 
 
 \subsubsection{Weights and biases}\label{sssec:weights_biases}
 The technique used to initialize the weights and biases in the FFNN can be vital for how fast the network learns. 
@@ -111,7 +113,7 @@ Initialization of the weights depend on the activation layer present in the laye
 function was non-linear and sigmoidal (such as softmax and sigmoidal), weights were initialized after
 the Xavier/Gloriot Normal Initialization method \cite{xaviergloriot}. 
 
-After implementation of different linear activation functions (ReLU) however, we added the option to initialze
+After implementation of different linear activation functions (ReLU), we added the option to initialze
 weights following the He normal initialization concept described here: \cite{heman}, as this is supposed to 
 lead to faster convergence of the neural network. 
 
@@ -168,11 +170,26 @@ setting each neuron to an absolute 0, which dealss the issue of dead neurons dur
    \delta \cdot z & \text{otherwise}
 \end{cases}
 \]
+\\
+3. \textbf{ReLU6:}
+We added the option to implement ReLU 6 after overflow errors during training with the BC data set. This activation
+function is similar to RelU, but with a max value of 6. 
+\[
+\text{ReLU6}(z) = 
+\begin{cases} 
+   z & \text{if } z \in [0, 6] \\
+   0 & \text{if } z < 0 \\
+   6 & \text{if } z > 6
+\end{cases}
+\]
+\\
 
 
 \subsubsection{Loss functions}\label{sssec:loss_functions}
-Loss functions in neural networks are key to training the weights and biases in a network, as they are the initial function we aim to minimize. 
-Since the whole backpropagation step is essentially built around the derivative of our loss function, we provide a short summary of our choice of 
+Loss functions in neural networks are key to training the weights and biases in a network, as they are the 
+initial function we aim to minimize. 
+Since the whole backpropagation step is essentially built around the derivative of our loss function,
+we provide a short summary of our choice of 
 loss functions and where we've applied them. 
 \\
 \\
@@ -209,9 +226,56 @@ where \( y \) is the binary target and \( \hat{y} \) is the predicted probabilit
 
 \subsubsection{Forward propagation}\label{sssec:forward_propagation}
 
+
+The feed-forward process begins with an input vector \( \mathbf{x} \), which is transformed through each layer 
+of the neural network by a series of transformations described below
+
+For each layer \( l \), we compute a hidden layer \( \mathbf{h}^{(l)} \) with the following transformation:
+
+\begin{equation}\label{eq:ffnn}
+    \mathbf{h}^{(l)} = a \Big( \mathbf{W}^{(l)T} \mathbf{a}^{(l-1)} + \mathbf{b}^{(l)} \Big) ,
+\end{equation}
+
+where \( a \) is the activation function we choose as described in Subsection \ref{sssec:activation_functions}, 
+\( \mathbf{W}^{(l)} \) is the weight matrix for the \( l \)-th layer, \( \mathbf{b}^{(l)} \) is the bias vector, 
+and \( \mathbf{a}^{(l-1)} \) is the result of the activation function from the previous layer. 
+\( \mathbf{h}^{(l)} \) is then used as the input to the next layer, becoming \( \mathbf{a}^{(l)} \).
+
+This continues until the final layer, where the output of the last layer,
+ \( \mathbf{a}^{(L)} \), is the network prediction. 
+
+Thus, the feed-forward process systematically applies each layer’s weights, biases, and activation function 
+to the input, resulting in a transformed output that serves as the final prediction from the neural network.
+
 \subsubsection{Back-propagation}\label{sssec:backpropagation}
 
-Something about vanishing gradients...
+Backpropagation refers to the process of calculating the gradient in each layer of the nerual network when
+moving backwards from the final layer $L$. The gradient is found by taking the derivative of the 
+loss function with regards to the weights and biases of each layer. However, each layer $l$ is connected to
+it's former layer $l-1$. Therefore, the backpropagation becomes a large calculation using the chain rule of 
+derivatives as illustradet below. 
+
+\[
+\frac{\partial C}{\partial \theta^L} = \frac{\partial C}{\partial a^L} \frac{\partial a^L}{\partial \theta^L} = 
+\]
+
+\[
+\frac{\partial C}{\partial \theta^{L-1}} = \frac{\partial C}{\partial a^L} \frac{\partial a^L}{\partial \theta^{L-1}} = 
+\]
+
+\[
+\frac{\partial C}{\partial \theta^{L-2}} = \frac{\partial C}{\partial a^{L-1}} \frac{\partial a^L}{\partial a^{L-1}} \frac{\partial a^{L-1}}{\partial \theta^{L-2}}
+\]
+
+\textbf{General formula:}
+
+\[
+\frac{\partial C}{\partial \theta^{L-2}} = \frac{\partial C}{\partial a^{L-1}} \frac{\partial a^L}{\partial a^{L-1}} \frac{\partial a^{L-1}}{\partial \theta^{L-2}} \cdots \frac{\partial a^{l-z}}{\partial a^{l+1}} \frac{\partial a^{l+1}}{\partial \theta^l}
+\]
+
+Doing this step manually can quickly become a time consuming task. We chose to instead implement an automatic 
+differentiation step, as desribed in our Tools subsection \ref{sssec:tools}.
+
 
 
 %------------ Data --------------------------------------------
