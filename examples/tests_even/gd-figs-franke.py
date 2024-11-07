@@ -11,6 +11,9 @@ from ptwo.models import GradientDescent
 from ptwo.optimizers import Momentum, ADAM, AdaGrad, RMSProp
 from ptwo.gradients import grad_OLS, grad_ridge
 from ptwo.costfuns import mse
+from ptwo.plot import set_plt_params
+
+set_plt_params()
 
 # Make data.
 x1 = np.arange(0, 1, 0.05)

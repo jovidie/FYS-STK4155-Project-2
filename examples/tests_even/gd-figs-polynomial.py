@@ -8,8 +8,9 @@ from ptwo.utils import calculate_polynomial
 from ptwo.models import GradientDescent
 from ptwo.optimizers import Momentum, ADAM, AdaGrad, RMSProp
 from ptwo.gradients import grad_OLS
+from ptwo.plot import set_plt_params
 
-
+set_plt_params()
 # generate data
 np.random.seed(238947987)
 n = 100
