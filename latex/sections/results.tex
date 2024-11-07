@@ -63,6 +63,15 @@ For gradient descent on the terrain data ...
 
 
 \subsection{Breast cancer data}
+We tested a set of different optimizers and learning rates on our breast cancer (BC) data, and found the best optimizer to be Adam, as is the golden standard for many NN problems today. The optimal learning rate with Adam was 0.1. To perform the classification we chose two layers of size 100 and 2, where our final layer output was a $n x 2$ vector with probabilities. For information about this selection process, see our appendix. "cite something?"
+
+After splitting and normalizing the input data, we trained our neural net against Sklearns MLPClassifier with the same amount of layers. We chose the ReLU6 activation function for the first 100-node layer, and the final layer was sigmoidal. For argumentation, see Subsection \ref{sssec:activation_functions}.
+
+To prevent potential unwelcome batch effects that can occur from random splitting of test and train data, we did a 10-fold cross validation inside the NN-data and chose the back-propagation path with the best accuracy. The result was suprisingly that our neural network performed better than Sklearn to a very small degree, as presented below: 
+
+
+
+
 - A couple of sentences on choosing optimizer
 - Classification and accuracy of binary classification\\
 - Discuss the results and analyze the different parameters used (learning rate, lambda) and the effect of different activation functions\\
