@@ -15,7 +15,8 @@ def set_plt_params():
         "xtick.labelsize": "large",
         "ytick.labelsize": "large",
         "legend.fontsize": "medium", 
-        "savefig.dpi": 300
+        "savefig.dpi": 300, 
+        "axes.grid" : False
     }
     plt.rcParams.update(params)
 

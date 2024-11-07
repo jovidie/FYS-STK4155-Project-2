@@ -36,7 +36,7 @@ for i, t in enumerate(targets):
     targets_percent[i, t] = 1
 
 # setting seed for reproducibility
-np.random.seed(60)
+np.random.seed(42)
 
 # splitting and scaling: 
 train_in, test_in, train_o, test_o = train_test_split(network_input, targets_percent, test_size = 0.2)
@@ -47,13 +47,26 @@ test_in = standard_scaler.transform(test_in)
 #joint parameters
 epochs = 200
 lrate = 0.1
-layer_output_sizes = [100, 2]
-activators = [sigmoid, sigmoid]
-data_title = "ADAM_sigmoid-100_sigmoid-2"
+layer_output_sizes = [100,  2]
+activators = [relu6, sigmoid]
+data_title = "ADAM"
+metadata_f = [f.__name__ for f in activators]
+metadata_l = [str(l) for l in layer_output_sizes]
+combined_metadata = [f + "-" + l for f, l in zip(metadata_f, metadata_l)]
+for combmet in combined_metadata:
+    data_title += "_" + combmet
+
+# set this to true to view and save confusion matrix after training and prediction
+confusion = False
+
+# set this to true to view aroc: 
+roc = False
+
+
 
 print(f"\n\n ------------ Building neural networks with {len(layer_output_sizes)} layer for Sklearn and own FFNN ------------ \n")
 #sklearn classifier: 
-clf = MLPClassifier(max_iter = epochs, learning_rate_init = lrate)
+clf = MLPClassifier(hidden_layer_sizes = layer_output_sizes, max_iter = epochs, learning_rate_init = lrate)
 clf.fit(train_in, train_o)
 clf_test_pred = clf.predict(test_in)
 clf.score(test_in, test_o)
@@ -71,15 +84,21 @@ predi = np.argmax(test_pred, axis=1)
 clf_predictions = np.argmax(clf_test_pred, axis=1)
 golden = np.argmax(test_o, axis=1)
 
-#confusion matrices
-conf1 = confusion_matrix(golden, clf_predictions, labels = [0, 1])
-ConfusionMatrixDisplay(conf1).plot()
-plt.title(f"Confusion matrix, Sklearn's NN, acc: {round(accuracy_score(clf_predictions, golden), 4)}")
-plt.savefig("./latex/figures/sklearnWBC_final_" + data_title + ".pdf", bbox_inches = "tight")
-plt.show()
 
-conf2 = confusion_matrix(golden, predi, labels = [0, 1])
-ConfusionMatrixDisplay(conf2).plot()
-plt.title(f"Confusion matrix, our NN, acc: {round(accuracy_score(predi, golden), 4)}")
-plt.savefig("./latex/figures/ourWBC_final_"+ data_title + ".pdf", bbox_inches = "tight")
-plt.show()
+if confusion: 
+
+    #confusion matrices
+    conf1 = confusion_matrix(golden, clf_predictions, labels = [0, 1])
+    ConfusionMatrixDisplay(conf1).plot()
+    plt.title(f"Confusion matrix, Sklearn's NN, acc: {round(accuracy_score(clf_predictions, golden), 4)}")
+    plt.savefig("./latex/figures/sklearnWBC_final_" + data_title + ".pdf", bbox_inches = "tight")
+    plt.show()
+
+    conf2 = confusion_matrix(golden, predi, labels = [0, 1])
+    ConfusionMatrixDisplay(conf2).plot()
+    plt.title(f"Confusion matrix, our NN, acc: {round(accuracy_score(predi, golden), 4)}")
+    plt.savefig("./latex/figures/ourWBC_final_"+ data_title + ".pdf", bbox_inches = "tight")
+    plt.show()
+
+if roc: 
+
