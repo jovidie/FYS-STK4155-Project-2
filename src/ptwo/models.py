@@ -2,6 +2,7 @@ import autograd.numpy as np
 from sklearn.metrics import accuracy_score
 from autograd import grad
 from sklearn.utils import resample
+from sklearn.model_selection import KFold
 
 class NeuralNetwork:
     """
@@ -49,9 +50,9 @@ class NeuralNetwork:
         lay = 0
         func_names = [func.__name__.lower() for func in self.activation_funcs]
         for ind, layer_output_size in enumerate(self.layer_output_sizes):
-            if "leaky_relu" == func_names[ind].lower() or "relu" == func_names[ind].lower() : 
+            if "leaky_relu" == func_names[ind].lower() or "relu" == func_names[ind].lower() or "relu6" == func_names[ind].lower() : 
                 # He-normal initalization for rectified linear units
-                W = np.random.randn(i_size, layer_output_size) * np.sqrt(2/i_size + layer_output_size)
+                W = np.random.randn(i_size, layer_output_size) * np.sqrt(2/i_size)
             else:
                 # Xavier/Glorot initialization for sigmoidal non-linear activation functions
                 W = np.random.randn(i_size, layer_output_size) * np.sqrt(1/i_size)
@@ -69,16 +70,16 @@ class NeuralNetwork:
         if layers is None:
             layers = self.layers
         predictions = self.feed_forward_batch(x, layers)
-        base_cost = self.cost_function(predictions, targets)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            base_cost = self.cost_function(predictions, targets)
         
-        # L2 regularization term
+        #L2 regularization term
         l2_term = 0
         for W, b in layers:
             l2_term += np.sum(W**2)
         l2_term *= (self.lmb / 2.0)
 
-        return base_cost  + l2_term
-
+        return base_cost  #+ l2_term
 
     def feed_forward_batch(self, x, layers=None):
         """
@@ -161,6 +162,20 @@ class NeuralNetwork:
         else:
             self._train_network_sgd(train_input, train_targets, learning_rate, epochs, batch_size, verbose)
         print("FINISHED TRAINING")
+
+    def kfold_train(self, train_input, train_targets, learning_rate=0.001, epochs=100, batch_size = None, verbose = False, k = 5):
+        kfold = KFold(n_splits=k)
+        best_accuracy = 0
+
+        for i, (train_ind, test_ind) in enumerate(kfold.split(train_input)):
+            print("Fold:", i)
+            self.create_layers_batch()
+            self.train_network(train_input[train_ind], train_targets[train_ind], learning_rate, epochs, batch_size, verbose)
+            if self.accuracy_evolution[-1] > best_accuracy:
+                best_accuracy = self.accuracy(train_input[test_ind], train_targets[test_ind])
+                keep_layers = self.layers
+        print(f"Best accuracy on validation data achieved at {best_accuracy}, initializing saved weights from this run in NN")
+        self.layers = keep_layers
     
     def _train_network_gd(self, train_input, train_targets, learning_rate, epochs, verbose):
         self.train_input = train_input
