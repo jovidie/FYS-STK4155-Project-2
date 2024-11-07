@@ -8,6 +8,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 from ptwo.models import LogisticRegression, NeuralNetwork
+from ptwo.optimizers import ADAM
 from ptwo.utils import preprocess_cancer_data
 from ptwo.plot import plot_heatmap
 from ptwo.costfuns import binary_cross_entropy
@@ -44,9 +45,13 @@ def test_optimal_params_logreg():
 
 def compare_models():
     X, y = preprocess_cancer_data()
+    #y = y.reshape(-1, 1) # -> funker ikke for logreg med reshape, funker ikke for sgd uten 
     n_data, n_features = X.shape
     n_outputs = y.shape
     eta = 0.001
+
+    print(X.shape)
+    print(y.shape)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     scaler = StandardScaler()
@@ -62,7 +67,7 @@ def compare_models():
         classification = True
     )
 
-    logreg_nn.train_network(X_train_scaled, y_train)
+    logreg_nn.train_network(X_train_scaled, y_train, learning_rate = 0.1, epochs = 1000, verbose = True)
     y_prob = logreg_nn.predict(X_test_scaled)
     y_pred = (y_prob>0.5).astype('int')
     # print(y_pred)
