@@ -50,9 +50,9 @@ class NeuralNetwork:
         lay = 0
         func_names = [func.__name__.lower() for func in self.activation_funcs]
         for ind, layer_output_size in enumerate(self.layer_output_sizes):
-            if "leaky_relu" == func_names[ind].lower() or "relu" == func_names[ind].lower() : 
+            if "leaky_relu" == func_names[ind].lower() or "relu" == func_names[ind].lower() or "relu6" == func_names[ind].lower() : 
                 # He-normal initalization for rectified linear units
-                W = np.random.randn(i_size, layer_output_size) * np.sqrt(2/i_size + layer_output_size)
+                W = np.random.randn(i_size, layer_output_size) * np.sqrt(2/i_size)
             else:
                 # Xavier/Glorot initialization for sigmoidal non-linear activation functions
                 W = np.random.randn(i_size, layer_output_size) * np.sqrt(1/i_size)
@@ -73,11 +73,11 @@ class NeuralNetwork:
         with np.errstate(divide='ignore', invalid='ignore'):
             base_cost = self.cost_function(predictions, targets)
         
-        # L2 regularization term
-        #l2_term = 0
-        #for W, b in layers:
-        #    l2_term += np.sum(W**2)
-        #l2_term *= (self.lmb / 2.0)
+        #L2 regularization term
+        l2_term = 0
+        for W, b in layers:
+            l2_term += np.sum(W**2)
+        l2_term *= (self.lmb / 2.0)
 
         return base_cost  #+ l2_term
 
@@ -165,14 +165,16 @@ class NeuralNetwork:
 
     def kfold_train(self, train_input, train_targets, learning_rate=0.001, epochs=100, batch_size = None, verbose = False, k = 5):
         kfold = KFold(n_splits=k)
-        accuracies = 0
+        best_accuracy = 0
 
         for i, (train_ind, _) in enumerate(kfold.split(train_input)):
             print("Fold:", i)
             self.train_network(train_input[train_ind], train_targets[train_ind], learning_rate, epochs, batch_size, verbose)
-            accuracies += self.accuracy_evolution[-1]
-        print("mean accurcy after kfold cv:", accuracies/k)
-
+            if self.accuracy_evolution[-1] > best_accuracy:
+                best_accuracy = self.accuracy_evolution[-1]
+                keep_layers = self.layers
+            print(f"Best accuracy achieved at {best_accuracy}, initializing saved weights from this run in NN")
+            self.layers = keep_layers
     
     def _train_network_gd(self, train_input, train_targets, learning_rate, epochs, verbose):
         self.train_input = train_input
