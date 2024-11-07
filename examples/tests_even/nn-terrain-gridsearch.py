@@ -57,32 +57,34 @@ activation_funs = [sigmoid, ReLU, lambda x: x]
 # nn.train_network(X_train_scaled, y_train_scaled, learning_rate, verbose=True, epochs=301)
 # print(nn.get_cost(X_test_scaled, y_test_scaled))
 
-learning_rates = np.logspace(-3, 0, 10)
-lmbs = np.logspace(-6, 0, 10)
-np.save("examples/tests_even/data/learning_rates.npy", learning_rates)
-np.save("examples/tests_even/data/lmbs.npy", lmbs)
+learning_rates = np.logspace(-4, 1, 10)
+lmbs = np.logspace(-10, 0, 11)
+np.save("examples/tests_even/data/learning_rates3.npy", learning_rates)
+np.save("examples/tests_even/data/lmbs3.npy", lmbs)
 
-
+np.random.seed(4927384)
 mses = np.zeros( (len(lmbs), len(learning_rates)) )
 for i, learning_rate in enumerate(learning_rates):
     for j, lmb in enumerate(lmbs):
-        np.random.seed(4927384)
+        
         nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse, optimizer=ADAM(), lmb=lmb)
         nn.train_network(X_train_scaled, y_train_scaled, learning_rate, epochs=301)
         mses[j, i] = nn.get_cost(X_test_scaled, y_test_scaled)
+        print(mses)
 
-np.save("examples/tests_even/data/mses-terrain-gd-adam.npy", mses)
+np.save("examples/tests_even/data/mses-terrain-gd3-adam.npy", mses)
 
 
 mses_sgd = np.zeros( (len(lmbs), len(learning_rates)) )
 for i, learning_rate in enumerate(learning_rates):
     for j, lmb in enumerate(lmbs):
-        np.random.seed(4927384)
+
         nn = NeuralNetwork(input_size, layer_output_sizes, activation_funs, mse, optimizer=ADAM(), lmb=lmb)
         nn.train_network(X_train_scaled, y_train_scaled, learning_rate, epochs=50, batch_size=32)
         mses_sgd[j, i] = nn.get_cost(X_test_scaled, y_test_scaled)
+        print(mses_sgd)
 
-np.save("examples/tests_even/data/mses-terrain-sgd-adam.npy", mses_sgd)
+np.save("examples/tests_even/data/mses-terrain-sgd3-adam.npy", mses_sgd)
 
 
 lambda_lr_heatmap(mses, lmbs, learning_rates)
