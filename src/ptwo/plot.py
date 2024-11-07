@@ -3,9 +3,11 @@ import seaborn as sns
 import numpy as np
 
 
-def set_plt_params():
+def set_plt_params(remove_grid=False):
     """Set parameters and use seaborn theme to plot."""
     sns.set_theme()
+    if remove_grid:
+        sns.set_style("whitegrid", {"axes.grid": False})
     params = {
         "font.family": "Serif",
         "font.serif": "Roman", 
@@ -48,7 +50,7 @@ def plot_heatmap(etas, lmbdas, acc, figname=None):
     ax.plot(lmbda_opt, eta_opt, "X", label="Optimal") # $\lambda = {lmbda_opt}$ $\eta = {eta_opt}$
     ax.legend(title=f"Accuracy = {acc.max():.4f}")
 
-    fig.colorbar(cs, label="MSE")
+    fig.colorbar(cs, label="Accuracy")
 
     ax.set_xlabel(r"$Log_{10}(\lambda)$")
     ax.set_ylabel("Learning rate")

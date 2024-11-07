@@ -1,4 +1,4 @@
-#import git
+import git
 import autograd.numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -96,8 +96,8 @@ def preprocess_cancer_data(save=False):
         dataset.to_csv(f"{ROOT}/data/{save_as}.csv")
 
     else:
-        X = np.array(input_features)
-        y = np.array(target_feature)
+        X = np.array(input_features, dtype=float)
+        y = np.array(target_feature, dtype=float)
         return X, y
     
 
