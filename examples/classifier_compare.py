@@ -7,7 +7,7 @@ from ptwo.models import NeuralNetwork
 from ptwo.activators import sigmoid, relu6
 from ptwo.costfuns import binary_cross_entropy
 from ptwo.optimizers import ADAM
-from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix, accuracy_score
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix, accuracy_score, roc_auc_score, roc_curve, auc
 import matplotlib.pyplot as plt
 from ptwo.plot import set_plt_params
 
@@ -36,7 +36,7 @@ for i, t in enumerate(targets):
     targets_percent[i, t] = 1
 
 # setting seed for reproducibility
-np.random.seed(42)
+np.random.seed(65)
 
 # splitting and scaling: 
 train_in, test_in, train_o, test_o = train_test_split(network_input, targets_percent, test_size = 0.2)
@@ -57,10 +57,10 @@ for combmet in combined_metadata:
     data_title += "_" + combmet
 
 # set this to true to view and save confusion matrix after training and prediction
-confusion = False
+confusion = True
 
 # set this to true to view aroc: 
-roc = False
+roc = True
 
 
 
@@ -101,4 +101,24 @@ if confusion:
     plt.show()
 
 if roc: 
+    print(roc_auc_score(predi, golden))
+    print(roc_auc_score(clf_predictions, golden))
+
+    fpr, tpr, thresholds = roc_curve(predi, golden)
+    f, t, th = roc_curve(clf_predictions, golden)
+
+    roc_auc = auc(fpr, tpr)
+    r_a = auc(f, t)
+    plt.figure()
+    plt.plot(fpr, tpr, color='purple', lw=2, label=f'ROC curve our NN, (area = {roc_auc:.2f})')
+    plt.plot(f, t, color='cyan', lw=2, label=f'ROC curve Sklearn NN, (area = {r_a:.2f})')
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic (ROC) Curve')
+    plt.legend(loc="lower right")
+    plt.savefig("./latex/figures/ADAM_AUCROC_"+ data_title + ".pdf", bbox_inches = "tight")
+    plt.show()
 
