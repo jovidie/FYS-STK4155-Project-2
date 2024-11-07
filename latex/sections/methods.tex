@@ -143,24 +143,22 @@ function was non-linear and sigmoidal (such as softmax and sigmoidal), weights w
 the Xavier/Gloriot Normal Initialization method \cite{xaviergloriot}. 
 
 After implementation of different linear activation functions (ReLU), we added the option to initialze
-weights following the He normal initialization concept described here: \cite{heman}, as this is supposed to 
-lead to faster convergence of the neural network. 
+weights following the He normal initialization \cite{heman}, as this is supposed to 
+lead to faster convergence of the neural network when using ReLU activation. 
 
 \subsubsection{Activation functions}\label{sssec:activation_functions}
 
-Activation functions in neural networks are meant to represent neuronal firing, a process which in simplified terms is either on or off. Thus, the output 
-of an activation function is going to be between 0 and 1, depending on the input. If 0, the neuron can be considered "dead" and will not contribute 
-to the final prediction. If 1, the neuron is completely "on" and will pass on the information to the next node as described in Eq. (\cite{ffnn}). 
+Activation functions in neural networks are meant to represent neuronal firing, a process which in simplified terms is either on or off. In early neural networks, the activation function were often sigmoidal, with outputs between 0 and 1, depending on the input. If 0, the neuron would be considered "dead" and not contribute to the final prediction. If 1, the neuron is completely "on" and will pass on the information to the next node. Today however, sigmoidal functions are often replaced with rectified linear units with different outputs. 
 
 Here we separate between sigmoidal nonlinearities and rectified linear hidden units (ReLU). The latter is shown to give better results in many cases 
 \cite{relu_best_ever}, but is not suitable as the final layer activation function. Sigmoidal nonlinear activation functions have been shown to 
-cause vanishing gradients, as discussed in \ref{subsec:backpropagation}, but they are the golden standard as the final activation function. 
+cause vanishing gradients, as discussed in the backpropacation subsection \ref{sssec:backpropagation}, but they are the golden standard as the final activation function. 
 \\
 \\
-In our network, we choose between four different activation functions as presented below: 
+In our network, we choose between five different activation functions as presented below: 
 \\
 \\
-1. \textbf{Sigmoid:}
+1. Sigmoid:
 The sigmoidal or logistic activation function is a saturating function that was previously used for all layers in early neural networks, 
 however it's now more common as the final activation layer in binary classification networks.
 \[
@@ -168,17 +166,15 @@ however it's now more common as the final activation layer in binary classificat
 \]
 \\
 \\
-2. \textbf{Softmax (for matrix input):}
-The softmax activation functions has the same use-case as the sigmoidal, but for non-binary classification cases. 
-
-For a matrix \( z \) with rows representing sets of scores, the softmax function can be applied to each row \( z_{i,:} \) as:
+2. Softmax (for matrix input):
+The softmax activation functions has the same use-case as the sigmoidal, but for non-binary classification cases. For a matrix \( z \) with rows representing sets of scores, the softmax function can be applied to each row \( z_{i,:} \) as:
 \[
 \text{softmax}(z_{i,j}) = \frac{e^{z_{i,j} - \max(z_{i,:})}}{\sum_{k} e^{z_{i,k} - \max(z_{i,:})}}
 \]
 where \( \max(z_{i,:}) \) is the maximum value in the \( i \)-th row.
 \\
 \\
-3. \textbf{ReLU (Rectified Linear Unit):}
+3. ReLU (Rectified Linear Unit):
 The ReLU activation function is a simple non-saturating activation function that is useful to prevent gradients from vanishing during backpropagation, 
 but it can also suffer from dead neurons when the output is 0, which makes it hard to update the weights during backpropagation.  
 \[
@@ -189,8 +185,8 @@ but it can also suffer from dead neurons when the output is 0, which makes it ha
 \end{cases}
 \]
 \\
-4. \textbf{Leaky ReLU:}
-The leaky ReLU is a version of the ReLU above which was developed by A.L.Maas, A.Y.Hannum and A.Y.Ng \cite{relu_best_ever}. The $\delta$ coefficient avoids
+4. Leaky ReLU:
+The leaky ReLU is a version of the ReLU above which was developed by A.L.Maas, A.Y.Hannum and A.Y.Ng \cite{relu_best_ever}. The small $\delta$ coefficient avoids
 setting each neuron to an absolute 0, which dealss the issue of dead neurons during backpropagation.
 \[
 \text{Leaky\_ReLU}(z) = 
@@ -200,13 +196,13 @@ setting each neuron to an absolute 0, which dealss the issue of dead neurons dur
 \end{cases}
 \]
 \\
-3. \textbf{ReLU6:}
+3. ReLU6:
 We added the option to implement ReLU 6 after overflow errors during training with the BC data set. This activation
-function is similar to RelU, but with a max value of 6. 
+function is similar to ReLU, but with a max value of 6. 
 \[
 \text{ReLU6}(z) = 
 \begin{cases} 
-   z & \text{if } z \in [0, 6] \\
+   z & \text{if } z \in \ <0, 6> \\
    0 & \text{if } z < 0 \\
    6 & \text{if } z > 6
 \end{cases}
@@ -222,7 +218,7 @@ we provide a short summary of our choice of
 loss functions and where we've applied them. 
 \\
 \\
-1. \textbf{Mean Squared Error (MSE):}
+1. Mean Squared Error (MSE):
 We use the mean square error as the loss function in all of our regression cases to compare how the targets differ from the predictions, such
 as with the Topographical data preditions. 
    \[
@@ -234,7 +230,7 @@ as with the Topographical data preditions.
    - \( n \) is the number of data points.
 \\
 \\
-2. \textbf{Cross-Entropy:}
+2. Cross-Entropy:
 We use cross-entropy (CE) as the loss function for all classification cases with more than two outcomes (non-binary). Although none of our results include
 details on this, the ANN was tested on the Iris dataset with a cross-entropy loss function. 
    \[
@@ -244,7 +240,7 @@ details on this, the ANN was tested on the Iris dataset with a cross-entropy los
    %
 \\
 \\
-3. \textbf{Binary Cross-Entropy:}
+3. Binary Cross-Entropy:
 We use binary cross entropy (bce) as the loss function for all binary classification cases, such as the Wisconsin Breast Cancer predictions. 
    \[
    \text{BCE}(\hat{y}, y) = -\frac{1}{n} \sum_{i=1}^{n} \left( y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \right)
@@ -278,11 +274,11 @@ to the input, resulting in a transformed output that serves as the final predict
 
 \subsubsection{Back-propagation}\label{sssec:backpropagation}
 
-Backpropagation refers to the process of calculating the gradient in each layer of the nerual network when
+Back-propagation refers to the process of calculating the gradient in each layer of the neural network when
 moving backwards from the final layer $L$. The gradient is found by taking the derivative of the 
 loss function with regards to the weights and biases of each layer. However, each layer $l$ is connected to
-it's former layer $l-1$. Therefore, the backpropagation becomes a large calculation using the chain rule of 
-derivatives as illustradet below. 
+it's former layer $l-1$. Therefore, the back-propagation becomes a large calculation using the chain rule of 
+derivatives as illustrated below. 
 
 \[
 \frac{\partial C}{\partial \theta^L} = \frac{\partial C}{\partial a^L} \frac{\partial a^L}{\partial \theta^L} = 
@@ -295,44 +291,49 @@ derivatives as illustradet below.
 \[
 \frac{\partial C}{\partial \theta^{L-2}} = \frac{\partial C}{\partial a^{L-1}} \frac{\partial a^L}{\partial a^{L-1}} \frac{\partial a^{L-1}}{\partial \theta^{L-2}}
 \]
-
-\textbf{General formula:}
+\\
+\\
+General formula:
 
 \[
 \frac{\partial C}{\partial \theta^{L-2}} = \frac{\partial C}{\partial a^{L-1}} \frac{\partial a^L}{\partial a^{L-1}} \frac{\partial a^{L-1}}{\partial \theta^{L-2}} \cdots \frac{\partial a^{l-z}}{\partial a^{l+1}} \frac{\partial a^{l+1}}{\partial \theta^l}
 \]
-
+%
 Doing this step manually can quickly become a time consuming task. We chose to instead implement an automatic 
-differentiation step, as desribed in our Tools subsection \ref{sssec:tools}.
+differentiation step, as desribed in our Tools subsection \ref{ssec:tools}.
 
 
 
 %------------ Data --------------------------------------------
 \subsection{Data}\label{ssec:data}
 %
-\paragraph*{Topographical data}
-We obtained geographical data of the Stavanger area, Norway, from EarthExplorer (\footnote{\url{https://earthexplorer.usgs.gov/}}, 
-via \footnote{\url{https://github.com/CompPhysics/MachineLearning/tree/master/doc/Projects/2023/Project1/DataFiles}}). 
+\subsubsection*{Topographical data}
+We obtained geographical data of the Stavanger area, Norway, from EarthExplorer (\footnote{\url{https://earthexplorer.usgs.gov/}}, via \footnote{\url{https://github.com/CompPhysics/MachineLearning/tree/master/doc/Projects/2023/Project1/DataFiles}}). 
 The data contained a 200x200 grid of altitudes (m) of the area, with arbitrary x- and y-coordinates that we used as our features. 
-We constructed a design matrix with polynomial features in the same manner as with synthetic data, and split the data in 80:20 training 
-and data set using \texttt{train\_test\_split}. We scaled the data by standard normalization. We chose to scale since some linear regression 
-models such as Lasso and Ridge perform better when all features are on a similar scale \supercite{raschka2019}. 
+We split the data in 80:20 training 
+and data set using \texttt{train\_test\_split} and scaled by standard normalization. We chose to scale since some linear regression 
+models such as Lasso and Ridge perform better when all features are on a similar scale \cite{raschka2019}. 
 \\
-\paragraph*{Wisconsin breast cancer data}
-The Wisconsin data set \cite{bc_wisconsin} is considered to be a benchmark data set for testing novel or existing machine learning methods on, and 
-there is extensive documentation on previously explored machine learning methods on the data that can be found here: 
+\subsubsection*{Wisconsin breast cancer data}
+The Wisconsin Breast Cancer data \cite{bc_wisconsin} is considered to be a benchmark data set for testing novel or existing machine learning methods on, and there is extensive documentation on previously explored machine learning methods on the data that can be found here: 
 \cite{wisconsin_example1}, \cite{wisconsin_example2} and \cite{wisconsin_example3}.
 
-As described in the original article which produced the data \cite{first_wisconsin}, it consists of a 30 features describing biopsied cell nuclei from 
-a total of 569 samples. To produce the data, non-invasive fine needle aspirations of tumors were put on glass and stained, 
-then pictures were taken of each sample. The features were then derived from each image with a "computer diagnostic system" that 
+As described in the original article which produced the data \cite{first_wisconsin}, it consists of a 30 features, 29 of which are describing biopsied cell nuclei from 
+a total of 569 samples and the final feature is the diagnosis we wish to predict. 
+
+To produce the data, non-invasive fine needle aspirations of tumors were put on glass and stained, then pictures were taken of each sample. The features were then derived from each image with a "computer diagnostic system" that 
 analyzed the images and computed an extensive set of nuclei features such as radius, perimeter, area, smoothness, concavity, symmetry and texture. 
 
 The authors Nick Street and William H. Wolberg from the original paper performed a classification using a variant on the Multisurface 
 Method, where they reached an accuracy of 97$\%$ after a ten-fold cross validation process with a sensitivity of 0.9 and a specificity of 0.86. 
 These terms are important to include in any analysis on medicinal data as the implementation of computer aided diagnosis in clinical practice 
-needs to be thoughourly documented and understood by physicians beforehand. Sensitivity is described as $\frac{correct\ positive}{total\ positive}$, 
-while the specificity is $\frac{correct\ negative}{total\ negative}$
+needs to be thoughourly documented and understood by physicians beforehand: 
+\\
+\\
+Sensitivity = $\frac{correct\ positive}{total\ positive}$,
+\\
+\\
+Specificity = $\frac{correct\ negative}{total\ negative}$.
 %
 %------------ Tools -------------------------------------------
 \subsection{Tools}\label{ssec:tools}
