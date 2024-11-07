@@ -1,8 +1,9 @@
 import autograd.numpy as np
 from sklearn.metrics import accuracy_score
-from autograd import grad
+from autograd import grad, elementwise_grad
 from sklearn.utils import resample
 from sklearn.model_selection import KFold
+from scipy.special import expit
 
 class NeuralNetwork:
     """
@@ -254,8 +255,8 @@ class LogisticRegression:
         self._beta = None
     
     def _init_params(self, X):
-        self._m, self._n = X.shape 
-        self._beta = np.random.randn(self._n)
+        self._n_data, self._n_features = X.shape 
+        self._beta = np.random.randn(self._n_features)
 
     def _scheduler(self, t):
         return self._batch_size/(t + self._n_epochs)
@@ -273,9 +274,9 @@ class LogisticRegression:
         """
         for i in range(n_epochs):
             y_pred = self.forward(X)
-            grad = self.gradient(X, y, y_pred)
+            grad = self.gradient(X, y, y_pred) + self._lmbda * self._beta
             # Without optimizer
-            self._beta -= self._eta * grad
+            self._beta -= self._eta / self._n_data * grad
 
 
     def _sgd(self, X, y, n_epochs, batch_size):
@@ -292,7 +293,7 @@ class LogisticRegression:
         """
         self._n_epochs = n_epochs
         self._batch_size = batch_size
-        n_batches = int(self._m / batch_size)
+        n_batches = int(self._n_data / batch_size)
         # xy = np.column_stack([X,y]) 
 
         for epoch in range(n_epochs):
@@ -302,17 +303,18 @@ class LogisticRegression:
                 yi = y[idx:idx+batch_size]
                 y_pred = self.forward(xi)
                 grad = self.gradient(xi, yi, y_pred)
-                self._eta = self._optimizer(grad)
-                # self._eta = self._scheduler(epoch*n_batches+i)
+                # self._eta = self._optimizer(grad)
+                self._eta = self._scheduler(epoch*n_batches+i)
                 self._beta -= self._eta*grad 
                 # self._optimizer.reset()
 
 
     def sigmoid(self, X):
-        return 1 / (1 + np.exp(-X))
-    
+        # Handles overflow in exp using scipy expit
+        return 1.0 / (1 + expit(-1.0 * X))
+
     def gradient(self, X, y, y_pred):
-        return (X.T @ (y_pred - y)) / self._m
+        return X.T @ (self.sigmoid(y_pred - y)) #/ self._n_data
     
     def forward(self, X):
         """Transform input data using the sigmoid function.
@@ -323,7 +325,8 @@ class LogisticRegression:
         Returns:
             np.ndarray of transformed values
         """
-        return self.sigmoid(X @ self._beta)
+        a = X @ self._beta
+        return self.sigmoid(a)
     
     def accuracy(self, y_pred, y_true, threshold=0.5):
         y_cat = (y_pred > threshold).astype('int')
