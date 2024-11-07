@@ -168,14 +168,15 @@ class NeuralNetwork:
         kfold = KFold(n_splits=k)
         best_accuracy = 0
 
-        for i, (train_ind, _) in enumerate(kfold.split(train_input)):
+        for i, (train_ind, test_ind) in enumerate(kfold.split(train_input)):
             print("Fold:", i)
+            self.create_layers_batch()
             self.train_network(train_input[train_ind], train_targets[train_ind], learning_rate, epochs, batch_size, verbose)
             if self.accuracy_evolution[-1] > best_accuracy:
-                best_accuracy = self.accuracy_evolution[-1]
+                best_accuracy = self.accuracy(train_input[test_ind], train_targets[test_ind])
                 keep_layers = self.layers
-            print(f"Best accuracy achieved at {best_accuracy}, initializing saved weights from this run in NN")
-            self.layers = keep_layers
+        print(f"Best accuracy on validation data achieved at {best_accuracy}, initializing saved weights from this run in NN")
+        self.layers = keep_layers
     
     def _train_network_gd(self, train_input, train_targets, learning_rate, epochs, verbose):
         self.train_input = train_input
