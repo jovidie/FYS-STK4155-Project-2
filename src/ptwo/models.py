@@ -2,6 +2,7 @@ import autograd.numpy as np
 from sklearn.metrics import accuracy_score
 from autograd import grad
 from sklearn.utils import resample
+from sklearn.model_selection import KFold
 
 class NeuralNetwork:
     """
@@ -69,16 +70,16 @@ class NeuralNetwork:
         if layers is None:
             layers = self.layers
         predictions = self.feed_forward_batch(x, layers)
-        base_cost = self.cost_function(predictions, targets)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            base_cost = self.cost_function(predictions, targets)
         
         # L2 regularization term
-        l2_term = 0
-        for W, b in layers:
-            l2_term += np.sum(W**2)
-        l2_term *= (self.lmb / 2.0)
+        #l2_term = 0
+        #for W, b in layers:
+        #    l2_term += np.sum(W**2)
+        #l2_term *= (self.lmb / 2.0)
 
-        return base_cost  + l2_term
-
+        return base_cost  #+ l2_term
 
     def feed_forward_batch(self, x, layers=None):
         """
@@ -161,6 +162,17 @@ class NeuralNetwork:
         else:
             self._train_network_sgd(train_input, train_targets, learning_rate, epochs, batch_size, verbose)
         print("FINISHED TRAINING")
+
+    def kfold_train(self, train_input, train_targets, learning_rate=0.001, epochs=100, batch_size = None, verbose = False, k = 5):
+        kfold = KFold(n_splits=k)
+        accuracies = 0
+
+        for i, (train_ind, _) in enumerate(kfold.split(train_input)):
+            print("Fold:", i)
+            self.train_network(train_input[train_ind], train_targets[train_ind], learning_rate, epochs, batch_size, verbose)
+            accuracies += self.accuracy_evolution[-1]
+        print("mean accurcy after kfold cv:", accuracies/k)
+
     
     def _train_network_gd(self, train_input, train_targets, learning_rate, epochs, verbose):
         self.train_input = train_input

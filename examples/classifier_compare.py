@@ -4,7 +4,7 @@ import autograd.numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from ptwo.models import NeuralNetwork
-from ptwo.activators import sigmoid
+from ptwo.activators import sigmoid, relu6
 from ptwo.costfuns import binary_cross_entropy
 from ptwo.optimizers import ADAM
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
@@ -39,10 +39,10 @@ test_in = standard_scaler.transform(test_in)
 
 #joint parameters
 np.random.seed(42)
-epochs = 1000
+epochs = 500
 lrate = 0.1
 layer_output_sizes = [100,  2]
-activators = [sigmoid, sigmoid]
+activators = [relu6, sigmoid]
 
 print(f"\n\n ------------ Building neural networks with {len(layer_output_sizes)} layer for Sklearn and own FFNN ------------ \n")
 #sklearn classifier: 
@@ -63,5 +63,5 @@ print("SKLEARN NN", clf.score(test_in, test_o))
 print("OUR NN", NN.accuracy(test_in, test_o))
 
 # confusion matrix - this doesnt work...
-conf = confusion_matrix(test_o, clf_test_pred)
+#conf = confusion_matrix(test_o, clf_test_pred)
 #ConfusionMatrixDisplay(test_o, clf_test_pred).plot(conf)
