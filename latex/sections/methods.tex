@@ -7,21 +7,50 @@
 Janita, Even writes about GD and SGD?
 %------------ Background? -------------------------------------
 \subsection{Regression vs. Classification}\label{ssec:regression_classification}
+In regression problems the aim is to find a functional relationship between a dependent variable, and one or more independent variables. For linear regression the outcome is a linear function which approximates this relationship. For terrain data, the input are coordinates and the output is the height.
+
+In classification, however, the aim is to separate the outputs into classes, and the model assigns a class for the input. We focused on two classification methods for predicting breast cancer, specifically logistic regression and neural networks.
 
 
 %------------ Logistic Regression -----------------------------
 \subsection{Logistic Regression}\label{ssec:logreg}
-Logistic regression is a method of classification, which estimates the probability of being in a certain class. In contrast to linear regression methods, where the outcome is continuous function, the outcome of logistic regression is a linear classifier which gives a decision boundary between classes. This method is often used as a baseline model, particularly in problems in the nature of binary classification, which is what we will focus on.
+Logistic regression is a method of classification, which estimates the probability of being in a certain class. In contrast to linear regression methods, where the outcome is an approximation of a continuous function, the outcome of logistic regression is a classifier which gives decision boundaries between classes. This method is often used as a baseline model, particularly in problems in the nature of binary classification, which is what we will focus on.
 
-The sigmoid function is used to fit the model, and is written as
+The sigmoid function in Equation \eqref{eq:sigmoid}, is used to assign a class to the input data, by determining the likelihood of that event.
 \begin{equation}\label{eq:sigmoid}
     p(z) = \frac{1}{1 + \exp{-z}} , 
 \end{equation}
-where $z$ is the model's prediction. We define the cost function as the log-likelihood in Equation \eqref{eq:log_likelihood}, which is derived from the Maximum Likelihood Principle.
+where $z$ is the model's predicted outcome. We define the cost function as the log-likelihood in Equation \eqref{eq:log_likelihood}, which is derived from the Maximum Likelihood Principle \cite[p. 31]{hastie:2009:elements}.
 \begin{equation}\label{eq:log_likelihood}
-    \mathcal{C}(\mathbf{\beta}) = - \sum_{i=1}^{n} (y_{i} (\beta_{0} + \beta_{1} x_{i}) - \log (1 + \exp{\beta_{0} + \beta_{1} x_{i}})))
+\begin{split}
+    \mathcal{C}(\mathbf{\beta}) = \sum_{i=1}^{n} & (y_{i} \log p(y_{i} = 1 | x_{i}, \beta) \\
+    & + (1 - y_{i}) \log (1 - p(y_{i} = 1 | x_{i}, \beta x_{i})))
+\end{split}
 \end{equation}
+Re-writing the logarithms, and maximizing with respect to $\beta$ result in the cross entropy cost function in Equation \eqref{eq:cross_entropy}.
+\begin{equation}\label{eq:cross_entropy}
+\begin{split}
+    \mathcal{C}(\mathbf{\beta}) = - \sum_{i=1}^{n} & (y_{i} (\beta_{0} + \beta_{1} x_{i}) \\
+    &- \log (1 + \exp{\beta_{0} + \beta_{1} x_{i}})))
+\end{split}
+\end{equation}
+Here we can also add a term of regulatization, such as the $L_{2}$ regularization 
+\begin{equation}
+    L_{2} = \lambda || \beta ||_{2}^{2} ,
+\end{equation}
+where $\lambda$ is the penalty parameter.
 
+The cost function is a convex function, and by minimizing it we find the derivatives
+\begin{equation}\label{eq:d_cross_entropy}
+    \frac{\partial \mathcal{C} \beta}{\partial \beta} = - \mathbf{X}^{T} (\mathbf{y} - \mathbf{p})
+\end{equation}
+and 
+\begin{equation}\label{eq:dd_cross_entropy}
+    \frac{\partial^{2} \mathcal{C} \beta}{\partial \beta \partial \beta^{T}} = \mathbf{X}^{T} \mathbf{W} \mathbf{X} .
+\end{equation}
+The matrix $\mathbf{X}$ contains the input values, $\mathbf{y}$ the target classes, $\mathbf{p}$ the probabilities of an outcome class, and $\mathbf{W}$ is the diagonal matrix with the product of the probabilities. 
+
+To find the minima of our function, we used both the gradient descent and stochastic gradient descent methods.
 
 %------------ Gradient Descent --------------------------------
 \subsection{Gradient Descent}\label{ssec:gradient_descent}
