@@ -58,9 +58,10 @@ def compare_models():
         network_input_size=n_features, 
         layer_output_sizes=[1],
         activation_funcs=[sigmoid],
-        cost_function=binary_cross_entropy,
-        classification=True
+        cost_function = binary_cross_entropy,
+        classification = True
     )
+
     logreg_nn.train_network(X_train_scaled, y_train)
     y_prob = logreg_nn.predict(X_test_scaled)
     y_pred = (y_prob>0.5).astype('int')

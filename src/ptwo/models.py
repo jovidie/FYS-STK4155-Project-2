@@ -276,8 +276,7 @@ class LogisticRegression:
         for i in range(n_epochs):
             y_pred = self.forward(X)
             grad = self.gradient(X, y, y_pred) + self._lmbda * self._beta
-            # Without optimizer
-            self._beta -= self._eta / self._n_data * grad
+            self._beta -= self._eta * grad #/ self._n_data * grad
 
 
     def _sgd(self, X, y, n_epochs, batch_size):
