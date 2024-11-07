@@ -67,14 +67,44 @@ We tested a set of different optimizers and learning rates on our breast cancer 
 
 After splitting and normalizing the input data, we trained our neural net against Sklearns MLPClassifier with the same amount of layers. We chose the ReLU6 activation function for the first 100-node layer, and the final layer was sigmoidal. For argumentation, see Subsection \ref{sssec:activation_functions}.
 
-To prevent potential unwelcome batch effects that can occur from random splitting of test and train data, we did a 10-fold cross validation inside the NN-data and chose the back-propagation path with the best accuracy. The result was suprisingly that our neural network performed better than Sklearn to a very small degree, as presented below: 
+To prevent potential unwelcome batch effects that can occur from random splitting of test and train data, we did a 10-fold cross validation inside the NN-data and chose the back-propagation path with the best accuracy. The result was suprisingly that our neural network performed better than Sklearn to a very small degree, as presented in Figure \ref{fig:our confusion matrix} and \ref{fig:sklearns confusion matrix}, as well as in \ref{fig:roc}.
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.99\linewidth]{figures/ourWBC_final_ADAM_relu6-100_sigmoid-2.pdf}
+    \caption{Confusion matrix displaying how our NN performs on test data after training for 200 epochs with 10-fold cross validation.}
+    \label{fig:our confusion matrix}
+\end{figure}
 
+We then compared the same train and test set with the same amount of layers with Sklearn's classifier, which had a ReLU and a sigmoidal layer, the results are presented in Figure \ref{fig:sklearns confusion matrix}. We summarize the sensitivity and specificity of both models in Table \ref{table:sensitivity and specificity}. 
 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.99\linewidth]{latex/figures/sklearnWBC_final_ADAM_relu6-100_sigmoid-2.pdf}
+    \caption{Confusion matrix displaying how Sklearn's NN performs on test data after training for 200 epochs. Accuracy of 1, as seen in plot title.}
+    \label{fig:sklearns confusion matrix}
+\end{figure}
 
-- A couple of sentences on choosing optimizer
-- Classification and accuracy of binary classification\\
-- Discuss the results and analyze the different parameters used (learning rate, lambda) and the effect of different activation functions\\
-- Compare with similar code from Scikit-Learn etc.\\
+\begin{table}[h!]
+\centering
+\begin{tabular}{ccc}
+\hline
+\textbf{Method} & \textbf{Sensitivity} & \textbf{Specificity} \\
+\hline
+Our NN          & 1.0                           & 1.0                  \\
+Sklearn's NN    & 0.9778                        & 1.0                  \\
+\hline
+\label{table:sensitivity and specificity}
+\end{tabular}
+\caption{Sensitivity and Specificity for each method based on the confusion matrices. Accuracy of 0.9912, as seen in the plot title.}
+\end{table}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.99\linewidth]{latex/figures/ADAM_AUCROC_ADAM_relu6-100_sigmoid-2.pdf}
+    \caption{Receiver operating characteristic (ROC) curve displaying the true positive rate against the false positive rate. The dotted line shows what our model would predict if outputs were completely random. The figure tells us that both models are perfect (our) or near perfect (Sklearn) predictors on the test data.}
+    \label{fig:roc}
+\end{figure}
+
 - Compare with logistic regression\\
 
