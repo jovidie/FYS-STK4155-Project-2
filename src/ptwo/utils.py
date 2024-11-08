@@ -81,14 +81,17 @@ def preprocess_cancer_data(save=False):
     ROOT = git.Repo(".", search_parent_directories=True).working_dir
     filename = "wisconsin_breast_cancer_data.csv"
     df = pd.read_csv(f"{ROOT}/data/{filename}")
-
+    print(df)
     # Clean up
     not_include = ["id", "diagnosis", "Unnamed: 32"]
     input_features = df[df.columns.difference(not_include)]
+    print(input_features)
     target_feature = df.diagnosis
+    print(target_feature)
     # Transform to binary
     pd.set_option('future.no_silent_downcasting', True)
     target_feature.replace({"M":1, "B":0}, inplace=True)
+    print(target_feature)
 
     if save:
         dataset = pd.concat([input_features, target_feature], axis=1).reindex(input_features.index)
@@ -96,8 +99,11 @@ def preprocess_cancer_data(save=False):
         dataset.to_csv(f"{ROOT}/data/{save_as}.csv")
 
     else:
-        X = np.array(input_features, dtype=float)
-        y = np.array(target_feature, dtype=float)
+        # X = np.array(input_features, dtype=float)
+        # y = np.array(target_feature, dtype=float)
+        X = input_features.to_numpy()
+        print(X[:, :2])
+        y = target_feature.to_numpy()
         return X, y
     
 
