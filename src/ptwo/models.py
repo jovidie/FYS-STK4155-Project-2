@@ -255,11 +255,29 @@ class LogisticRegression:
         self._lmbda = lmbda
         self._bias = bias
         self._beta = None
+        self._train_losses = []
+        self._train_accuracies = []
+        self._epochs_trained = None
+
+    @property
+    def epochs(self):
+        return self._epochs_trained
+    
+    @epochs.setter
+    def epochs(self, epoch):
+        self._epochs_trained = epoch
+
+    @property
+    def get_loss(self):
+        return self._train_losses
+    
+    @property
+    def get_accuracies(self):
+        return self._train_accuracies
     
     def _init_params(self, X):
         self._n_data, self._n_features = X.shape 
-        self._beta = np.random.randn(self._n_features+1)
-        return self._add_bias(X)
+        self._beta = np.random.randn(self._n_features)
 
     def _add_bias(self, X):
         N = X.shape[0]
@@ -269,7 +287,7 @@ class LogisticRegression:
     def _scheduler(self, t):
         return self._batch_size/(t + self._n_epochs)
 
-    def _gd(self, X, y, n_epochs):
+    def _gd(self, X, y, n_epochs, tol, n_epochs_no_update):
         """Gradient descent solver method, to fit beta param.
         
         Args:
@@ -280,11 +298,27 @@ class LogisticRegression:
         Returns:
             None
         """
-        for i in range(n_epochs):
-            y_pred = self.forward(X)
-            grad = self.gradient(X, y, y_pred) + self._lmbda * self._beta
-            self._beta -= self._eta * grad
+        prev_loss = n_epochs
+        no_update = 0
+        for epoch in range(n_epochs):
+            y_pred = self.predict(X)
+            grad_est = self.gradient(X, y, y_pred) 
+            self._beta -= self._eta * grad_est
+            # Evaluate 
+            train_loss = np.mean(grad_est)
+            self._train_losses.append(train_loss)
+            train_acc = accuracy_score(y, y_pred)
+            self._train_accuracies.append(train_acc)
 
+            loss_update = prev_loss - train_loss
+            if loss_update < tol:
+                no_update += 1
+            else:
+                no_update = 0
+
+            if no_update >= n_epochs_no_update: 
+                self.epochs_trained = epoch + 1
+                break
 
     def _sgd(self, X, y, n_epochs, batch_size):
         """Stochastic gradient descent solver method, to fit beta param.
@@ -308,7 +342,7 @@ class LogisticRegression:
                 idx = batch_size*np.random.randint(n_batches)
                 xi = X[idx:idx+batch_size]
                 yi = y[idx:idx+batch_size]
-                y_pred = self.forward(xi)
+                y_pred = self.predict(xi)
                 grad = self.gradient(xi, yi, y_pred)
                 # self._eta = self._optimizer(grad)
                 self._eta = self._scheduler(epoch*n_batches+i)
@@ -318,7 +352,8 @@ class LogisticRegression:
 
     def sigmoid(self, X):
         # Handles overflow in exp using scipy expit
-        return 1.0 / (1 + expit(-1.0 * X))
+        # return 1.0 / (1 + np.exp(-X))
+        return 1.0 / (1 + expit(-X))
 
     def gradient(self, X, y, y_pred):
         return X.T @ (self.sigmoid(y_pred - y)) #/ self._n_data
@@ -339,10 +374,14 @@ class LogisticRegression:
         y_cat = (y_pred > threshold).astype('int')
         return np.mean(y_cat == y_true)
     
-    def cost(self, y_pred, y_true):
-        with np.errstate(divide='ignore', invalid='ignore'):
-            result = - np.mean(y_true*np.log(y_pred) + (1 - y_true)*np.log(1 - y_pred))
-            return result
+    def cost(self, y_true, y_pred):
+        prob = y_pred*y_true + (1 - y_pred) * (1 - y_true)
+        return - np.sum(np.log(prob))
+        # with np.errstate(divide='ignore', invalid='ignore'):
+        #     result = - np.mean(y_true*np.log(y_pred) + (1 - y_true)*np.log(1 - y_pred))
+        #     return result
+        # y_pred = self.predict_bias(X)
+        # return - np.mean(y * np.log(y_pred + 1e-15) + (1 - y) * np.log(1 - y_pred + 1e-15))
         
     def cost_reg(self, y_pred, y_true):
         n = len(y_true)
@@ -351,7 +390,7 @@ class LogisticRegression:
             l2 = self._lmbda * np.sum(self._beta*self._beta) / n
             return term + l2
     
-    def fit(self, X_train, y_train, batch_size=None, optimizer=None, eta=0.01, n_epochs=1000):
+    def fit(self, X_train, y_train, batch_size=None, optimizer=None, eta=0.01, n_epochs=1000, tol=0.001, n_epochs_no_update=10):
         """Train the model using either the gradient descent or stochastic 
         gradient descent method.
         
@@ -372,24 +411,29 @@ class LogisticRegression:
             self._optimizer = optimizer
 
         if self._beta is None:
-            X_train = self._init_params(X_train) 
+            self._init_params(X_train) 
         
         if batch_size is None:
-            self._gd(X_train, y_train, n_epochs)
+            self._gd(X_train, y_train, n_epochs, tol, n_epochs_no_update)
         
         else:
             self._sgd(X_train, y_train, n_epochs, batch_size)
 
     
     def predict(self, X, threshold=0.5):
-        X = self._add_bias(X)
+        score = self.forward(X)
+        self._y_pred = (score>threshold).astype('int')
+        return self._y_pred
+    
+    def predict_bias(self, X, threshold=0.5):
+        # X = self._add_bias(X)
         score = self.forward(X)
         self._y_pred = (score>threshold).astype('int')
         return self._y_pred
     
 
     def predict_proba(self, X):
-        X = self._add_bias(X)
+        # X = self._add_bias(X)
         return self.forward(X)
     
 
