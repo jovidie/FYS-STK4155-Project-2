@@ -1,7 +1,9 @@
+from os import access
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix, accuracy_score
 
 def set_plt_params(remove_grid=False):
     """Set parameters and use seaborn theme to plot."""
@@ -129,5 +131,56 @@ def plot_mse(common, mse_test, mse_train=None, figname=None):
     if figname is not None:
         fig.savefig(f"latex/figures/{figname}.pdf", bbox_inches="tight")
         
+    else:
+        plt.show()
+
+
+def plot_loss_acc(common, loss, acc, figname=None):
+    """Function to show how to plot MSE and R2 score in one plot.
+    
+    Args:
+        common (np.ndarray): common feature to plot
+        mse (np.ndarray): MSE values
+        r2 (np.ndarray): R2 score values
+		figname (str): saves figure with the given name 
+		
+	Returns:
+        None
+    """
+    c = sns.color_palette("mako", n_colors=2, as_cmap=False)
+
+    fig, ax = plt.subplots(layout='constrained')
+    ax2 = ax.twinx()
+    ax.plot(common, loss, color=c[0],  label="Loss")
+    ax2.plot(common, acc, color=c[1], label="Accuracy")
+
+    ax2.grid(None)
+
+    loss_lines, loss_labels = ax.get_legend_handles_labels()
+    acc_lines, acc_labels = ax2.get_legend_handles_labels() 
+    ax2.legend(loss_lines+acc_lines, loss_labels+acc_labels, loc="upper right")
+
+    # Change Common to feature name to plot against eg. degree, epoch
+    ax.set_xlabel("Common")
+    ax.set_ylabel("Loss")
+    ax2.set_ylabel("Accuracy")
+
+    if figname is not None:
+        fig.savefig(f"latex/figures/{figname}.pdf", bbox_inches="tight")
+    
+    else:
+        plt.show()
+
+
+def plot_confusion(y_pred, y_test, title, figname=None):
+    acc = accuracy_score(y_test, y_pred)
+    c = sns.color_palette("mako", as_cmap=True)
+    conf1 = confusion_matrix(y_test, y_pred, labels = [0, 1])
+    ConfusionMatrixDisplay(conf1).plot(cmap=c)
+    plt.title(f"{title}, acc: {acc:.4f}")
+
+    if figname is not None:
+        plt.savefig(f"latex/figures/{figname}.pdf", bbox_inches="tight")
+    
     else:
         plt.show()
