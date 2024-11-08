@@ -4,7 +4,6 @@
 % Explain how everything is implemented, and possibly mention the structure of the algorithm. 
 % Add demonstrations such as tests, selected runs and validations. 
 %==============================================================
-Janita, Even writes about GD and SGD?
 %------------ Background? -------------------------------------
 \subsection{Regression vs. Classification}\label{ssec:regression_classification}
 In regression problems the aim is to find a functional relationship between a dependent variable, and one or more independent variables. For linear regression the outcome is a linear function which approximates this relationship. For terrain data, the input are coordinates and the output is the height.
@@ -56,7 +55,7 @@ To find the minima of our function, we used both the gradient descent and stocha
 \subsection{Gradient Descent}\label{ssec:gradient_descent}
 
 %% work-in-progress her, må samle tankene for å forklare dette på en god måte!
-For both regression and classification, we want to optimize a set of parameters $\theta$ given a cost function $C(X, \theta)$. This is ususally done by minimizing the cost function. One way of finding the minimum of the cost function given our parameters is by gradient descent (GD) (Algorithm \ref{alg:gd}). In gradient descent you start with a random set of parameters, and change these in small steps towards the optimal values by moving iteratively along a gradient \cite{Goodfellow:2016:deep_learning}. The gradient is found by calculating the first derivatives of the cost function with respect to the parameters, and evaluating these for each iteration. The rate of descent for each parameter is ideally determined using Newton's method, but this requires the often prohibitively expensive operation of calculating the Hessian matrix \cite{battiti1992:newtons_method}. Instead, it is common use a fixed step size $\eta$, known as the learning rate of the model. The algorithm is run either until some convergence criterion is reached (e.g., gradients approaching 0) it reaches the maximum number of iterations.
+For both regression and classification, we want to optimize a set of parameters $\theta$ given a cost function $C(X, \theta)$, usually by minimizing the cost function. One way of finding the minimum of the cost function given our parameters is by gradient descent (GD) (Algorithm \ref{alg:gd}). In gradient descent you start with a random set of parameters, and change these in small steps towards the optimal values by moving iteratively along a gradient \cite{Goodfellow:2016:deep_learning}. The gradient is found by calculating the first derivatives of the cost function with respect to the parameters, and evaluating these for each iteration. The rate of descent for each parameter is ideally determined using Newton's method, but this requires the often prohibitively expensive operation of calculating the Hessian matrix \cite{battiti1992:newtons_method}. Instead, it is common use a fixed step size $\eta$, known as the learning rate of the model. The algorithm is run either until some convergence criterion is reached (e.g., gradients approaching 0) it reaches the maximum number of iterations.
 
 \begin{algorithm}
 \caption{Gradient descent}\label{alg:gd}

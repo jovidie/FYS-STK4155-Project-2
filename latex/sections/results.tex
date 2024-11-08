@@ -36,9 +36,6 @@ We used simple data generated from the Franke function \cite{franke1979} with ad
 
 We found the optimal parameters for gradient descent on the terrain data through a grid-search of $\lambda$ and learning rates. The optimal model was SGD with the ADAM optimizer, $\lambda=1.7\cdot10^{-6}$, and learning rate $\eta=1.78\cdot10^{-3}$, giving a test MSE of 0.19 on scaled, centered data. The model captured the general patterns in the terrain, but the predictions were less detailed than those from Ridge regression (Figure \ref{fig:terrain-allfigs}). This result is expected, as gradient descent with a Ridge gradient and polynomial features simply tries to approximate the best solution, which is found analytically in Ridge regression.
 
-\subsection{Regression analysis with the feed-forward neural network}
-
-We used our FFNN to predict the landscape
 
 \begin{figure*}[t]
     \centering
@@ -49,7 +46,7 @@ We used our FFNN to predict the landscape
             \caption{Terrain}
             \label{fig:terrain1}
         \end{subfigure} &
-        \begin{subfigure}[b]{0.37\textwidth}
+        \begin{subfigure}[b]{0.49\textwidth}
             \centering
             \includegraphics[width=\textwidth]{latex/figures/ridge_terrain1_prediction.pdf}
             \caption{Prediction from Ridge regression}
@@ -73,12 +70,18 @@ We used our FFNN to predict the landscape
 \end{figure*}
 \clearpage
 
-- compare to project 1\\
-- discuss results compared to OLS/Ridge\\
-- Optimal learning rates and parameters, lambda-learningrate grid-search\\
-- discuss activation functions\\
-- discuss initialization of learning rates\\
+\subsection{Validating the FFNN on terrain data}
 
+We used our FFNN to predict the terrain data to compare with gradient descent and Ridge regression. SGD with the ADAM optimizer gave the best results, producing an MSE of 0.0491 with $lambda=10^-9$ and $\eta=1.67\cdot10^{-2}$ (Figure \ref{fig:nn-terrain-sgd-grid}). The MSE is considerably lower than for just SGD on the same data, and the predictions seem to match the true terrain better visually (Figure \ref{fig:terrain1-nn}. The terrain is also arguably visually closer to the terrain than ridge regression, albeit with some artifacts.
+
+In Ridge (and OLS) regression, and the gradient descent algorithm, we had to assume that the terrain could be explained by a polynomial, and were similarly constrained by using polynomial functions to describe our data. In the FFNN, however, we had no such constraints, and allowed the network to run on just the input data (the grid coordinates). That we can achieve similar or better results on a neural network allows for analyzing and predicting data with fewer initial assumptions.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.99\linewidth]{latex/figures/nn-grid-search-sgd.pdf}
+    \caption{Grid search of learning rate $\eta$ and regularization parameter $\lambda$ for a feed-forward neural network (FFNN) using stochastic gradient descent on the terrain data. The optimal combination of parameters is $lambda=10^{-9}$ and $\eta=1.67\cdot10^{-2}$. The neural network was run for 50 epochs with batch size 32. It had 2 hidden layers with, respectively, 20 nodes and the ReLu activation function, and 10 nodes and the sigmoid activation function. The output layer had 1 node, and an identity activation function.}
+    \label{fig:nn-terrain-sgd-grid}
+\end{figure}
 
 \subsection{Breast cancer data}
 We tested a set of different optimizers and learning rates on our breast cancer (BC) data, and found the best optimizer to be Adam, as is the golden standard for many NN problems today. The optimal learning rate with Adam was 0.1. To perform the classification we chose two layers of size 100 and 2, where our final layer output was a $n\ x\ 2$ vector with probabilities for each column, or diagnosis. We tested the network for up to 4 layers, but observed that accuracy on the test set decreased. This can be seen as a consequence of over-parametrization of the NN. Interestingly, the Sklearn NN acuracy fell more drastically that our NN, perhaps due to the 10-fold validatino step. For information about this selection process, see our appendix. "cite something?"
