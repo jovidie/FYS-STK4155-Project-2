@@ -96,9 +96,9 @@ def compare_models():
         cost_function = binary_cross_entropy,
         classification = True
     )
-
-    logreg_nn.train_network(X_train_scaled, y_train, learning_rate = 0.1, epochs = 1000, verbose = True)
+    
     y_prob = logreg_nn.predict(X_test_scaled)
+    logreg_nn.train_network(X_train_scaled, y_train, learning_rate = 0.1, epochs = 1000, verbose = True)
     y_pred = (y_prob>0.5).astype('int')
     # print(y_pred)
     # print(y_test)

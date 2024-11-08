@@ -151,7 +151,11 @@ plt.show()
 ```
 
 
+Tests were ran for all optimizer methods as well as for GD and SGD. Adam was by far the best algorithm for this. 
 
 ```{python}
-from cancer_tests import gd_test, sgd_test, rmsprop_sgd_test, momentum_sgd_test, adagrad_sgd_test, adam_sgd_test
+#from cancer_tests import gd_test, sgd_test, rmsprop_sgd_test, #momentum_sgd_test, adagrad_sgd_test, adam_sgd_test
 ```
+
+All methods were tested using different hyperparamters. The figure below illustrates how the models with performs with optimal parameters. 
+![All methods](../latex/figures/all_methods_cancer_NN.pdf){width=400%}

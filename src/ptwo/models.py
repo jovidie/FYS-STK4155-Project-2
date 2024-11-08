@@ -57,7 +57,7 @@ class NeuralNetwork:
             else:
                 # Xavier/Glorot initialization for sigmoidal non-linear activation functions
                 W = np.random.randn(i_size, layer_output_size) * np.sqrt(1/i_size)
-            #b = np.random.randn(layer_output_size)
+            b = np.random.randn(layer_output_size)
             # bias initialized as 0
             b = np.zeros(layer_output_size)
             # https://stackoverflow.com/questions/44883861/initial-bias-values-for-a-neural-network

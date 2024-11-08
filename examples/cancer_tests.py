@@ -17,7 +17,7 @@ set_plt_params()
 
 def main():
     #importing data:
-    data = pd.read_csv("../data/wisconsin_breast_cancer_data.csv")
+    data = pd.read_csv("./data/wisconsin_breast_cancer_data.csv")
     print(f"DATA\n{data}")
 
     # preprocessing data: 
@@ -302,10 +302,11 @@ def main():
             plt.show()
 
     #adam_sgd_test(fig, axs)
+    fig, axs = plt.subplots(2,1)
 
     all_tests = [gd_test, sgd_test, momentum_sgd_test, rmsprop_sgd_test, adagrad_sgd_test, adam_sgd_test]
     l_rate = [[x] for x in [0.9, 0.9, 0.1, 0.1, 0.1, 0.1]]
-    """
+    
     for ind, test in enumerate(all_tests):
         test(fig, axs, epochs = 400, lrates = l_rate[ind], display_data = False)
     #    if ind == len(all_tests)-1:
@@ -321,7 +322,8 @@ def main():
     axs[1].legend(loc = "upper right")
     fig.suptitle(f"Loss function and accuracy wih different optimizsers")
     fig.tight_layout()
-    """
+    plt.show()
+    
     #plt.savefig("./latex/figures/all_methods_cancer_NN.pdf", bbox_inches = "tight")
     #plt.show()
 
