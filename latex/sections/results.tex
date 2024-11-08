@@ -38,14 +38,14 @@ We found the optimal parameters for gradient descent on the terrain data through
 
 \subsection{Regression analysis with the feed-forward neural network}
 
-
+We used our FFNN to predict the landscape
 
 \begin{figure*}[t]
     \centering
     \begin{tabular}{cc}
-        \begin{subfigure}[b]{0.37\textwidth}
+        \begin{subfigure}[b]{0.49\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{latex/figures/terrain1.pdf}
+            \includegraphics[width=\textwidth]{examples/tests_even/figs/terrain-map.pdf}
             \caption{Terrain}
             \label{fig:terrain1}
         \end{subfigure} &
@@ -55,13 +55,13 @@ We found the optimal parameters for gradient descent on the terrain data through
             \caption{Prediction from Ridge regression}
             \label{fig:terrain1-ridge}
         \end{subfigure} \\
-        \begin{subfigure}[b]{0.5\textwidth}
+        \begin{subfigure}[b]{0.49\textwidth}
             \centering
             \includegraphics[width=\textwidth]{examples/tests_even/figs/gradient-descent-terrain-map.pdf}
             \caption{Prediction from stochastic gradient descent}
             \label{fig:terrain1-gd}
         \end{subfigure} &
-        \begin{subfigure}[b]{0.5\textwidth}
+        \begin{subfigure}[b]{0.49\textwidth}
             \centering
             \includegraphics[width=\textwidth]{examples/tests_even/figs/neural-network-terrain-map.pdf}
             \caption{Prediction from the neural network}
