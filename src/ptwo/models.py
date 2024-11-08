@@ -251,13 +251,20 @@ class LogisticRegression:
     """Logistic regression model, fit data using either gradient or stochastic
     gradient descent method. Predicts target probability using the sigmoid function,
     and target class using a threshold."""
-    def __init__(self, lmbda=0.0):
+    def __init__(self, lmbda=0.0, bias=1):
         self._lmbda = lmbda
+        self._bias = bias
         self._beta = None
     
     def _init_params(self, X):
         self._n_data, self._n_features = X.shape 
-        self._beta = np.random.randn(self._n_features)
+        self._beta = np.random.randn(self._n_features+1)
+        return self._add_bias(X)
+
+    def _add_bias(self, X):
+        N = X.shape[0]
+        biases = np.ones((N, 1)) * self._bias
+        return np.concatenate((biases, X), axis  = 1) 
 
     def _scheduler(self, t):
         return self._batch_size/(t + self._n_epochs)
@@ -276,7 +283,7 @@ class LogisticRegression:
         for i in range(n_epochs):
             y_pred = self.forward(X)
             grad = self.gradient(X, y, y_pred) + self._lmbda * self._beta
-            self._beta -= self._eta * grad #/ self._n_data * grad
+            self._beta -= self._eta * grad
 
 
     def _sgd(self, X, y, n_epochs, batch_size):
@@ -361,9 +368,11 @@ class LogisticRegression:
         self._eta = eta
         if optimizer is None:
             self._optimizer = self._scheduler
+        else:
+            self._optimizer = optimizer
 
         if self._beta is None:
-            self._init_params(X_train) 
+            X_train = self._init_params(X_train) 
         
         if batch_size is None:
             self._gd(X_train, y_train, n_epochs)
@@ -373,12 +382,14 @@ class LogisticRegression:
 
     
     def predict(self, X, threshold=0.5):
+        X = self._add_bias(X)
         score = self.forward(X)
         self._y_pred = (score>threshold).astype('int')
         return self._y_pred
     
 
     def predict_proba(self, X):
+        X = self._add_bias(X)
         return self.forward(X)
     
 
