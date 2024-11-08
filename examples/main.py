@@ -2,14 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
+from sklearn.linear_model import LogisticRegression as LogReg
 from sklearn.datasets import load_breast_cancer
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.metrics import accuracy_score
 
 from ptwo.models import NeuralNetwork, LogisticRegression
 from ptwo.utils import preprocess_cancer_data
 from ptwo.activators import sigmoid
 from ptwo.costfuns import binary_cross_entropy
-#from ptwo.optimizers import 
+from ptwo.optimizers import ADAM, AdaGrad, RMSProp
 
 def part_a():
     # GD with fixed learning rate and analytical gradient
@@ -55,6 +57,8 @@ def part_e():
     n_data, n_features = X.shape
     n_outputs = y.shape
     eta = 0.001
+    n_epochs = 10000
+    lmbda = 0.001
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     scaler = MinMaxScaler()
@@ -62,28 +66,43 @@ def part_e():
     X_train_scaled = scaler.transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
+    print("\n----------------------------------------------------------------------------------------")
+    print("[        Comparing performance of logistic regression models to SKlearn's model        ] ")
+    print("----------------------------------------------------------------------------------------\n")
+
+
     logreg_nn = NeuralNetwork(
         network_input_size=n_features, 
         layer_output_sizes=[1],
         activation_funcs=[sigmoid],
         cost_function=binary_cross_entropy,
+        # optimizer=RMSProp(),
+        lmb=lmbda,
         classification=True
     )
     logreg_nn.train_network(X_train_scaled, y_train)
-    y_prob = logreg_nn.predict(X_test_scaled)
-    y_pred = (y_prob>0.5).astype('int')
-    # print(y_pred)
-    # print(y_test)
-    acc = np.mean(y_pred == y_test)
-    print(f"NN logreg accuracy {acc}")
+    y_pred_nn = logreg_nn.predict_proba(X_test_scaled)
+    acc_nn = accuracy_score(y_test, y_pred_nn)
+    print(f"NN accuracy {acc_nn}")
 
-    logreg = LogisticRegression()
-    logreg.fit(X_train_scaled, y_train, eta=0.001, n_epochs=1000)
-    y_pred = logreg.predict(X_test_scaled)
-    # print(y_pred)
-    # print(y_test)
-    acc = np.mean(y_pred == y_test)
-    print(f"Logistic regression accuracy {acc}")
+    logreg_gd = LogisticRegression(lmbda=lmbda)
+    logreg_gd.fit(X_train_scaled, y_train, eta=0.001, n_epochs=n_epochs)
+    y_pred_gd = logreg_gd.predict(X_test_scaled)
+    acc_gd = accuracy_score(y_test, y_pred_gd)
+    print(f"GD accuracy {acc_gd}")
+
+    logreg_sgd = LogisticRegression(lmbda=lmbda)
+    logreg_sgd.fit(X_train_scaled, y_train, batch_size=50, optimizer=ADAM(), eta=0.001, n_epochs=n_epochs)
+    y_pred_sgd = logreg_sgd.predict(X_test_scaled)
+    acc_sgd = accuracy_score(y_test, y_pred_sgd)
+    print(f"SGD accuracy {acc_sgd}")
+
+    logreg_sk = LogReg(fit_intercept=False, max_iter=n_epochs)
+    logreg_sk.fit(X_train_scaled, y_train)
+    y_pred_sk = logreg_sk.predict(X_test_scaled)
+    acc_sk = accuracy_score(y_test, y_pred_sk)
+    print(f"SKlearn accuracy {acc_sk}")
+
     
 
 # part f is discussion only
@@ -91,36 +110,8 @@ def part_e():
 def main():
     pass
 
-def identity(X):
-    return X
-
-class Scheduler:
-    """
-    Abstract class for Schedulers
-    """
-
-    def __init__(self, eta):
-        self.eta = eta
-
-    # should be overwritten
-    def update_change(self, gradient):
-        raise NotImplementedError
-
-    # overwritten if needed
-    def reset(self):
-        pass
-
-
-class Constant(Scheduler):
-    def __init__(self, eta):
-        super().__init__(eta)
-
-    def update_change(self, gradient):
-        return self.eta * gradient
-    
-    def reset(self):
-        pass
 
 
 if __name__ == '__main__':
+    # np.random.seed(2024)
     part_e()
