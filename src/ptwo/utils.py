@@ -101,6 +101,38 @@ def preprocess_cancer_data(save=False):
         return X, y
     
 
+
+    def nn_tester(method, neuralnetwork, test_train_splits, fig, axs, lrates, epochs = 200, display_data = True):
+        optimizer = neuralnetwork.optimizer.__name__
+        gd_method = method
+
+        print("\n----------------------------------------------------------------------------------------")
+        print("[  Exploring NN with GD and automatic differentiation across different learning rates   ] ")
+        print("----------------------------------------------------------------------------------------\n")
+
+        for lrate in lrates: 
+            print(f"\n\n ------------ Training network with {epochs} epochs and {round(lrate, 4)} learning rate ------------\n")
+            np.random.seed(42)
+            neuralnetwork.train_network(test_train_splits[0], test_train_splits[2], epochs = epochs, learning_rate = lrate, verbose = True)
+            # plotting per learning rate
+            axs[0].plot(neuralnetwork.cost_evolution, label = f"GD; no optimizer, lr: {round(lrate, 4)}")
+            axs[1].plot(neuralnetwork.accuracy_evolution, label = f"GD; no optimmizer, lr: {round(lrate, 4)}")
+
+        if display_data:
+            axs[0].set_title("Loss")
+            axs[0].set_ylabel("Binary cross entropy")
+            axs[0].set_xlabel("Epochs")
+            axs[1].set_title("Accuracy")
+            axs[1].set_xlabel("Epochs")
+            axs[1].set_ylabel("Accuracy")
+            axs[1].axhline(1, ls = ":")
+            axs[0].legend()
+            axs[1].legend()
+            fig.suptitle(f"Loss function and accuracy, {gd_method} w/{epochs} epochs - {optimizer}")
+            plt.savefig("./latex/figures/gd_autodiff_w_learningrates.pdf", bbox_inches = "tight")
+            plt.show()
+    
+
 if __name__ == '__main__':
     pass
     # preprocess_cancer_data(save=True)

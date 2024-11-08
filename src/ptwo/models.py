@@ -80,7 +80,7 @@ class NeuralNetwork:
             l2_term += np.sum(W**2)
         l2_term *= (self.lmb / 2.0)
 
-        return base_cost  #+ l2_term
+        return base_cost  + l2_term
 
     def feed_forward_batch(self, x, layers=None):
         """
@@ -185,7 +185,7 @@ class NeuralNetwork:
         for i in range(epochs):
             layers_grad = gradient_func(train_input, train_targets, self.layers)
             j = 0
-            if i % 100 == 0 and verbose: #printer ut info pr. tiende epoke
+            if i % 10 == 0 and verbose: #printer ut info pr. tiende epoke
                 print("EPOCH:", i)
                 print("COST FUNCTION:", self.get_cost(train_input, train_targets))
                 self.cost_evolution.append(self.get_cost(train_input, train_targets))
@@ -212,7 +212,7 @@ class NeuralNetwork:
         while i < epochs and convergence_not_reached: 
 
             # printing data as we go:
-            if i % 100 == 0 and verbose: #printer ut info pr. x-te epoke
+            if i % 10 == 0 and verbose: #printer ut info pr. x-te epoke
                 cost = self.get_cost(train_input, train_targets)
                 print("EPOCH:", i)
                 print("COST FUNCTION:", cost)

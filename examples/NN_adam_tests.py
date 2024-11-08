@@ -1,81 +1,15 @@
 
-
-
-Importing libraries: 
-
-```{python}
-from sklearn.datasets import load_breast_cancer
 import pandas as pd
+pd.set_option('future.no_silent_downcasting', True)
 import matplotlib.pyplot as plt
 import autograd.numpy as np
-cancer = load_breast_cancer()
-from ptwo.plot import set_plt_params
-pd.set_option('future.no_silent_downcasting', True)
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from ptwo.models import NeuralNetwork
 from ptwo.costfuns import binary_cross_entropy
 from ptwo.optimizers import ADAM
+from ptwo.plot import set_plt_params
 from ptwo.activators import relu6, sigmoid
-set_plt_params()
-```
-
-**Wisconsin Breast Cancer Data**:
-```{python}
-#| fig-cap: "Looking into the overlap of our features separated by diagnosis. This gives us an idea as to how each feature contributes to later classification."
-#| label: fig-S2.1
-
-
-# Making a data frame
-cancerpd = pd.DataFrame(cancer.data, columns=cancer.feature_names)
-
-fig, axes = plt.subplots(15,2,figsize=(10,20))
-malignant = cancer.data[cancer.target == 0]
-benign = cancer.data[cancer.target == 1]
-ax = axes.ravel()
-
-for i in range(30):
-    _, bins = np.histogram(cancer.data[:,i], bins =50)
-    ax[i].hist(malignant[:,i], bins = bins, alpha = 0.5)
-    ax[i].hist(benign[:,i], bins = bins, alpha = 0.5)
-    ax[i].set_title(cancer.feature_names[i])
-    ax[i].set_yticks(())
-ax[0].set_xlabel("Feature magnitude")
-ax[0].set_ylabel("Frequency")
-ax[0].legend(["Malignant", "Benign"], loc ="best")
-fig.tight_layout()
-plt.show()
-
-```
-
-Based on the overlap and lack of overlab between feature distributions, features such as "worst radius", "worst perimeter" and "worst concave points" are clear candidates to features that we suspect contribute to diagnosis. 
-
-
-
-Exploring correlation matrix: 
-
-```{python}
-#| fig-cap: "Looking into the correlation matrix for our features. High correlation = +/-1, the features overlap 100% in either direction."
-#| label: fig-S2.2
-import seaborn as sns
-correlation_matrix = cancerpd.corr().round(1)
-# use the heatmap function from seaborn to plot the correlation matrix
-# annot = True to print the values inside the square
-plt.figure(figsize=(15,8))
-sns.heatmap(data=correlation_matrix, annot=True)
-plt.show()
-```
-
-The correlation matrix gives us an idea of the correlation between different features. For example, we can see how the radius correlates with the area of the nucleus. This means that we can essentially choose one of the features instead of including all of them. 
-
-The features discussed above as good candidates for diagnosis prediction ("worst radius", "worst perimeter" and "worst concave points") show little correlation here, this further strengthens their position as possible features to be selected for prediction. 
-
-
-Selection of first layer in NN: 
-
-```{python}
-#| fig-cap: "Exploring which activation function for our first layer converges faster."
-#| label: fig-S2.3
 
 
 set_plt_params()
@@ -86,7 +20,7 @@ activators1 = [sigmoid, sigmoid]
 activators2 = [relu6, sigmoid]
 data_title = "ADAM"
 #importing data:
-data = pd.read_csv("../data/wisconsin_breast_cancer_data.csv")
+data = pd.read_csv("./data/wisconsin_breast_cancer_data.csv")
 print(f"DATA\n{data}")
 
 # preprocessing data: 
@@ -137,7 +71,7 @@ ax1.set_ylabel("Binary cross entropy")
 ax1.set_xlabel("Per 10 epochs")
 ax1.legend(loc= "upper right")
 plt.tight_layout()
-#plt.savefig("./latex/figures/adam_sgd_costLR.pdf", bbox_inches = "tight")
+plt.savefig("./latex/figures/adam_sgd_costLR.pdf", bbox_inches = "tight")
 #plt.show()
 
 ax2.set_title("Accuracy")
@@ -146,12 +80,5 @@ ax2.set_ylabel("Accuracy")
 ax2.axhline(1, ls = ":")
 ax2.legend(loc= "upper right")
 plt.tight_layout()
-#plt.savefig("./latex/figures/THIS_adam_sgd_LR01-sigmoid+sigmoid_relu6+sigmoid.pdf", bbox_inches = "tight")
+plt.savefig("./latex/figures/THIS_adam_sgd_LR01-sigmoid+sigmoid_relu6+sigmoid.pdf", bbox_inches = "tight")
 plt.show()
-```
-
-
-
-```{python}
-from cancer_tests import gd_test, sgd_test, rmsprop_sgd_test, momentum_sgd_test, adagrad_sgd_test, adam_sgd_test
-```

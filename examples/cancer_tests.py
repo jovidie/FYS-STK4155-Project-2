@@ -17,7 +17,7 @@ set_plt_params()
 
 def main():
     #importing data:
-    data = pd.read_csv("./data/wisconsin_breast_cancer_data.csv")
+    data = pd.read_csv("../data/wisconsin_breast_cancer_data.csv")
     print(f"DATA\n{data}")
 
     # preprocessing data: 
@@ -329,10 +329,10 @@ def main():
     #fig.suptitle(f"Loss function and accuracy for different ADAM learning rates")
     #adam_sgd_test(fig, axis, lrates = 10.**np.arange(-5,0))
 
+    """
     print("\n----------------------------------------------------------------------------------------")
     print("[                    Exploring NN with SGD and ADAM + autodiff                         ] ")
     print("----------------------------------------------------------------------------------------\n")
-
     fig1, ax1 = plt.subplots(1)
     fig2, ax2 = plt.subplots(1)
     for lrate in 10.**np.arange(-5,1):
@@ -363,6 +363,7 @@ def main():
     plt.tight_layout()
     plt.savefig("./latex/figures/adam_sgd_costLR.pdf", bbox_inches = "tight")
     plt.show()
+    """
 
 main()
 
