@@ -101,8 +101,9 @@ def compare_models(figname=None):
     acc_sk = accuracy_score(y_test, y_pred_sk)
     print(f"SKlearn accuracy {acc_sk}")
 
+    set_plt_params()
     plot_loss_acc(epochs, logreg_loss, logreg_acc, figname="logreg_loss_acc")
-
+    set_plt_params(remove_grid=True)
     plot_confusion(y_pred_gd, y_test, figname="logreg_confusion_matrix")
 
     # conf1 = confusion_matrix(y_test, y_pred_gd, labels = [0, 1])
@@ -114,7 +115,6 @@ def compare_models(figname=None):
 
 
 if __name__ == '__main__':
-    set_plt_params()
     warnings.filterwarnings('ignore')
     # test_optimal_params_logreg()
     compare_models()
