@@ -9,7 +9,7 @@
 
 \subsection{Gradient descent}
 
-We applied the gradient descent algorithm to data simulated from a third-degree polynomial without noise to assess convergence to the true parameters (APPENDIX). All parameters converged after approximately 800 iterations using plain gradient descent (figure \ref{fig:poly-converge}). Adding momentum to the gradient descent sped up convergence to around 4-fold (figure \ref{fig:poly-converge-momentum}), and using any optimizer had similar effects on convergence times (APPENDIX FIGS).
+We applied the gradient descent algorithm to data simulated from a third-degree polynomial without noise to assess convergence to the true parameters. All parameters converged after approximately 800 iterations using plain gradient descent (figure \ref{fig:poly-converge}). Adding momentum to the gradient descent sped up convergence to around 4-fold (figure \ref{fig:poly-converge-momentum}), and using any optimizer had similar effects on convergence times.
 
 \begin{figure}
     \centering
@@ -25,7 +25,7 @@ We applied the gradient descent algorithm to data simulated from a third-degree 
     \label{fig:poly-converge-momentum}
 \end{figure}
 
-The choice of learning rate affected the performance of the model regardless of optimizer. For data generated from the Franke function \cite{franke1979} with added noise, the different optimizers had different optimal learning rates, but in general a learning rate between $10^{-3}$ and $1$ gave the best results (figure \ref{fig:franke-learningrate}). For this particular data GD outperformed SGD (APPENDIX). Overall, ADAM consistently gave the lowest mean squared error on the test data over the largest range of learning rates. Because of this, we chose to emphasize ADAM over the other optimizers when analyzing the terrain data.
+We used simple data generated from the Franke function \cite{franke1979} with added noise to investigate the impact of learning rates and optimizers on gradient descent performance. The different optimizers had different optimal learning rates, but in general a learning rate between $10^{-3}$ and $1$ gave the best results (figure \ref{fig:franke-learningrate}). For this particular data GD outperformed SGD. Overall, ADAM consistently gave the lowest mean squared error on the test data over the largest range of learning rates. Because of this, we chose to emphasize ADAM over the other optimizers when analyzing the terrain data.
 
 \begin{figure}
     \centering
@@ -34,59 +34,44 @@ The choice of learning rate affected the performance of the model regardless of 
     \label{fig:franke-learningrate}
 \end{figure}
 
-For gradient descent on the terrain data ...
+We found the optimal parameters for gradient descent on the terrain data through a grid-search of $\lambda$ and learning rates. The optimal model was SGD with the ADAM optimizer, $\lambda=1.7\cdot10^{-6}$, and learning rate $\eta=1.78\cdot10^{-3}$, giving a test MSE of 0.19 on scaled, centered data. The model captured the general patterns in the terrain, but the predictions were less detailed than those from Ridge regression (Figure \ref{fig:terrain-allfigs}). This result is expected, as gradient descent with a Ridge gradient and polynomial features simply tries to approximate the best solution, which is found analytically in Ridge regression.
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.99\linewidth]{examples/tests_even/figs/gradient-descent-terrain-map.pdf}
-    \caption{Prediction of the terrain data from project 1 using gradient descent with a ridge gradient.}
-    \label{fig:enter-label}
-\end{figure}
+\subsection{Regression analysis with the feed-forward neural network}
 
 
 
-- describe implementation\\
-- Show all the different optimizers etc\\
-- compare to regression from last project\\
-- Based on this, we chose to keep this and this optimizer\\
-- include figure of terrain, compare to ridge from last project and data\\
-
-
-
-\subsection{Regression analysis with FFNN}
-
-\begin{figure}[!htbp]
+\begin{figure*}[t]
     \centering
     \begin{tabular}{cc}
-        \begin{subfigure}[b]{0.45\textwidth}
+        \begin{subfigure}[b]{0.37\textwidth}
             \centering
             \includegraphics[width=\textwidth]{latex/figures/terrain1.pdf}
-            \caption{OLS Prediction}
-            \label{fig:OLS}
+            \caption{Terrain}
+            \label{fig:terrain1}
         \end{subfigure} &
-        \begin{subfigure}[b]{0.45\textwidth}
+        \begin{subfigure}[b]{0.37\textwidth}
             \centering
             \includegraphics[width=\textwidth]{latex/figures/ridge_terrain1_prediction.pdf}
-            \caption{Ridge Prediction}
-            \label{fig:ridge}
+            \caption{Prediction from Ridge regression}
+            \label{fig:terrain1-ridge}
         \end{subfigure} \\
-        
-        \begin{subfigure}[b]{0.45\textwidth}
+        \begin{subfigure}[b]{0.5\textwidth}
             \centering
             \includegraphics[width=\textwidth]{examples/tests_even/figs/gradient-descent-terrain-map.pdf}
-            \caption{Lasso Prediction}
-            \label{fig:lasso}
+            \caption{Prediction from stochastic gradient descent}
+            \label{fig:terrain1-gd}
         \end{subfigure} &
-        \begin{subfigure}[b]{0.45\textwidth}
+        \begin{subfigure}[b]{0.5\textwidth}
             \centering
             \includegraphics[width=\textwidth]{examples/tests_even/figs/neural-network-terrain-map.pdf}
-            \caption{Terrain}
-            \label{fig:terrain}
+            \caption{Prediction from the neural network}
+            \label{fig:terrain1-nn}
         \end{subfigure}
     \end{tabular}
-    \caption{Various models' predictions for Terrain 2}
-    \label{fig:main_caption}
-\end{figure}
+    \caption{Prediction of terrain data (a) using various methods.}
+    \label{fig:terrain-allfigs}
+\end{figure*}
+\clearpage
 
 - compare to project 1\\
 - discuss results compared to OLS/Ridge\\
@@ -96,7 +81,7 @@ For gradient descent on the terrain data ...
 
 
 \subsection{Breast cancer data}
-We tested a set of different optimizers and learning rates on our breast cancer (BC) data, and found the best optimizer to be Adam, as is the golden standard for many NN problems today. The optimal learning rate with Adam was 0.1. To perform the classification we chose two layers of size 100 and 2, where our final layer output was a $n\ x\ 2$ vector with probabilities for each column, or diagnosis. For information about this selection process, see our appendix. "cite something?"
+We tested a set of different optimizers and learning rates on our breast cancer (BC) data, and found the best optimizer to be Adam, as is the golden standard for many NN problems today. The optimal learning rate with Adam was 0.1. To perform the classification we chose two layers of size 100 and 2, where our final layer output was a $n\ x\ 2$ vector with probabilities for each column, or diagnosis. We tested the network for up to 4 layers, but observed that accuracy on the test set decreased. This can be seen as a consequence of over-parametrization of the NN. Interestingly, the Sklearn NN acuracy fell more drastically that our NN, perhaps due to the 10-fold validatino step. For information about this selection process, see our appendix. "cite something?"
 
 After splitting and normalizing the input data, we trained our neural net against Sklearns MLPClassifier with the same amount of layers. We chose the ReLU6 activation function for the first 100-node layer, and the final two-node layer had a sigmoidal activation function. For argumentation, see Subsection \ref{sssec:activation_functions}.
 
@@ -109,7 +94,7 @@ To prevent potential unwelcome batch effects that can occur from random splittin
     \label{fig:our confusion matrix}
 \end{figure}
 
-We then compared the same train and test set with the same amount of layers with Sklearn's classifier, which had a ReLU activation function and a sigmoidal activation function for the 100-node and 2-node layer, respectively. The results are presented in Figure \ref{fig:sklearns confusion matrix}. We summarize the sensitivity and specificity of both models in Table \ref{table:sensitivity and specificity}. Although our NN outperforms Sklearn's model in these results, we noticed that the final accuracy can vary, and their performance was quite similar on average based on our observations. 
+We then compared the same train and test set with the same amount of layers with Sklearn's classifier, which had a ReLU activation function and a sigmoidal activation function for the 100-node and 2-node layer, respectively. The results are presented in Figure \ref{fig:sklearns confusion matrix}. We summarize the sensitivity and specificity of both models in Table \ref{table:sensitivity-and-specificity}. Although our NN outperforms Sklearn's model in these results, we noticed that the final accuracy can vary, and their performance was quite similar on average based on our observations. 
 
 \begin{figure}
     \centering
@@ -127,9 +112,9 @@ We then compared the same train and test set with the same amount of layers with
 Our NN          & 1.0                           & 1.0                  \\
 Sklearn's NN    & 0.9778                        & 1.0                  \\
 \hline
-\label{table:sensitivity and specificity}
 \end{tabular}
 \caption{Sensitivity and Specificity for each method based on the confusion matrices.}
+\label{table:sensitivity-and-specificity}
 \end{table}
 
 \begin{figure}
