@@ -14,7 +14,7 @@ from ptwo.optimizers import Momentum, ADAM, AdaGrad, RMSProp
 from ptwo.costfuns import mse
 from ptwo.plot import set_plt_params
 
-set_plt_params()
+#set_plt_params()
 
 # modify heatmap function
 
@@ -89,11 +89,11 @@ scalery = StandardScaler(with_std = True)
 y_train_scaled = scalery.fit_transform(y_train)
 y_test_scaled = scalery.transform(y_test)
 
-# y_plot = y.reshape(200,200)
-# plt.imshow(y_plot, cmap='gray')
-# plt.xlabel('X')
-# plt.ylabel('Y')
-# plt.show()
+plt.imshow(terrain1, cmap='gray')
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.savefig("examples/tests_even/figs/terrain-map.pdf")
+plt.show()
 
 
 #set_plt_params()
@@ -105,8 +105,8 @@ mse_sgd = np.load("examples/tests_even/data/mses-terrain-sgd3-adam.npy")
 
 #lambda_lr_heatmap(mse_gd, lmbs, learning_rates)
 #lambda_lr_heatmap(mse_sgd, lmbs, learning_rates)
-plot_heatmap2(learning_rates, lmbs, mse_gd, figname="nn-grid-search-gd")
-plot_heatmap2(learning_rates, lmbs, mse_sgd, figname="nn-grid-search-sgd")
+#plot_heatmap2(learning_rates, lmbs, mse_gd, figname="nn-grid-search-gd")
+#plot_heatmap2(learning_rates, lmbs, mse_sgd, figname="nn-grid-search-sgd")
 
 ## Final test with optimal values
 np.random.seed(65345)
@@ -129,3 +129,4 @@ plt.imshow(y_predict, cmap='gray')
 plt.xlabel('X')
 plt.ylabel('Y')
 plt.savefig("examples/tests_even/figs/neural-network-terrain-map.pdf")
+plt.show()

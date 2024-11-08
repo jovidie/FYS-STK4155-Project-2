@@ -13,7 +13,7 @@ from ptwo.gradients import grad_OLS, grad_ridge
 from ptwo.costfuns import mse
 from ptwo.plot import set_plt_params
 
-set_plt_params()
+#set_plt_params()
 
 
 terrain_full = imread('data/SRTM_data_Norway_2.tif')
