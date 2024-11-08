@@ -99,7 +99,7 @@ Rather than simply using the current gradient and a fixed learning rate $\eta$, 
     
 where $\theta$ is the parameters, and $\mathbf{v}_t$ and $\mathbf{v}_{t-1}$ is the current and previous change in the gradient, respectively. This method is known as gradient descent with momentum, and can be used with both GD and SGD. Adding momentum changes both the direction and magnitude of the steps based on the previous gradients, and often improves convergence times \cite{Goodfellow:2016:deep_learning}.
 
-As the optimal learning rate for reaching a minimum often changes as you iterate, several algorithms (optimizers) exist to adaptively change the learning rate during gradient descent. Three common optimizers are AdaGrad \cite{duchi2011:adagrad}, RMSProp \cite{hinton2012:rmsprop}, and ADAM \cite{kingma2017:adam}. These methods all scale the learning rate using the accumulated square gradients during the course of training. While AdaGrad simply divides the learning rate by the square root of the summed square gradients, RMSProp implements a decay rate so the more recent gradients have a larger contribution than earier ones. ADAM can be seen as an implementation of RMSProp with momentum, but that also rescales the gradients and applies bias-correction before scaling the learning rate \cite{Goodfellow:2016:deep_learning}. RMSProp and ADAM tends to outperform AdaGrad, and is frequently used in machine learning \cite{Goodfellow:2016:deep_learning}.
+As the optimal learning rate for reaching a minimum often changes as you iterate, several algorithms (optimizers) exist to adaptively change the learning rate during gradient descent. Three common optimizers are AdaGrad \cite{duchi2011:adagrad}, RMSProp \cite{hinton2012:rmsprop}, and Adam \cite{kingma2017:Adam}. These methods all scale the learning rate using the accumulated square gradients during the course of training. While AdaGrad simply divides the learning rate by the square root of the summed square gradients, RMSProp implements a decay rate so the more recent gradients have a larger contribution than earier ones. Adam can be seen as an implementation of RMSProp with momentum, but that also rescales the gradients and applies bias-correction before scaling the learning rate \cite{Goodfellow:2016:deep_learning}. RMSProp and Adam tends to outperform AdaGrad, and is frequently used in machine learning \cite{Goodfellow:2016:deep_learning}.
 
 
 
@@ -257,7 +257,7 @@ of the neural network by a series of transformations described below
 For each layer \( l \), we compute a hidden layer \( \mathbf{h}^{(l)} \) with the following transformation:
 
 \begin{equation}\label{eq:ffnn}
-    \mathbf{h}^{(l)} = a \Big( \mathbf{W}^{(l)T} \mathbf{a}^{(l-1)} + \mathbf{b}^{(l)} \Big) ,
+    \mathbf{h}^{(l)} = a \Big( \mathbf{W}^{(l)T} \mathbf{h}^{(l-1)} + \mathbf{b}^{(l)} \Big) ,
 \end{equation}
 
 where \( a \) is the activation function we choose as described in Subsection \ref{sssec:activation_functions}, 
@@ -277,29 +277,38 @@ Back-propagation refers to the process of calculating the gradient in each layer
 moving backwards from the final layer $L$. The gradient is found by taking the derivative of the 
 loss function with regards to the weights and biases of each layer. However, each layer $l$ is connected to
 it's former layer $l-1$. Therefore, the back-propagation becomes a large calculation using the chain rule of 
-derivatives as illustrated below. 
-
-\[
-\frac{\partial C}{\partial \theta^L} = \frac{\partial C}{\partial a^L} \frac{\partial a^L}{\partial \theta^L} = 
-\]
-
-\[
-\frac{\partial C}{\partial \theta^{L-1}} = \frac{\partial C}{\partial a^L} \frac{\partial a^L}{\partial \theta^{L-1}} = 
-\]
-
-\[
-\frac{\partial C}{\partial \theta^{L-2}} = \frac{\partial C}{\partial a^{L-1}} \frac{\partial a^L}{\partial a^{L-1}} \frac{\partial a^{L-1}}{\partial \theta^{L-2}}
-\]
+derivatives as illustrated below.
 \\
 \\
-General formula:
+We wish to obtain the derivative of the cost function: 
 
-\[
-\frac{\partial C}{\partial \theta^{L-2}} = \frac{\partial C}{\partial a^{L-1}} \frac{\partial a^L}{\partial a^{L-1}} \frac{\partial a^{L-1}}{\partial \theta^{L-2}} \cdots \frac{\partial a^{l-z}}{\partial a^{l+1}} \frac{\partial a^{l+1}}{\partial \theta^l}
-\]
+$$
+\delta_j^l =\frac{\partial {\cal C}}{\partial z_j^l}.
+$$
 %
+Which can be written as
+$$
+\delta_j^l =\sum_k \frac{\partial {\cal C}}{\partial z_k^{l+1}}\frac{\partial z_k^{l+1}}{\partial z_j^{l}}=\sum_k \delta_k^{l+1}\frac{\partial z_k^{l+1}}{\partial z_j^{l}},
+$$
+this is equal to
+$$
+\delta_j^l =\sum_k \delta_k^{l+1}w_{kj}^{l+1}\sigma'(z_j^l).
+$$
+\\
+\\
+After computing $\delta$ we can update the weights and biases as follows:
+$$
+w_{ij}^l\leftarrow  = w_{ij}^l- \eta \delta_j^la_i^{l-1},
+$$
+$$
+b_j^l \leftarrow b_j^l-\eta \frac{\partial {\cal C}}{\partial b_j^l}=b_j^l-\eta \delta_j^l,
+$$
+%
+where $\eta$ is our learning rate.
+\\
+\\
 Doing this step manually can quickly become a time consuming task. We chose to instead implement an automatic 
-differentiation step, as desribed in our Tools subsection \ref{ssec:tools}.
+differentiation step, as desribed in our Tools subsection\ref{ssec:tools}.
 
 
 
@@ -311,22 +320,22 @@ We obtained geographical data of the Stavanger area, Norway, from EarthExplorer 
 The data contained a 200x200 grid of altitudes (m) of the area, with arbitrary x- and y-coordinates that we used as our features. 
 We split the data in 80:20 training 
 and data set using \texttt{train\_test\_split} and scaled by standard normalization. We chose to scale since some linear regression 
-models such as Lasso and Ridge perform better when all features are on a similar scale \cite{raschka2019}. 
+models such as Lasso and Ridge perform better when all features are on a similar scale \cite{raschka:2022:ml_pytorch_scikit}. 
 \\
 \subsubsection*{Wisconsin breast cancer data}
 The Wisconsin Breast Cancer data \cite{bc_wisconsin} is considered to be a benchmark data set for testing novel or existing machine learning methods on, and there is extensive documentation on previously explored machine learning methods on the data that can be found here: 
 \cite{wisconsin_example1}, \cite{wisconsin_example2} and \cite{wisconsin_example3}.
 
 As described in the original article which produced the data \cite{first_wisconsin}, it consists of a 30 features, 29 of which are describing biopsied cell nuclei from 
-a total of 569 samples and the final feature is the diagnosis we wish to predict. 
+a total of 569 samples and the final feature is the diagnosis we wish to predict. We treated the data just as with the topographical data, with \texttt{train\_test\_split} as well as standard normalization. 
 
 To produce the data, non-invasive fine needle aspirations of tumors were put on glass and stained, then pictures were taken of each sample. The features were then derived from each image with a "computer diagnostic system" that 
-analyzed the images and computed an extensive set of nuclei features such as radius, perimeter, area, smoothness, concavity, symmetry and texture. 
+analyzed the images and computed an extensive set of nuclei features such as radius, perimeter, area, smoothness, concavity, symmetry and texture. Some insight into the data can be viewed in the \texttt{Cancer\_appendix.html} found in our Github repository. 
 
 The authors Nick Street and William H. Wolberg from the original paper performed a classification using a variant on the Multisurface 
 Method, where they reached an accuracy of 97$\%$ after a ten-fold cross validation process with a sensitivity of 0.9 and a specificity of 0.86. 
 These terms are important to include in any analysis on medicinal data as the implementation of computer aided diagnosis in clinical practice 
-needs to be thoughourly documented and understood by physicians beforehand: 
+needs to be thoroughly documented and understood by physicians beforehand: 
 \\
 \\
 Sensitivity = $\frac{correct\ positive}{total\ positive}$,
@@ -338,4 +347,4 @@ Specificity = $\frac{correct\ negative}{total\ negative}$.
 \subsection{Tools}\label{ssec:tools}
 The models were implemented in \verb|Python| version 3.12, and the figures produced using the \verb|matplotlib| library, 
 and stylized using \verb|seaborn|. The FFNN was implemented from scratch, using the \verb|autograd| library \cite{maclaurin2015:autograd} 
-for computing the gradients.
+for computing the gradients. We used the general modeling tools from \verb|scikit-learn| \cite{scikit-learn} to test our models, and validated our implementations of logistic regression and neural network classification against the implementations there.
