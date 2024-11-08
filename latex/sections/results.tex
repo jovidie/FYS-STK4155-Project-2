@@ -55,6 +55,39 @@ For gradient descent on the terrain data ...
 
 \subsection{Regression analysis with FFNN}
 
+\begin{figure}[!htbp]
+    \centering
+    \begin{tabular}{cc}
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{latex/figures/terrain1.pdf}
+            \caption{OLS Prediction}
+            \label{fig:OLS}
+        \end{subfigure} &
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{latex/figures/ridge_terrain1_prediction.pdf}
+            \caption{Ridge Prediction}
+            \label{fig:ridge}
+        \end{subfigure} \\
+        
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{examples/tests_even/figs/gradient-descent-terrain-map.pdf}
+            \caption{Lasso Prediction}
+            \label{fig:lasso}
+        \end{subfigure} &
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{examples/tests_even/figs/neural-network-terrain-map.pdf}
+            \caption{Terrain}
+            \label{fig:terrain}
+        \end{subfigure}
+    \end{tabular}
+    \caption{Various models' predictions for Terrain 2}
+    \label{fig:main_caption}
+\end{figure}
+
 - compare to project 1\\
 - discuss results compared to OLS/Ridge\\
 - Optimal learning rates and parameters, lambda-learningrate grid-search\\
