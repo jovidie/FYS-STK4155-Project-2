@@ -76,7 +76,7 @@ def compare_models(figname=None):
     X = dataset.data
     y = dataset.target
     eta = 0.01
-    n_epochs = 1000
+    n_epochs = 200
     epochs = np.arange(n_epochs)
     lmbda = 0.0001
 
