@@ -3,14 +3,16 @@ import warnings
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix, accuracy_score
+from sklearn.preprocessing import StandardScaler 
+from sklearn.linear_model import LogisticRegression as LogReg
+from sklearn.datasets import load_breast_cancer
 
-from ptwo.models import LogisticRegression, NeuralNetwork
-from ptwo.optimizers import ADAM, AdaGrad, RMSProp
+from ptwo.models import LogisticRegression
 from ptwo.utils import preprocess_cancer_data
-from ptwo.plot import plot_heatmap
+from ptwo.plot import plot_heatmap, plot_loss_acc, plot_confusion, set_plt_params
 from ptwo.costfuns import binary_cross_entropy
 from ptwo.activators import sigmoid
 
@@ -49,14 +51,12 @@ def test_optimal_params_logreg():
 
 
 def test_logreg_sgd():
-    X, y = preprocess_cancer_data()
-    #y = y.reshape(-1, 1) # -> funker ikke for logreg med reshape, funker ikke for sgd uten 
-    n_data, n_features = X.shape
-    n_outputs = y.shape
-    eta = 0.001
-
-    print(X.shape)
-    print(y.shape)
+    dataset = load_breast_cancer()
+    X = dataset.data
+    y = dataset.target
+    eta = 0.01
+    n_epochs = 100
+    lmbda = 0.0001
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     scaler = StandardScaler()
@@ -67,21 +67,18 @@ def test_logreg_sgd():
     logreg = LogisticRegression()
     logreg.fit(X_train_scaled, y_train, batch_size=50, eta=eta, n_epochs=1000)
     y_pred = logreg.predict(X_test_scaled)
-    # print(y_pred)
-    # print(y_test)
     acc = np.mean(y_pred == y_test)
     print(f"Logistic regression accuracy {acc}")
 
 
-def compare_models():
-    X, y = preprocess_cancer_data()
-    #y = y.reshape(-1, 1) # -> funker ikke for logreg med reshape, funker ikke for sgd uten 
-    n_data, n_features = X.shape
-    n_outputs = y.shape
-    eta = 0.001
-
-    print(X.shape)
-    print(y.shape)
+def compare_models(figname=None):
+    dataset = load_breast_cancer()
+    X = dataset.data
+    y = dataset.target
+    eta = 0.01
+    n_epochs = 1000
+    epochs = np.arange(n_epochs)
+    lmbda = 0.0001
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
     scaler = StandardScaler()
@@ -89,36 +86,39 @@ def compare_models():
     X_train_scaled = scaler.transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
-    logreg_nn = NeuralNetwork(
-        network_input_size=n_features, 
-        layer_output_sizes=[1],
-        activation_funcs=[sigmoid],
-        cost_function = binary_cross_entropy,
-        classification = True
-    )
+    logreg_gd = LogisticRegression(lmbda=lmbda)
+    logreg_gd.fit(X_train_scaled, y_train, eta=eta, n_epochs=n_epochs)
+    y_pred_gd = logreg_gd.predict_bias(X_test_scaled)
+    acc_gd = accuracy_score(y_test, y_pred_gd)
+    print(f"GD accuracy {acc_gd}")
 
-    logreg_nn.train_network(X_train_scaled, y_train, learning_rate = 0.1, epochs = 1000, verbose = True)
-    y_prob = logreg_nn.predict(X_test_scaled)
-    y_pred = (y_prob>0.5).astype('int')
-    # print(y_pred)
-    # print(y_test)
-    acc = np.mean(y_pred == y_test)
-    print(f"NN logreg accuracy {acc}")
+    logreg_loss = logreg_gd.get_loss
+    logreg_acc = logreg_gd.get_accuracies
 
-    logreg = LogisticRegression()
-    logreg.fit(X_train_scaled, y_train, eta=0.001, n_epochs=1000)
-    y_pred = logreg.predict(X_test_scaled)
-    # print(y_pred)
-    # print(y_test)
-    acc = np.mean(y_pred == y_test)
-    print(f"Logistic regression accuracy {acc}")
+    logreg_sk = LogReg(fit_intercept=False, max_iter=n_epochs)
+    logreg_sk.fit(X_train_scaled, y_train)
+    y_pred_sk = logreg_sk.predict(X_test_scaled)
+    acc_sk = accuracy_score(y_test, y_pred_sk)
+    print(f"SKlearn accuracy {acc_sk}")
+
+    plot_loss_acc(epochs, logreg_loss, logreg_acc, figname="logreg_loss_acc")
+
+    plot_confusion(y_pred_gd, y_test, figname="logreg_confusion_matrix")
+
+    # conf1 = confusion_matrix(y_test, y_pred_gd, labels = [0, 1])
+    # ConfusionMatrixDisplay(conf1).plot()
+    # plt.title(f"Confusion matrix, Logistic Regression")
+    # filename = "logreg_confusion"
+    # # plt.savefig(f"./latex/figures/{filename}", bbox_inches = "tight")
+    # plt.show()
 
 
 if __name__ == '__main__':
+    set_plt_params()
     warnings.filterwarnings('ignore')
     # test_optimal_params_logreg()
-    # compare_models()
-    test_logreg_sgd()
+    compare_models()
+    # test_logreg_sgd()
 
 """Thought around implementation of Logistic regression:
 
