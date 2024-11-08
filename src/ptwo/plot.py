@@ -161,7 +161,7 @@ def plot_loss_acc(common, loss, acc, figname=None):
     ax2.legend(loss_lines+acc_lines, loss_labels+acc_labels, loc="upper right")
 
     # Change Common to feature name to plot against eg. degree, epoch
-    ax.set_xlabel("Common")
+    ax.set_xlabel("Number of iterations")
     ax.set_ylabel("Loss")
     ax2.set_ylabel("Accuracy")
 
